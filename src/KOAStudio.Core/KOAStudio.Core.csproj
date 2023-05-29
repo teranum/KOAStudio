@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>default</LangVersion>
+		<TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<Platforms>x86;x64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="*" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="*" />
+		<PackageReference Include="AvalonEdit" Version="*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Resources\icons.png" />
+	</ItemGroup>
+
+</Project>

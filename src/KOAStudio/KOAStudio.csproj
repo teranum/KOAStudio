@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<LangVersion>default</LangVersion>
+		<TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>app.ico</ApplicationIcon>
+		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
+		<Platforms>x86;x64</Platforms>
+		<PreserveCompilationContext>false</PreserveCompilationContext>
+	</PropertyGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0-windows' ">
+		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj">
+			<SetTargetFramework>TargetFramework=net7.0-windows</SetTargetFramework>
+		</ProjectReference>
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj">
+			<SetTargetFramework>TargetFramework=net48</SetTargetFramework>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="KHOpenApi.NET" Version="*" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="*" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+		<Reference Include="System.IO.Compression" />
+		<PackageReference Include="Costura.Fody" Version="5.7.0">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="FID_KORNAME.txt">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>
