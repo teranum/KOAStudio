@@ -1,6 +1,6 @@
-# KOAStudio
+# KOAStudio, WKOAStudio
 
-키움증권 KOAStudio clone project
+키움증권 KOAStudio, WKOAStudio clone project
 
 
 ## 📁 개발환경
@@ -9,8 +9,9 @@
 | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Development tool, language**          |VisualStudio2022, C# |
 | **UI Design**          |WPF, MVVM |
-| **KOAStudio.Core**<br />KOAStudio MVVM core Library          |[![NET7](https://img.shields.io/badge/.NET-7.0-purple)](https://github.com/terapark/KOAStudio/blob/master/Src/KOAStudio.Core/KOAStudio.Core.csproj)  [![NETFramework48](https://img.shields.io/badge/.NET%20Framework-4.8-brightgreen)](https://github.com/terapark/KOAStudio/blob/master/Src/KOAStudio.Core/KOAStudio.Core.csproj) |
-| **KOAStudio**<br />Main project          |[![NET7](https://img.shields.io/badge/.NET-7.0-purple)](https://github.com/terapark/KOAStudio/blob/master/Src/KOAStudio/KOAStudio.csproj)  [![NETFramework48](https://img.shields.io/badge/.NET%20Framework-4.8-brightgreen)](https://github.com/terapark/KOAStudio/blob/master/Src/KOAStudio/KOAStudio.csproj) |
+| **KOAStudio.Core**<br />KOAStudio MVVM core Library          |[![NET7](https://img.shields.io/badge/.NET-7.0-purple)](https://github.com/terapark/KOAStudio/blob/master/src/KOAStudio.Core/KOAStudio.Core.csproj)  [![NETFramework48](https://img.shields.io/badge/.NET%20Framework-4.8-brightgreen)](https://github.com/terapark/KOAStudio/blob/master/src/KOAStudio.Core/KOAStudio.Core.csproj) |
+| **KOAStudio**<br />국내OpenApi Main project          |[![NET7](https://img.shields.io/badge/.NET-7.0-purple)](https://github.com/terapark/KOAStudio/blob/master/src/KOAStudio/KOAStudio.csproj)  [![NETFramework48](https://img.shields.io/badge/.NET%20Framework-4.8-brightgreen)](https://github.com/terapark/KOAStudio/blob/master/src/KOAStudio/KOAStudio.csproj) |
+| **WKOAStudio**<br />해외OpenApi Main project          |[![NET7](https://img.shields.io/badge/.NET-7.0-purple)](https://github.com/terapark/KOAStudio/blob/master/src/WKOAStudio/WKOAStudio.csproj)  [![NETFramework48](https://img.shields.io/badge/.NET%20Framework-4.8-brightgreen)](https://github.com/terapark/KOAStudio/blob/master/src/WKOAStudio/WKOAStudio.csproj) |
 | **3rd nuget packages**          |CommunityToolkit.Mvvm<br />Microsoft.Extensions.DependencyInjection<br />Microsoft.Xaml.Behaviors.Wpf<br />AvalonEdit<br />System.Text.Encoding.CodePages<br />Costura.Fody<br />KHOpenApi.NET |
 
 ## 📷 Screenshots
