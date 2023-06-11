@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOAStudio", "Src\KOAStudio\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOAStudio.Core", "src\KOAStudio.Core\KOAStudio.Core.csproj", "{2FDA2267-424E-4EDA-A313-9C6CB9E3C3FB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WKOAStudio", "src\WKOAStudio\WKOAStudio.csproj", "{ACF418EA-D87D-4480-AFE7-C50669D6AB04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{2FDA2267-424E-4EDA-A313-9C6CB9E3C3FB}.Release|x64.Build.0 = Release|x64
 		{2FDA2267-424E-4EDA-A313-9C6CB9E3C3FB}.Release|x86.ActiveCfg = Release|x86
 		{2FDA2267-424E-4EDA-A313-9C6CB9E3C3FB}.Release|x86.Build.0 = Release|x86
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Debug|x64.ActiveCfg = Debug|x64
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Debug|x64.Build.0 = Debug|x64
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Debug|x86.ActiveCfg = Debug|x86
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Debug|x86.Build.0 = Debug|x86
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Release|x64.ActiveCfg = Release|x64
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Release|x64.Build.0 = Release|x64
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Release|x86.ActiveCfg = Release|x86
+		{ACF418EA-D87D-4480-AFE7-C50669D6AB04}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
