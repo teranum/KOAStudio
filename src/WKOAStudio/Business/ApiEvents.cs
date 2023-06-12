@@ -18,7 +18,8 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
         if (e.sScrNo == SCR_REQ_TR_BASE)
         {
-            SetPropertyQueryNextEnable(e.sPreNext == "2");
+            TR_NextKey = e.sPreNext.TrimStart();
+            SetPropertyQueryNextEnable(TR_NextKey.Length > 0);
             var trData = TrDatas.FirstOrDefault(x => x.Code.Equals(e.sTrCode, StringComparison.CurrentCultureIgnoreCase));
             if (trData != null)
             {

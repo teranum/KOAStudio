@@ -239,7 +239,7 @@ internal sealed partial class BusinessLogic
                     stringBuilder.Append($"\t{trData.Inputs[i]} = {trData.InputDescs![i]}\r\n");
                 stringBuilder.Append($"\tSetInputValue(\"{trData.Inputs[i]}\"\t, \"입력값{i + 1}\");\r\n\r\n");
             }
-            stringBuilder.Append($"\r\n 2. Open API 조회 함수를 호출해서 전문을 서버로 전송합니다.\r\n\tCommRqData( \"RQName\"\t,  \"{trData.Code}\"\t,  \"0\"\t,  \"화면번호\"); \r\n");
+            stringBuilder.Append($"\r\n 2. Open API 조회 함수를 호출해서 전문을 서버로 전송합니다.\r\n\tCommRqData( \"RQName\"\t,  \"{trData.Code}\"\t,  \"\"\t,  \"화면번호\"); \r\n");
             stringBuilder.Append("\r\n/********************************************************************/\r\n");
 
             // input
@@ -368,6 +368,7 @@ internal sealed partial class BusinessLogic
         }
     }
 
+    private string TR_NextKey = string.Empty;
     public void QueryApiAction(string reqText, object parameters, bool bNext)
     {
         string szActionMsg = string.Empty;
@@ -387,7 +388,7 @@ internal sealed partial class BusinessLogic
             }
             if (axOpenAPI.GetConnectState() != 0)
             {
-                long lRet = axOpenAPI.CommRqData(OptCode, OptCode, bNext ? "2" : "0", SCR_REQ_TR_BASE);
+                long lRet = axOpenAPI.CommRqData(OptCode, OptCode, bNext ? TR_NextKey : "", SCR_REQ_TR_BASE);
                 if (lRet == 0)
                 {
                     szActionMsg = $"<TR ({OptCode}) 요청: 성공> lRet = {lRet}";
