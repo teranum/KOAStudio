@@ -292,7 +292,7 @@ internal sealed partial class BusinessLogic
             }
             stringBuilder.AppendLine();
             stringBuilder.AppendLine($" 2. Open API 조회 함수를 호출해서 전문을 서버로 전송합니다.");
-            stringBuilder.AppendLine($"\tCommRqData( \"RQName\"\t,  \"{trData.Code}\"\t,  \"0\"\t,  \"화면번호\");");
+            stringBuilder.AppendLine($"\tCommRqData( \"RQName\"\t,  \"{trData.Code}\"\t,  0\t,  \"화면번호\");");
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("/********************************************************************/");
 
