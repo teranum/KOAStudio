@@ -16,7 +16,7 @@ internal sealed partial class BusinessLogic
         var received_data = AppEncoder.GetBytes(memory_full_data);
         //
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
-        if (e.sScrNo == SCR_REQ_TR_BASE)
+        //if (e.sScrNo == SCR_REQ_TR_BASE)
         {
             TR_NextKey = e.sPreNext.TrimStart();
             SetPropertyQueryNextEnable(TR_NextKey.Length > 0);

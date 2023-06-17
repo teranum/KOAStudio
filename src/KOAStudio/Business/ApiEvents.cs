@@ -13,7 +13,7 @@ internal sealed partial class BusinessLogic
     private void AxKHOpenApi_OnReceiveTrData(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
     {
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
-        if (e.sScrNo == SCR_REQ_TR_BASE)
+        //if (e.sScrNo == SCR_REQ_TR_BASE)
         {
             SetPropertyQueryNextEnable(e.sPrevNext == "2");
             // TR코드 필드 찾기
