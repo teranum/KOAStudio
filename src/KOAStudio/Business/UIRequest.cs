@@ -1,8 +1,5 @@
 ﻿using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -354,7 +351,7 @@ internal sealed partial class BusinessLogic
             }
 
             return stringBuilder.ToString();
-        };
+        }
     }
 
     public void ReqTRHistory(int tabIndex, string text)
@@ -471,7 +468,15 @@ internal sealed partial class BusinessLogic
                 else
                 {
                     parameter_text += nvd.Value;
-                    int nVal = Convert.ToInt32(nvd.Value);
+                    int nVal;
+                    try
+                    {
+                        nVal = Convert.ToInt32(nvd.Value);
+                    }
+                    catch
+                    {
+                        nVal = 0;
+                    }
                     _appRegistry.SetValue(szFuncName, nvd.Name, nVal);
                     Params[i] = new VariantWrapper(nVal);
                 }
