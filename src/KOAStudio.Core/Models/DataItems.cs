@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace KOAStudio.Core.Models;
+﻿namespace KOAStudio.Core.Models;
 
 public enum OpenApiLoginState
 {

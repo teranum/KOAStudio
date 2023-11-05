@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace KOAStudio.Core.Helpers
+﻿namespace KOAStudio.Core.Helpers
 {
     public interface IAppRegistry
     {
