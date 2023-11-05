@@ -13,7 +13,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
         //if (e.sScrNo == SCR_REQ_TR_BASE)
         {
-            SetPropertyQueryNextEnable(string.Equals(e.sPrevNext, "2", StringComparison.Ordinal));
+            SetPropertyQueryNextEnable(string.Equals(e.sPrevNext, "2"));
             // TR코드 필드 찾기
             var trData = TrDatas.FirstOrDefault(x => x.Code.Equals(e.sTrCode, StringComparison.CurrentCultureIgnoreCase));
             if (trData is not null)
@@ -168,7 +168,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0)
         {
-            _IsRealServer = !string.Equals(axOpenAPI!.GetLoginInfo("GetServerGubun"), "1", StringComparison.Ordinal);
+            _IsRealServer = !string.Equals(axOpenAPI!.GetLoginInfo("GetServerGubun"), "1");
             LoginState = OpenApiLoginState.LoginSucceed;
 
             ApiFolder = axOpenAPI.GetAPIModulePath();

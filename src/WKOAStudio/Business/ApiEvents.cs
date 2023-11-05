@@ -132,7 +132,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0 && LoginState != OpenApiLoginState.LoginFailed)
         {
-            _IsRealServer = !string.Equals(axOpenAPI!.GetCommonFunc("GetServerGubunW", ""), "1", StringComparison.Ordinal);
+            _IsRealServer = !string.Equals(axOpenAPI!.GetCommonFunc("GetServerGubunW", ""), "1");
             LoginState = OpenApiLoginState.LoginSucceed;
 
             ApiFolder = axOpenAPI.GetAPIModulePath();

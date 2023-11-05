@@ -308,7 +308,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         foreach (var entry in zip.Entries)
                         {
                             string entruTitle = entry.Name.Substring(0, entry.Name.Length - 4);
-                            if (string.Equals(entruTitle, FileTitle.ToUpper(), StringComparison.Ordinal))
+                            if (string.Equals(entruTitle, FileTitle.ToUpper()))
                             {
                                 using (var stream = entry.Open())
                                 {
@@ -321,39 +321,39 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                     // [INPUT]
                                     int nPos = 0;
                                     int nPosEnd = 0;
-                                    nPos = text.IndexOf("[INPUT]", nPos, StringComparison.Ordinal);
-                                    nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
+                                    nPos = text.IndexOf("[INPUT]", nPos);
+                                    nPos = text.IndexOf("@START_", nPos);
                                     nPos += "@START_".Length;
-                                    nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
+                                    nPosEnd = text.IndexOf("\r\n", nPos);
                                     string TRName = text.Substring(nPos, nPosEnd - nPos);
                                     trData.Name = TRName;
                                     nPos = nPosEnd + "\r\n".Length;
-                                    nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
+                                    nPosEnd = text.IndexOf("@END_", nPos);
                                     string InputBody = text.Substring(nPos, nPosEnd - nPos);
                                     trData.Inputs = GetKeyNames(InputBody);
                                     // [OUTPUT]
                                     nPos = nPosEnd;
-                                    nPos = text.IndexOf("[OUTPUT]", nPos, StringComparison.Ordinal);
-                                    nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
-                                    nPosEnd = text.IndexOf("=", nPos, StringComparison.Ordinal);
+                                    nPos = text.IndexOf("[OUTPUT]", nPos);
+                                    nPos = text.IndexOf("@START_", nPos);
+                                    nPosEnd = text.IndexOf("=", nPos);
                                     string OutName, OutIdent;
                                     OutName = text.Substring(nPos + 7, nPosEnd - nPos - 7);
                                     nPos = nPosEnd + 1;
-                                    nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
+                                    nPosEnd = text.IndexOf("\r\n", nPos);
                                     OutIdent = text.Substring(nPos, nPosEnd - nPos);
                                     nPos = nPosEnd + "\r\n".Length;
-                                    nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
+                                    nPosEnd = text.IndexOf("@END_", nPos);
                                     string namebody = text.Substring(nPos, nPosEnd - nPos);
-                                    if (string.Equals(OutIdent, "*,*,*", StringComparison.Ordinal))
+                                    if (string.Equals(OutIdent, "*,*,*"))
                                     {
                                         trData.OutputSingle = GetKeyNames(namebody);
                                         nPos = nPosEnd + "\r\n".Length;
-                                        nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
+                                        nPos = text.IndexOf("@START_", nPos);
                                         if (nPos != -1)
                                         {
-                                            nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
+                                            nPosEnd = text.IndexOf("\r\n", nPos);
                                             nPos = nPosEnd + "\r\n".Length;
-                                            nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
+                                            nPosEnd = text.IndexOf("@END_", nPos);
                                             string ortherbody = text.Substring(nPos, nPosEnd - nPos);
                                             trData.OutputMuti = GetKeyNames(ortherbody);
                                         }
@@ -504,11 +504,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         if (pIAttrNode != null)
                         {
                             string bName = pIAttrNode.Name;
-                            if (string.Equals(bName, "type", StringComparison.Ordinal))
+                            if (string.Equals(bName, "type"))
                             {
                                 szTypeValue = pIAttrNode.InnerText;
                             }
-                            if (string.Equals(bName, "name", StringComparison.Ordinal))
+                            if (string.Equals(bName, "name"))
                             {
                                 szNameValue = pIAttrNode.InnerText;
                                 break;
@@ -526,7 +526,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         nImg = 7;
                     else if (nImg == 3)
                     {
-                        if (string.Equals(szTypeValue, "event", StringComparison.Ordinal))
+                        if (string.Equals(szTypeValue, "event"))
                             nImg = 9;
                         else
                             nImg = 6;
@@ -607,11 +607,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             if (line[0] == '[')
             {
                 Section = GetSection(line);
-                if (string.Equals(Section, "Info", StringComparison.Ordinal))
+                if (string.Equals(Section, "Info"))
                 {
                     line = lines[1];
                     KeyAndValue = GetKeyAndValue(line);
-                    if (string.Equals(KeyAndValue.Key, "TotalScreenCount", StringComparison.Ordinal))
+                    if (string.Equals(KeyAndValue.Key, "TotalScreenCount"))
                     {
                         int TotalScreenCount = Convert.ToInt32(KeyAndValue.Value);
                         ScrnSpecials = new SCRN_SPECIAL[TotalScreenCount];
@@ -644,7 +644,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         break;
                                     default:
                                         {
-                                            int nPos = KeyAndValue.Key.IndexOf("TR_", StringComparison.Ordinal);
+                                            int nPos = KeyAndValue.Key.IndexOf("TR_");
                                             if (nPos != -1)
                                             {
                                                 int nIndex = Convert.ToInt32(KeyAndValue.Key.Substring(3, KeyAndValue.Key.Length - 3));

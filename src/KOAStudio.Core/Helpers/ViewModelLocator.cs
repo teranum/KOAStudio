@@ -62,7 +62,7 @@ namespace KOAStudio.Core.Helpers
             {
                 viewName = viewName.Replace(".Views.", ".ViewModels.");
                 var viewAssemblyName = viewType.GetTypeInfo().Assembly.FullName;
-                var suffix = viewName.EndsWith("View", StringComparison.Ordinal) ? "Model" : "ViewModel";
+                var suffix = viewName.EndsWith("View") ? "Model" : "ViewModel";
                 var viewModelName = string.Format(CultureInfo.InvariantCulture, "{0}{1}, {2}", viewName, suffix, viewAssemblyName);
                 var viemodel_type = Type.GetType(viewModelName);
                 if (viemodel_type is not null)

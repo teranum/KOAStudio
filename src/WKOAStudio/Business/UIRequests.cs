@@ -111,7 +111,7 @@ internal sealed partial class BusinessLogic
                     }
 
                     // 함수 선택 확정
-                    if (selectedItem.Parent != null && string.Equals(selectedItem.Parent.Text, "함수들", StringComparison.Ordinal) && selectedItem.IconId == 9 && axOpenAPI != null)
+                    if (selectedItem.Parent != null && string.Equals(selectedItem.Parent.Text, "함수들") && selectedItem.IconId == 9 && axOpenAPI != null)
                     {
                         string szFuncName = SelectedText;
                         MethodInfo? theMethod = axOpenAPI.GetType().GetMethod(szFuncName);
@@ -188,7 +188,7 @@ internal sealed partial class BusinessLogic
                     if (axOpenAPI!.GetConnectState() == 0) return;
                     if (selectedItem.IconId == 13)
                     {
-                        if (string.Equals(SelectedText, "사용자정보", StringComparison.Ordinal))
+                        if (string.Equals(SelectedText, "사용자정보"))
                         {
                             StringBuilder stringBuilder = new StringBuilder();
                             stringBuilder.AppendLine();
@@ -328,7 +328,7 @@ internal sealed partial class BusinessLogic
         {
             if (text != null && text != string.Empty)
             {
-                int nSubPos = text.IndexOf(" : ", StringComparison.Ordinal);
+                int nSubPos = text.IndexOf(" : ");
                 if (nSubPos != -1)
                 {
                     codeName = text.Substring(nSubPos + " : ".Length);
@@ -336,14 +336,14 @@ internal sealed partial class BusinessLogic
             }
         }
 
-        int nPos = codeName.IndexOf(" : ", StringComparison.Ordinal);
+        int nPos = codeName.IndexOf(" : ");
         if (nPos != -1)
         {
             string code = codeName.Substring(0, nPos);
             for (int i = 0; i < TrDatas.Count; i++)
             {
                 var trData = TrDatas[i];
-                if (string.Equals(trData.Code, code, StringComparison.Ordinal))
+                if (string.Equals(trData.Code, code))
                 {
                     // property
                     var prop_items = new List<PropertyItem>();
@@ -374,9 +374,9 @@ internal sealed partial class BusinessLogic
         var datagrid_PropertiesItems = parameters as IList<PropertyItem>;
         if (datagrid_PropertiesItems == null || axOpenAPI == null || axOpenAPI.Created == false)
             return;
-        if (string.Equals(SelectedText.Substring(0, 2).ToUpper(), "OP", StringComparison.Ordinal)) // TR요청
+        if (string.Equals(SelectedText.Substring(0, 2).ToUpper(), "OP")) // TR요청
         {
-            string OptCode = SelectedText.Substring(0, SelectedText.IndexOf(" : ", StringComparison.Ordinal));
+            string OptCode = SelectedText.Substring(0, SelectedText.IndexOf(" : "));
             for (int i = 0; i < datagrid_PropertiesItems.Count; i++)
             {
                 var nvd = datagrid_PropertiesItems[i];
@@ -394,7 +394,7 @@ internal sealed partial class BusinessLogic
                     szActionMsg = $"<TR ({OptCode}) 요청: 실패> lRet = {lRet}";
             }
         }
-        else if (string.Equals(SelectedText.Substring(0, 7), "함수호출 : ", StringComparison.Ordinal)) // 함수호출
+        else if (string.Equals(SelectedText.Substring(0, 7), "함수호출 : ")) // 함수호출
         {
             string szFuncName = SelectedText.Substring("함수호출 : ".Length);
             VariantWrapper[] Params = new VariantWrapper[datagrid_PropertiesItems.Count];
