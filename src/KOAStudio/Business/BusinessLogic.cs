@@ -2,14 +2,10 @@
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
-using System;
-using System.Collections.Generic;
 using System.IO.Compression;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Xml;
@@ -34,9 +30,9 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
     private static readonly string SCR_REQ_COND_BASE = "4000";
     private static readonly string SCR_REQ_COND_LAST = "4999";
 
-    private readonly Dictionary<string, string> MapCondNameToIndex = new Dictionary<string, string>();
+    private readonly IDictionary<string, string> MapCondNameToIndex = new Dictionary<string, string>(StringComparer.Ordinal);
 
-    private readonly Dictionary<string, string> Map_FidToName = new Dictionary<string, string>();
+    private readonly IDictionary<string, string> Map_FidToName = new Dictionary<string, string>(StringComparer.Ordinal);
 
     private class TR_SPECIAL
     {
@@ -50,7 +46,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
     }
     private readonly List<TR_SPECIAL> TrDatas = new List<TR_SPECIAL>();
 
-    private readonly Dictionary<string, string> MapDevContentToDescs = new Dictionary<string, string>();
+    private readonly IDictionary<string, string> MapDevContentToDescs = new Dictionary<string, string>(StringComparer.Ordinal);
 
     private struct SCRN_SPECIAL
     {
@@ -274,7 +270,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             root.Text = root.Text + $" ({root.Items.Count})";
             return root;
         });
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -312,52 +308,52 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         foreach (var entry in zip.Entries)
                         {
                             string entruTitle = entry.Name.Substring(0, entry.Name.Length - 4);
-                            if (entruTitle == FileTitle.ToUpper())
+                            if (string.Equals(entruTitle, FileTitle.ToUpper(), StringComparison.Ordinal))
                             {
                                 using (var stream = entry.Open())
                                 {
                                     TR_SPECIAL trData = new TR_SPECIAL();
                                     //
                                     trData.Code = FileTitle;
-                                    stream.Read(buffer, 0, buffer.Length);
+                                    _ = stream.Read(buffer, 0, buffer.Length);
                                     string text = AppEncoder.GetString(buffer);
                                     int nLen = text.Length;
                                     // [INPUT]
                                     int nPos = 0;
                                     int nPosEnd = 0;
-                                    nPos = text.IndexOf("[INPUT]", nPos);
-                                    nPos = text.IndexOf("@START_", nPos);
+                                    nPos = text.IndexOf("[INPUT]", nPos, StringComparison.Ordinal);
+                                    nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
                                     nPos += "@START_".Length;
-                                    nPosEnd = text.IndexOf("\r\n", nPos);
+                                    nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
                                     string TRName = text.Substring(nPos, nPosEnd - nPos);
                                     trData.Name = TRName;
                                     nPos = nPosEnd + "\r\n".Length;
-                                    nPosEnd = text.IndexOf("@END_", nPos);
+                                    nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
                                     string InputBody = text.Substring(nPos, nPosEnd - nPos);
                                     trData.Inputs = GetKeyNames(InputBody);
                                     // [OUTPUT]
                                     nPos = nPosEnd;
-                                    nPos = text.IndexOf("[OUTPUT]", nPos);
-                                    nPos = text.IndexOf("@START_", nPos);
-                                    nPosEnd = text.IndexOf("=", nPos);
+                                    nPos = text.IndexOf("[OUTPUT]", nPos, StringComparison.Ordinal);
+                                    nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
+                                    nPosEnd = text.IndexOf("=", nPos, StringComparison.Ordinal);
                                     string OutName, OutIdent;
                                     OutName = text.Substring(nPos + 7, nPosEnd - nPos - 7);
                                     nPos = nPosEnd + 1;
-                                    nPosEnd = text.IndexOf("\r\n", nPos);
+                                    nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
                                     OutIdent = text.Substring(nPos, nPosEnd - nPos);
                                     nPos = nPosEnd + "\r\n".Length;
-                                    nPosEnd = text.IndexOf("@END_", nPos);
+                                    nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
                                     string namebody = text.Substring(nPos, nPosEnd - nPos);
-                                    if (OutIdent == "*,*,*")
+                                    if (string.Equals(OutIdent, "*,*,*", StringComparison.Ordinal))
                                     {
                                         trData.OutputSingle = GetKeyNames(namebody);
                                         nPos = nPosEnd + "\r\n".Length;
-                                        nPos = text.IndexOf("@START_", nPos);
+                                        nPos = text.IndexOf("@START_", nPos, StringComparison.Ordinal);
                                         if (nPos != -1)
                                         {
-                                            nPosEnd = text.IndexOf("\r\n", nPos);
+                                            nPosEnd = text.IndexOf("\r\n", nPos, StringComparison.Ordinal);
                                             nPos = nPosEnd + "\r\n".Length;
-                                            nPosEnd = text.IndexOf("@END_", nPos);
+                                            nPosEnd = text.IndexOf("@END_", nPos, StringComparison.Ordinal);
                                             string ortherbody = text.Substring(nPos, nPosEnd - nPos);
                                             trData.OutputMuti = GetKeyNames(ortherbody);
                                         }
@@ -428,7 +424,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
 
         });
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -450,7 +446,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 }
             }
             return sections;
-        };
+        }
     }
 
     private async void Load_개발가이드Async()
@@ -482,7 +478,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -500,7 +496,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 {
                     int length = DOMNamedNodeMapPtr.Count;
                     string szNameValue = string.Empty;
-                    string szTypeValue = string.Empty; ;
+                    string szTypeValue = string.Empty;
                     for (int j = 0; j < length; j++)
                     {
                         //get attribute node:							
@@ -508,11 +504,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         if (pIAttrNode != null)
                         {
                             string bName = pIAttrNode.Name;
-                            if (bName == "type")
+                            if (string.Equals(bName, "type", StringComparison.Ordinal))
                             {
                                 szTypeValue = pIAttrNode.InnerText;
                             }
-                            if (bName == "name")
+                            if (string.Equals(bName, "name", StringComparison.Ordinal))
                             {
                                 szNameValue = pIAttrNode.InnerText;
                                 break;
@@ -530,7 +526,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         nImg = 7;
                     else if (nImg == 3)
                     {
-                        if (szTypeValue == "event")
+                        if (string.Equals(szTypeValue, "event", StringComparison.Ordinal))
                             nImg = 9;
                         else
                             nImg = 6;
@@ -611,11 +607,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             if (line[0] == '[')
             {
                 Section = GetSection(line);
-                if (Section == "Info")
+                if (string.Equals(Section, "Info", StringComparison.Ordinal))
                 {
                     line = lines[1];
                     KeyAndValue = GetKeyAndValue(line);
-                    if (KeyAndValue.Key == "TotalScreenCount")
+                    if (string.Equals(KeyAndValue.Key, "TotalScreenCount", StringComparison.Ordinal))
                     {
                         int TotalScreenCount = Convert.ToInt32(KeyAndValue.Value);
                         ScrnSpecials = new SCRN_SPECIAL[TotalScreenCount];
@@ -648,7 +644,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         break;
                                     default:
                                         {
-                                            int nPos = KeyAndValue.Key.IndexOf("TR_");
+                                            int nPos = KeyAndValue.Key.IndexOf("TR_", StringComparison.Ordinal);
                                             if (nPos != -1)
                                             {
                                                 int nIndex = Convert.ToInt32(KeyAndValue.Key.Substring(3, KeyAndValue.Key.Length - 3));
@@ -688,7 +684,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -704,13 +700,13 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             result.Key = s.Substring(0, nEndPos);
             result.Value = s.Substring(nEndPos + 1, s.Length - nEndPos - 1);
             return result;
-        };
+        }
 
         string GetSection(string s)
         {
             int nEndPos = s.IndexOf(']');
             return s.Substring(1, nEndPos - 1);
-        };
+        }
     }
 
     private void Load_종목정보()

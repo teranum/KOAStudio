@@ -3,9 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace KOAStudio.Core.ViewModels
 {
@@ -123,14 +120,14 @@ namespace KOAStudio.Core.ViewModels
                 }
                 return newlistItems;
             });
-            TabDatas[TabSelectedIndex].Items = await task;
+            TabDatas[TabSelectedIndex].Items = await task.ConfigureAwait(true);
         }
 
         [RelayCommand]
         private async Task Popup_FilterMode()
         {
             FilterOnlyNodeChecked ^= true;
-            await Filter();
+            await Filter().ConfigureAwait(true);
         }
         // sub functions
         IconTextItem? FindMatchedItemOnlyNode(IconTextItem orgitem, string text)

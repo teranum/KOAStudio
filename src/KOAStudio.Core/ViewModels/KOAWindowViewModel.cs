@@ -3,8 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
-using System;
-using System.Collections.Generic;
 
 namespace KOAStudio.Core.ViewModels
 {

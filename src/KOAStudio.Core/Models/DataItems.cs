@@ -32,7 +32,7 @@ public class IconTextItem : IconText
     }
 
     public IconTextItem? Parent;
-    public List<object> Items { get; }
+    public IList<object> Items { get; }
     public void AddChild(IconTextItem item)
     {
         item.Parent = this;

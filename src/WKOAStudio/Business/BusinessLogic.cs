@@ -2,12 +2,8 @@
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -25,11 +21,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
     private AxKFOpenAPI? axOpenAPI;
     private string ApiFolder = string.Empty;
-    private Encoding AppEncoder = Encoding.GetEncoding(949);
+    private readonly Encoding AppEncoder = Encoding.GetEncoding(949);
 
     private static readonly string SCR_REQ_TR_BASE = "3000";
 
-    private Dictionary<string, string> Map_FidToName = new Dictionary<string, string>();
+    private readonly IDictionary<string, string> Map_FidToName = new Dictionary<string, string>(StringComparer.Ordinal);
 
 
     private class TR_SPECIAL
@@ -49,9 +45,9 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         public List<int>? SizeMuti_add;
 
     }
-    private List<TR_SPECIAL> TrDatas = new List<TR_SPECIAL>();
+    private readonly IList<TR_SPECIAL> TrDatas = new List<TR_SPECIAL>();
 
-    private Dictionary<string, string> MapDevContentToDescs = new Dictionary<string, string>();
+    private readonly IDictionary<string, string> MapDevContentToDescs = new Dictionary<string, string>(StringComparer.Ordinal);
 
     private struct SCRN_SPECIAL
     {
@@ -65,7 +61,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         public string Key;
         public string Value;
     };
-    private Dictionary<string, List<KEY_VALUE>> Map_IniFile_TrInfo = new Dictionary<string, List<KEY_VALUE>>();
+    private readonly IDictionary<string, List<KEY_VALUE>> Map_IniFile_TrInfo = new Dictionary<string, List<KEY_VALUE>>(StringComparer.Ordinal);
 
     private readonly List<string> _menu_Customize = new List<string>
     {
@@ -118,13 +114,13 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             }
         }
     }
-    private IAppRegistry _appRegistry;
+    private readonly IAppRegistry _appRegistry;
     public BusinessLogic(IAppRegistry appRegistry)
     {
         _appRegistry = appRegistry;
     }
 
-    private void GetIniFileData(string ini_path, ref Dictionary<string, List<KEY_VALUE>> IniFile_Info)
+    private void GetIniFileData(string ini_path, IDictionary<string, List<KEY_VALUE>> IniFile_Info)
     {
         // 파일에서 TR정보 가져오기
         string[] lines = Array.Empty<string>();
@@ -266,7 +262,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         }
 
         // 파일에서 TR정보 가져오기
-        GetIniFileData($"{ApiFolder}\\data\\kfoptrinfo.dat", ref Map_IniFile_TrInfo);
+        GetIniFileData($"{ApiFolder}\\data\\kfoptrinfo.dat", Map_IniFile_TrInfo);
 
         // 초기데이터 로딩
         Load_실시간목록Async();
@@ -295,7 +291,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 if (trlists != null)
                 {
                     string[]? real_tr_names = null;
-                    var real_tr = trlists.FirstOrDefault(tr => tr.Key == "Real");
+                    var real_tr = trlists.FirstOrDefault(tr => string.Equals(tr.Key, "Real", StringComparison.Ordinal));
 
                     real_tr_names = real_tr.Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
                     if (real_tr_names != null && real_tr_names.Length > 0)
@@ -309,11 +305,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                 IconTextItem? hitem = null;
                                 foreach (var item in key_values)
                                 {
-                                    if (item.Key == "Title")
+                                    if (string.Equals(item.Key, "Title", StringComparison.Ordinal))
                                     {
                                         hitem = new IconTextItem(1, "Real Type : " + item.Value);
                                     }
-                                    else if (hitem != null && item.Key != "Type" && item.Value != "-1")
+                                    else if (hitem != null && !string.Equals(item.Key, "Type", StringComparison.Ordinal) && !string.Equals(item.Value, "-1", StringComparison.Ordinal))
                                     {
                                         var valTemp = item.Value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
                                         if (valTemp != null && valTemp.Count() > 0)
@@ -349,7 +345,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -369,7 +365,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 if (trlists != null)
                 {
                     string[] sections = { "Quote", "Order", "Chart" };
-                    var all_trs = trlists.Where(tr => sections.Contains(tr.Key));
+                    var all_trs = trlists.Where(tr => sections.Contains(tr.Key, StringComparer.Ordinal));
                     List<string> tr_names = new List<string>();
 
                     foreach (var tr_part in all_trs)
@@ -389,10 +385,10 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                             List<KEY_VALUE>? key_values;
                             if (Map_IniFile_TrInfo.TryGetValue(tr_name + "_INPUT", out key_values))
                             {
-                                trData.Name = key_values.FirstOrDefault(tr => tr.Key == "Title").Value;
+                                trData.Name = key_values.FirstOrDefault(tr => string.Equals(tr.Key, "Title", StringComparison.Ordinal)).Value;
                                 foreach (var key_value in key_values)
                                 {
-                                    if (key_value.Key == "Title")
+                                    if (string.Equals(key_value.Key, "Title", StringComparison.Ordinal))
                                         trData.Name = key_value.Value;
                                     else
                                     {
@@ -407,7 +403,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                 {
                                     for (int i = 0; i < trData.Inputs.Count; i++)
                                     {
-                                        if (key_value.Key == trData.Inputs[i])
+                                        if (string.Equals(key_value.Key, trData.Inputs[i], StringComparison.Ordinal))
                                         {
                                             trData.InputDescs[i] = key_value.Value;
                                             break;
@@ -421,12 +417,12 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                 trData.SizeSingle = new List<int>();
                                 foreach (var key_value in key_values)
                                 {
-                                    if (key_value.Key != "Title" && key_value.Key != "출력건수")
+                                    if (!string.Equals(key_value.Key, "Title", StringComparison.Ordinal) && !string.Equals(key_value.Key, "출력건수", StringComparison.Ordinal))
                                     {
                                         trData.OutputSingle.Add(key_value.Key);
                                         // size
                                         int size = 0;
-                                        int pos = key_value.Value.IndexOf(",");
+                                        int pos = key_value.Value.IndexOf(",", StringComparison.Ordinal);
                                         if (pos >= 0)
                                             size = Convert.ToInt32(key_value.Value.Substring(0, pos));
                                         trData.SizeSingle.Add(size);
@@ -436,10 +432,10 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                             string GFID = string.Empty;
                             if (Map_IniFile_TrInfo.TryGetValue(tr_name + "_TRINFO", out key_values))
                             {
-                                GFID = key_values.FirstOrDefault(tr => tr.Key == "GFID").Value;
+                                GFID = key_values.FirstOrDefault(tr => string.Equals(tr.Key, "GFID", StringComparison.Ordinal)).Value;
                             }
 
-                            if (GFID.IndexOf(",") == -1)
+                            if (GFID.IndexOf(",", StringComparison.Ordinal) == -1)
                             {
                                 if (Map_IniFile_TrInfo.TryGetValue(tr_name + "_OCCURS_" + GFID, out key_values))
                                 {
@@ -447,12 +443,12 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                     trData.SizeMuti = new List<int>();
                                     foreach (var key_value in key_values)
                                     {
-                                        if (key_value.Key != "Title" && key_value.Key != "Count")
+                                        if (!string.Equals(key_value.Key, "Title", StringComparison.Ordinal) && !string.Equals(key_value.Key, "Count", StringComparison.Ordinal))
                                         {
                                             trData.OutputMuti.Add(key_value.Key);
                                             // size
                                             int size = 0;
-                                            int pos = key_value.Value.IndexOf(",");
+                                            int pos = key_value.Value.IndexOf(",", StringComparison.Ordinal);
                                             if (pos >= 0)
                                                 size = Convert.ToInt32(key_value.Value.Substring(0, pos));
                                             trData.SizeMuti.Add(size);
@@ -460,7 +456,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                     }
                                 }
                             }
-                            else if (GFID == "0,1")
+                            else if (string.Equals(GFID, "0,1", StringComparison.Ordinal))
                             {
                                 var gfids = GFID.Split(',', StringSplitOptions.RemoveEmptyEntries);
                                 if (gfids.Length == 2)
@@ -471,12 +467,12 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         trData.SizeMuti = new List<int>();
                                         foreach (var key_value in key_values)
                                         {
-                                            if (key_value.Key != "Title" && key_value.Key != "Count")
+                                            if (!string.Equals(key_value.Key, "Title", StringComparison.Ordinal) && !string.Equals(key_value.Key, "Count", StringComparison.Ordinal))
                                             {
                                                 trData.OutputMuti.Add(key_value.Key);
                                                 // size
                                                 int size = 0;
-                                                int pos = key_value.Value.IndexOf(",");
+                                                int pos = key_value.Value.IndexOf(",", StringComparison.Ordinal);
                                                 if (pos >= 0)
                                                     size = Convert.ToInt32(key_value.Value.Substring(0, pos));
                                                 trData.SizeMuti.Add(size);
@@ -489,12 +485,12 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         trData.SizeMuti_add = new List<int>();
                                         foreach (var key_value in key_values)
                                         {
-                                            if (key_value.Key != "Title" && key_value.Key != "Count")
+                                            if (!string.Equals(key_value.Key, "Title", StringComparison.Ordinal) && !string.Equals(key_value.Key, "Count", StringComparison.Ordinal))
                                             {
                                                 trData.OutputMuti_add.Add(key_value.Key);
                                                 // size
                                                 int size = 0;
-                                                int pos = key_value.Value.IndexOf(",");
+                                                int pos = key_value.Value.IndexOf(",", StringComparison.Ordinal);
                                                 if (pos >= 0)
                                                     size = Convert.ToInt32(key_value.Value.Substring(0, pos));
                                                 trData.SizeMuti_add.Add(size);
@@ -571,7 +567,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -623,7 +619,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -680,7 +676,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             return root;
         });
 
-        var root = await task;
+        var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
@@ -763,11 +759,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         hChild.AddChild(new IconTextItem(13, $"{sFut_Field_Name[k]} : {item[k]}"));
                     }
                     hGroup.AddChild(hChild);
-                    if (item[15] == "1")
+                    if (string.Equals(item[15], "1", StringComparison.Ordinal))
                     {
                         child최근월물.AddChild(CopyItem(hChild));
                     }
-                    if (item[16] == "1")
+                    if (string.Equals(item[16], "1", StringComparison.Ordinal))
                     {
                         child액티브월물.AddChild(CopyItem(hChild));
                     }

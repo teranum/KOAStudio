@@ -1,9 +1,7 @@
 ﻿using KFOpenApi.NET;
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
-using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace WKOAStudio.Business;
 
@@ -134,7 +132,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0 && LoginState != OpenApiLoginState.LoginFailed)
         {
-            _IsRealServer = axOpenAPI!.GetCommonFunc("GetServerGubunW", "") != "1";
+            _IsRealServer = !string.Equals(axOpenAPI!.GetCommonFunc("GetServerGubunW", ""), "1", StringComparison.Ordinal);
             LoginState = OpenApiLoginState.LoginSucceed;
 
             ApiFolder = axOpenAPI.GetAPIModulePath();

@@ -195,7 +195,7 @@ internal sealed partial class BusinessLogic
                     if (axOpenAPI!.GetConnectState() == 0) return;
                     if (selectedItem.IconId == 13)
                     {
-                        if (SelectedText == "사용자정보")
+                        if (string.Equals(SelectedText, "사용자정보", StringComparison.Ordinal))
                         {
                             StringBuilder stringBuilder = new StringBuilder();
                             stringBuilder.AppendLine();
@@ -361,7 +361,7 @@ internal sealed partial class BusinessLogic
         {
             if (text != null && text != string.Empty)
             {
-                int nSubPos = text.IndexOf(" : ");
+                int nSubPos = text.IndexOf(" : ", StringComparison.Ordinal);
                 if (nSubPos != -1)
                 {
                     codeName = text.Substring(nSubPos + " : ".Length);
@@ -369,14 +369,14 @@ internal sealed partial class BusinessLogic
             }
         }
 
-        int nPos = codeName.IndexOf(" : ");
+        int nPos = codeName.IndexOf(" : ", StringComparison.Ordinal);
         if (nPos != -1)
         {
             string code = codeName.Substring(0, nPos);
             for (int i = 0; i < TrDatas.Count; i++)
             {
                 var trData = TrDatas[i];
-                if (trData.Code == code)
+                if (string.Equals(trData.Code, code, StringComparison.Ordinal))
                 {
                     // property
                     var prop_items = new List<PropertyItem>();
@@ -406,9 +406,9 @@ internal sealed partial class BusinessLogic
         var datagrid_PropertiesItems = parameters as IList<PropertyItem>;
         if (datagrid_PropertiesItems == null || axOpenAPI == null || axOpenAPI.Created == false)
             return;
-        if (SelectedText.Substring(0, 2).ToUpper() == "OP") // TR요청
+        if (string.Equals(SelectedText.Substring(0, 2).ToUpper(), "OP", StringComparison.Ordinal)) // TR요청
         {
-            string OptCode = SelectedText.Substring(0, SelectedText.IndexOf(" : "));
+            string OptCode = SelectedText.Substring(0, SelectedText.IndexOf(" : ", StringComparison.Ordinal));
             for (int i = 0; i < datagrid_PropertiesItems.Count; i++)
             {
                 var nvd = datagrid_PropertiesItems[i];
@@ -426,7 +426,7 @@ internal sealed partial class BusinessLogic
                     szActionMsg = $"<TR ({OptCode}) 요청: 실패> lRet = {lRet}";
             }
         }
-        else if (SelectedText.Substring(0, 7) == "조건검색 : ") // 조건검색
+        else if (string.Equals(SelectedText.Substring(0, 7), "조건검색 : ", StringComparison.Ordinal)) // 조건검색
         {
             string? szScrNum = datagrid_PropertiesItems[0].Value;
             string? szCondName = datagrid_PropertiesItems[1].Value;
@@ -446,7 +446,7 @@ internal sealed partial class BusinessLogic
                     szActionMsg = $"<조건검색 ({szCondName}) 요청: 실패> lRet = {lRet}";
             }
         }
-        else if (SelectedText.Substring(0, 7) == "함수호출 : ") // 함수호출
+        else if (string.Equals(SelectedText.Substring(0, 7), "함수호출 : ", StringComparison.Ordinal)) // 함수호출
         {
             string szFuncName = SelectedText.Substring("함수호출 : ".Length);
             VariantWrapper[] Params = new VariantWrapper[datagrid_PropertiesItems.Count];

@@ -1,5 +1,4 @@
 ﻿using ICSharpCode.AvalonEdit.Editing;
-using System;
 using System.ComponentModel;
 using System.Windows;
 
@@ -22,9 +21,9 @@ namespace KOAStudio.Core.Views
         {
             ShowLineNumbers = true;
             var leftMargins = TextArea.LeftMargins;
-            foreach (var Margin in leftMargins)
+            foreach (var margin in leftMargins)
             {
-                if (Margin is LineNumberMargin lmargin)
+                if (margin is LineNumberMargin lmargin)
                 {
                     lmargin.Width = 30;
                     break;
