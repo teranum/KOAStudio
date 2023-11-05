@@ -5,6 +5,7 @@
 		<LangVersion>default</LangVersion>
 		<TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
 		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>app.ico</ApplicationIcon>
 		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
@@ -12,28 +13,12 @@
 		<PreserveCompilationContext>false</PreserveCompilationContext>
 	</PropertyGroup>
 	
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0-windows' ">
-		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj">
-			<SetTargetFramework>TargetFramework=net7.0-windows</SetTargetFramework>
-		</ProjectReference>
-	</ItemGroup>
-	
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj">
-			<SetTargetFramework>TargetFramework=net48</SetTargetFramework>
-		</ProjectReference>
-	</ItemGroup>
-
 	<ItemGroup>
-		<PackageReference Include="KHOpenApi.NET" Version="*" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="*" />
+		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
 		<Reference Include="System.IO.Compression" />
-		<PackageReference Include="Costura.Fody" Version="5.7.0">
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
