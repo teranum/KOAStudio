@@ -11,7 +11,7 @@
 		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
 		<Platforms>x86;x64</Platforms>
 		<PreserveCompilationContext>false</PreserveCompilationContext>
-		<NoWarn>MA0048;MA0011;MA0051;MA0009;MA0074</NoWarn>
+		<NoWarn>$(NoWarn);MA0048;MA0009</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
