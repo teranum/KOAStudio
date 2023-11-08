@@ -16,8 +16,6 @@ namespace WKOAStudio
     {
         public App()
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
 

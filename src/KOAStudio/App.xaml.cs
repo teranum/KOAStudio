@@ -16,8 +16,6 @@ namespace KOAStudio
     {
         public App()
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
 
