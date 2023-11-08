@@ -42,6 +42,11 @@ namespace WKOAStudio.Business
             WeakReferenceMessenger.Default.Send(new LogOutputMessageType(tabIndex, content, maxLines, focus));
         }
 
+        public void OutputLogResetAllChangeState()
+        {
+            WeakReferenceMessenger.Default.Send(new LogOutputResetAllChangeStateMessageType());
+        }
+
         public void SetTabTrees(object items)
         {
             WeakReferenceMessenger.Default.Send(new SetTabTreesMessageType(items));

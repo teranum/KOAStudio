@@ -11,15 +11,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Balls_3.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="*" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="*" />
 		<PackageReference Include="AvalonEdit" Version="*" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="*" />
 		<PackageReference Include="KHOpenApi.NET" Version="1.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="Resources\Balls_3.png" />
 		<Resource Include="Resources\icons.png" />
 	</ItemGroup>
 

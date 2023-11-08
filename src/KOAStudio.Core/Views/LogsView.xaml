@@ -1,40 +1,55 @@
-﻿<UserControl x:Class="KOAStudio.Core.Views.LogsView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-        xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:local="clr-namespace:KOAStudio.Core.Views"
-        mc:Ignorable="d" 
-        xmlns:Helpers="clr-namespace:KOAStudio.Core.Helpers"
-        Helpers:ViewModelLocator.AutoWireViewModel="True"
-        d:DesignHeight="450" d:DesignWidth="800"
-        x:Name="root"
-        >
-    <TabControl Grid.Row="2" TabStripPlacement="Bottom"
-                    SelectedIndex="{Binding TabSelectedIndex}"
-                    ItemsSource="{Binding TabDatas}"
-                    >
+﻿<UserControl
+    x:Class="KOAStudio.Core.Views.LogsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Converters="clr-namespace:SI_DevCenter.Converters"
+    xmlns:Helpers="clr-namespace:KOAStudio.Core.Helpers"
+    xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:KOAStudio.Core.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    Helpers:ViewModelLocator.AutoWireViewModel="True"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <Converters:BallIdToImage x:Key="BallIdToImage" />
+    </UserControl.Resources>
+    <TabControl
+        Grid.Row="2"
+        ItemsSource="{Binding TabDatas}"
+        SelectedIndex="{Binding TabSelectedIndex}"
+        TabStripPlacement="Bottom">
         <TabControl.ContextMenu>
             <ContextMenu>
-                <MenuItem Header="복사" Command="{Binding Popup_CopyCommand}"/>
-                <MenuItem Header="지우기" Command="{Binding Popup_ClearCommand}"/>
-                <Separator/>
-                <MenuItem Header="실시간 중지" Command="{Binding Popup_Stop_RTCommand}"/>
+                <MenuItem Command="{Binding Popup_CopyCommand}" Header="복사" />
+                <MenuItem Command="{Binding Popup_ClearCommand}" Header="지우기" />
+                <Separator />
+                <MenuItem Command="{Binding Popup_Stop_RTCommand}" Header="실시간 중지" />
             </ContextMenu>
         </TabControl.ContextMenu>
         <TabControl.ItemTemplate>
             <DataTemplate>
-                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
+                    <Image
+                        Width="8"
+                        Margin="2,0,0,0"
+                        VerticalAlignment="Top"
+                        Source="{Binding BallImage, Converter={StaticResource BallIdToImage}}" />
+                </StackPanel>
             </DataTemplate>
         </TabControl.ItemTemplate>
         <TabControl.ContentTemplate>
             <DataTemplate>
-                <ListBox x:Name="listBox" ItemsSource="{Binding Items}" Margin="-3">
+                <ListBox
+                    x:Name="listBox"
+                    Margin="-3"
+                    ItemsSource="{Binding Items}">
                     <bh:Interaction.Triggers>
                         <bh:EventTrigger EventName="MouseDoubleClick">
-                            <bh:InvokeCommandAction Command="{Binding DataContext.ListBox_MouseDoubleClickCommand, ElementName=root}"
-                                                               CommandParameter="{Binding SelectedItem, ElementName=listBox}"/>
+                            <bh:InvokeCommandAction Command="{Binding DataContext.ListBox_MouseDoubleClickCommand, ElementName=root}" CommandParameter="{Binding SelectedItem, ElementName=listBox}" />
                         </bh:EventTrigger>
                     </bh:Interaction.Triggers>
                 </ListBox>

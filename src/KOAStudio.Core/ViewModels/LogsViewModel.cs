@@ -9,13 +9,15 @@ using System.Windows;
 
 namespace KOAStudio.Core.ViewModels
 {
-    internal class ListTabData
+    internal partial class ListTabData : ObservableObject
     {
         public ListTabData()
         {
             Title = string.Empty;
             Items = new ObservableCollection<string>();
         }
+        [ObservableProperty]
+        private int _BallImage;
         public string Title { get; set; }
         public ObservableCollection<string> Items { get; set; }
     }
@@ -47,7 +49,8 @@ namespace KOAStudio.Core.ViewModels
             {
                 var TabIndex = m.TabIndex;
                 if (TabDatas is null || TabIndex < 0 || TabIndex >= TabDatas.Count) return;
-                var listBoxData = TabDatas[TabIndex].Items;
+                var SelTab = TabDatas[TabIndex];
+                var listBoxData = SelTab.Items;
                 var Content = m.Content;
                 if (Content is null)
                     listBoxData.Clear();
@@ -75,10 +78,27 @@ namespace KOAStudio.Core.ViewModels
                             }
                         }
                     }
+
+                    if (TabIndex != TabSelectedIndex)
+                        SelTab.BallImage = 4;
+                    else SelTab.BallImage = 1;
                 }
                 if (m.Focus)
                 {
                     TabSelectedIndex = TabIndex;
+                    SelTab.BallImage = 1;
+                }
+            });
+
+            // 로그등록
+            WeakReferenceMessenger.Default.Register<LogOutputResetAllChangeStateMessageType>(this, (r, m) =>
+            {
+                if (TabDatas != null)
+                {
+                    foreach (var tabData in TabDatas)
+                    {
+                        tabData.BallImage = 0;
+                    }
                 }
             });
         }
@@ -86,8 +106,23 @@ namespace KOAStudio.Core.ViewModels
         [ObservableProperty]
         private List<ListTabData>? _TabDatas;
 
-        [ObservableProperty]
         private int _TabSelectedIndex;
+        public int TabSelectedIndex
+        {
+            get => _TabSelectedIndex;
+            set
+            {
+                if (_TabSelectedIndex != value)
+                {
+                    _TabSelectedIndex = value;
+                    if (TabDatas != null && TabDatas[_TabSelectedIndex].BallImage != 0)
+                    {
+                        TabDatas[_TabSelectedIndex].BallImage = 1;
+                    }
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         // 복사
         [RelayCommand]

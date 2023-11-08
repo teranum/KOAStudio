@@ -9,6 +9,7 @@ public record SetPropertiesMessageType(string Text, object Items);
 public record QueryNextEnabledMessageType(bool IsEnable);
 public record SetTabLogsMessageType(object Items);
 public record LogOutputMessageType(int TabIndex, object? Content, int MaxLines, bool Focus);
+public record LogOutputResetAllChangeStateMessageType();
 public record SetTabTreesMessageType(object Items);
 public record SetTreeItemsMessageType(int TabIndex, object? Items);
 
@@ -105,5 +106,6 @@ public record SetTreeItemsMessageType
         this.Items = Items;
     }
 }
+public record LogOutputResetAllChangeStateMessageType();
 
 #endif

@@ -15,7 +15,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="26"/>
+            <RowDefinition Height="22"/>
             <RowDefinition Height="26"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="104"/>
@@ -24,7 +24,7 @@
             <Button Content="조 회" Width="60" HorizontalAlignment="Left" Command="{Binding QueryCommand}" CommandParameter="{StaticResource False}" />
             <Button Content="다 음" Width="60" HorizontalAlignment="Left" Command="{Binding QueryCommand}" CommandParameter="{StaticResource True}" IsEnabled="{Binding QueryNextEnabled}" Margin="70,0,0,0"/>
         </Grid>
-        <TextBlock Grid.Row="1" Padding="10,3,0,0" Text="{Binding HeaderText}">
+        <TextBlock Grid.Row="1" Padding="10,5,0,0" Text="{Binding HeaderText}">
             <TextBlock.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF9F7F7" Offset="1"/>

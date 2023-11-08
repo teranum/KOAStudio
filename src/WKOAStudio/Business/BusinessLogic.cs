@@ -21,7 +21,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
     private AxKFOpenAPI? axOpenAPI;
     private string ApiFolder = string.Empty;
-    private readonly Encoding AppEncoder = Encoding.GetEncoding(949);
+    private readonly Encoding AppEncoder = Encoding.GetEncoding("EUC-KR");
 
     private static readonly string SCR_REQ_TR_BASE = "3000";
 
@@ -214,6 +214,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         OutputLog((int)LIST_TAB_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
         OutputLog((int)LIST_TAB_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
         OutputLog((int)LIST_TAB_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
+        OutputLogResetAllChangeState();
 
         // FID 네임 가져오기
         // /data/fidinfo.dat
