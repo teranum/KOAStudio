@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<LangVersion>default</LangVersion>
-		<TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+		<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<ImplicitUsings>enable</ImplicitUsings>
