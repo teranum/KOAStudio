@@ -18,10 +18,10 @@ namespace KOAStudio.Core.ViewModels
         public string Text { get; set; }
 
         [ObservableProperty]
-        private string _FilterText = string.Empty;
+        private string _filterText = string.Empty;
 
         [ObservableProperty]
-        private List<object>? _Items;
+        private List<object>? _items;
     }
 
     internal partial class ItemsViewModel : ObservableObject
@@ -40,7 +40,7 @@ namespace KOAStudio.Core.ViewModels
                     foreach (var item in items)
                     {
                         newTabDatas.Add(new TreeTabData() { IconId = item.IconId, Text = item.Text });
-                        tab_items.Add(null);
+                        _tab_items.Add(null);
                     }
                     this.TabDatas = newTabDatas;
                 }
@@ -55,30 +55,30 @@ namespace KOAStudio.Core.ViewModels
 
                 var newItems = m.Items as List<object>;
                 TabDatas[TabIndex].Items = newItems;
-                tab_items[TabIndex] = newItems;
+                _tab_items[TabIndex] = newItems;
             });
 
         }
 
-        List<List<object>?> tab_items = new List<List<object>?>();
+        private readonly List<List<object>?> _tab_items = [];
 
         [ObservableProperty]
-        private List<TreeTabData>? _TabDatas;
+        private List<TreeTabData>? _tabDatas;
 
         [ObservableProperty]
-        private int _TabSelectedIndex;
+        private int _tabSelectedIndex;
 
         [ObservableProperty]
-        private bool _FilterOnlyNodeChecked;
+        private bool _filterOnlyNodeChecked;
 
-        private IconTextItem? save_selectedItem;
+        private IconTextItem? _save_selectedItem;
         [RelayCommand]
         private void TreeView_SelectedItemChanged(IconTextItem? selectedItem)
         {
             if (selectedItem is null) return;
-            if (save_selectedItem != selectedItem)
+            if (_save_selectedItem != selectedItem)
             {
-                save_selectedItem = selectedItem;
+                _save_selectedItem = selectedItem;
                 _uiRequest.ItemSelectedChanged(TabSelectedIndex, selectedItem);
             }
         }
@@ -90,10 +90,10 @@ namespace KOAStudio.Core.ViewModels
             string FilterText = TabDatas[TabSelectedIndex].FilterText;
             if (FilterText.Length == 0)
             {
-                TabDatas[TabSelectedIndex].Items = tab_items[TabSelectedIndex];
+                TabDatas[TabSelectedIndex].Items = _tab_items[TabSelectedIndex];
                 return;
             }
-            var orglistItems = tab_items[TabSelectedIndex];
+            var orglistItems = _tab_items[TabSelectedIndex];
             if (orglistItems == null || orglistItems.Count == 0)
             {
                 return;
@@ -103,15 +103,14 @@ namespace KOAStudio.Core.ViewModels
 
             var task = Task.Run(() =>
             {
-                List<object> newlistItems = new List<object>();
+                List<object> newlistItems = [];
                 foreach (var orgItem in orglistItems)
                 {
-                    var imagetitle = orgItem as IconTextItem;
-                    if (imagetitle != null)
+                    if (orgItem is IconTextItem imagetitle)
                     {
                         IconTextItem? finded;
                         if (bOnlyNode)
-                            finded = FindMatchedItemOnlyNode(imagetitle, FilterText);
+                            finded = ItemsViewModel.FindMatchedItemOnlyNode(imagetitle, FilterText);
                         else
                             finded = FindMatchedItem(imagetitle, FilterText);
                         if (finded != null)
@@ -129,8 +128,9 @@ namespace KOAStudio.Core.ViewModels
             FilterOnlyNodeChecked ^= true;
             await Filter().ConfigureAwait(true);
         }
+
         // sub functions
-        IconTextItem? FindMatchedItemOnlyNode(IconTextItem orgitem, string text)
+        static IconTextItem? FindMatchedItemOnlyNode(IconTextItem orgitem, string text)
         {
             IconTextItem? me = null;
 
@@ -140,15 +140,14 @@ namespace KOAStudio.Core.ViewModels
                 {
                     if (childitem is IconTextItem imagetitle)
                     {
-                        IconTextItem? finded = FindMatchedItemOnlyNode(imagetitle, text);
+                        IconTextItem? finded = ItemsViewModel.FindMatchedItemOnlyNode(imagetitle, text);
                         if (finded != null)
                         {
-                            if (me == null)
-                                me = new IconTextItem(orgitem.IconId, orgitem.Text)
-                                {
-                                    IsExpanded = true,
-                                    IsActived = orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0,
-                                };
+                            me ??= new IconTextItem(orgitem.IconId, orgitem.Text)
+                            {
+                                IsExpanded = true,
+                                IsActived = orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0,
+                            };
                             me.AddChild(finded);
                         }
                     }
@@ -162,20 +161,20 @@ namespace KOAStudio.Core.ViewModels
                     me = new IconTextItem(orgitem.IconId, orgitem.Text)
                     {
                         IsExpanded = true,
-                        IsActived = true
+                        IsActived = true,
                     };
                 }
             }
             return me;
         }
 
-        IconTextItem? FindMatchedItem(IconTextItem orgitem, string text)
+        static IconTextItem? FindMatchedItem(IconTextItem orgitem, string text)
         {
             IconTextItem? me = null;
 
             if (orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                me = CopyItem(orgitem);
+                me = ItemsViewModel.CopyItem(orgitem);
                 me.IsActived = true;
             }
 
@@ -188,11 +187,10 @@ namespace KOAStudio.Core.ViewModels
                         IconTextItem? finded = FindMatchedItem(imagetitle, text);
                         if (finded != null)
                         {
-                            if (me == null)
-                                me = new IconTextItem(orgitem.IconId, orgitem.Text)
-                                {
-                                    IsExpanded = true
-                                };
+                            me ??= new IconTextItem(orgitem.IconId, orgitem.Text)
+                            {
+                                IsExpanded = true,
+                            };
                             me.AddChild(finded);
                         }
                     }
@@ -202,14 +200,14 @@ namespace KOAStudio.Core.ViewModels
             return me;
         }
 
-        IconTextItem CopyItem(IconTextItem orgitem)
+        static IconTextItem CopyItem(IconTextItem orgitem)
         {
             var newItem = new IconTextItem(orgitem.IconId, orgitem.Text);
             foreach (var childitem in orgitem.Items)
             {
                 if (childitem is IconTextItem item)
                 {
-                    newItem.AddChild(CopyItem(item));
+                    newItem.AddChild(ItemsViewModel.CopyItem(item));
                 }
             }
             return newItem;

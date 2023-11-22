@@ -14,10 +14,10 @@ namespace KOAStudio.Core.ViewModels
         public ListTabData()
         {
             Title = string.Empty;
-            Items = new ObservableCollection<string>();
+            Items = [];
         }
         [ObservableProperty]
-        private int _BallImage;
+        private int _ballImage;
         public string Title { get; set; }
         public ObservableCollection<string> Items { get; set; }
     }
@@ -104,20 +104,20 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [ObservableProperty]
-        private List<ListTabData>? _TabDatas;
+        private List<ListTabData>? _tabDatas;
 
-        private int _TabSelectedIndex;
+        private int _tabSelectedIndex;
         public int TabSelectedIndex
         {
-            get => _TabSelectedIndex;
+            get => _tabSelectedIndex;
             set
             {
-                if (_TabSelectedIndex != value)
+                if (_tabSelectedIndex != value)
                 {
-                    _TabSelectedIndex = value;
-                    if (TabDatas != null && TabDatas[_TabSelectedIndex].BallImage != 0)
+                    _tabSelectedIndex = value;
+                    if (TabDatas != null && TabDatas[_tabSelectedIndex].BallImage != 0)
                     {
-                        TabDatas[_TabSelectedIndex].BallImage = 1;
+                        TabDatas[_tabSelectedIndex].BallImage = 1;
                     }
                     OnPropertyChanged();
                 }
@@ -131,7 +131,7 @@ namespace KOAStudio.Core.ViewModels
             if (TabDatas is not null)
             {
                 var lines = TabDatas[TabSelectedIndex].Items;
-                StringBuilder stringBuilder = new StringBuilder();
+                StringBuilder stringBuilder = new();
                 foreach (string line in lines)
                 {
                     stringBuilder.AppendLine(line);
@@ -148,8 +148,7 @@ namespace KOAStudio.Core.ViewModels
         [RelayCommand]
         private void Popup_Clear()
         {
-            if (TabDatas is not null)
-                TabDatas[TabSelectedIndex].Items.Clear();
+            TabDatas?[TabSelectedIndex].Items.Clear();
         }
 
         // 실시간 중지

@@ -10,27 +10,17 @@ public enum OpenApiLoginState
     LoginOuted,
 };
 
-public class IconText
+public class IconText(int iconId, string text)
 {
-    public IconText(int iconId, string text)
-    {
-        Text = text;
-        IconId = iconId;
-    }
-    public int IconId { get; set; }
+    public int IconId { get; set; } = iconId;
 
-    public string Text { get; set; }
+    public string Text { get; set; } = text;
 }
 
-public class IconTextItem : IconText
+public class IconTextItem(int imageId, string text) : IconText(imageId, text)
 {
-    public IconTextItem(int imageId, string text) : base(imageId, text)
-    {
-        Items = new List<object>();
-    }
-
     public IconTextItem? Parent;
-    public IList<object> Items { get; }
+    public IList<object> Items { get; } = new List<object>();
     public void AddChild(IconTextItem item)
     {
         item.Parent = this;
@@ -42,27 +32,19 @@ public class IconTextItem : IconText
     public bool IsActived { get; set; }
 }
 
-public class PropertyItem
+public class PropertyItem(string Name, string Value, string Desc, PropertyItem.VALUE_TYPE type = PropertyItem.VALUE_TYPE.VALUE_STRING, bool IsValueReadOnly = false)
 {
     public enum VALUE_TYPE
     {
         VALUE_STRING,
-        VALUE_LONG
+        VALUE_LONG,
     }
 
-    public PropertyItem(string Name, string Value, string Desc, VALUE_TYPE type = VALUE_TYPE.VALUE_STRING, bool IsValueReadOnly = false)
-    {
-        this.Name = Name;
-        this.Value = Value;
-        this.Desc = Desc;
-        this.type = type;
-        this.IsValueReadOnly = IsValueReadOnly;
-    }
-    public string Name { get; }
-    public string Value { get; set; }
-    public string Desc { get; }
+    public string Name { get; } = Name;
+    public string Value { get; set; } = Value;
+    public string Desc { get; } = Desc;
 
-    public VALUE_TYPE type;
-    public bool IsValueReadOnly { get; }
+    public VALUE_TYPE type = type;
+    public bool IsValueReadOnly { get; } = IsValueReadOnly;
 }
 

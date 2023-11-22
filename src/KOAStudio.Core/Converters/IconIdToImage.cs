@@ -20,7 +20,7 @@ namespace KOAStudio.Core.Converters
         {
             if (Images is null)
             {
-                Images = new List<BitmapSource>();
+                Images = [];
                 var m_Png_dead = new BitmapImage(new Uri("pack://application:,,,/KOAStudio.Core;component/Resources/icons.png"));
                 int nCY = 20;
                 int nCX = 16;

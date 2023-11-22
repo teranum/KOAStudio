@@ -58,7 +58,7 @@ namespace KOAStudio.Core.Views
                 {
                     DefaultValue = default(string),
                     BindsTwoWayByDefault = true,
-                    PropertyChangedCallback = OnDependencyPropertyChanged
+                    PropertyChangedCallback = OnDependencyPropertyChanged,
                 }
             );
 
@@ -71,10 +71,7 @@ namespace KOAStudio.Core.Views
                 var caretOffset = target.CaretOffset;
                 var newValue = args.NewValue;
 
-                if (newValue is null)
-                {
-                    newValue = "";
-                }
+                newValue ??= "";
 
                 string text = (string)newValue;
                 target.Document.Text = text;
