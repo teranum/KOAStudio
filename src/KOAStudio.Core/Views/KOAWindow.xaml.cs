@@ -1,6 +1,7 @@
 ﻿using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace KOAStudio.Core.Views
 {
@@ -12,6 +13,11 @@ namespace KOAStudio.Core.Views
         public KOAWindow()
         {
             InitializeComponent();
+            MouseDown += (sender, e) =>
+            {
+                if (e.ChangedButton == MouseButton.Left)
+                    DragMove();
+            };
         }
     }
 
