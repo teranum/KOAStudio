@@ -33,7 +33,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
 
     private readonly Dictionary<string, string> _map_FidToName = new(StringComparer.Ordinal);
 
-    private class TR_SPECIAL
+    private sealed class TR_SPECIAL
     {
         public string Code = string.Empty;
         public string Name = string.Empty;

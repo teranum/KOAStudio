@@ -12,7 +12,7 @@
 		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
 		<Platforms>x86;x64</Platforms>
 		<PreserveCompilationContext>false</PreserveCompilationContext>
-		<NoWarn>$(NoWarn);MA0048;MA0009</NoWarn>
+		<NoWarn>$(NoWarn);MA0048</NoWarn>
 	</PropertyGroup>
 	
 	<ItemGroup>

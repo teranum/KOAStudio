@@ -67,7 +67,7 @@ namespace KOAStudio.Core.Helpers
                 var viemodel_type = Type.GetType(viewModelName);
                 if (viemodel_type is not null)
                 {
-                    var constructInfo = viemodel_type.GetConstructors().First();
+                    var constructInfo = viemodel_type.GetConstructors()[0];
                     var parameters = constructInfo.GetParameters().Select(x => Ioc.Default.GetService(x.ParameterType)).ToArray();
                     return Activator.CreateInstance(viemodel_type, parameters);
                 }
@@ -125,12 +125,10 @@ namespace KOAStudio.Core.Helpers
                 {
                     return diVM;
                 }
-                else
-                {
-                    var constructInfo = viemodel_type.GetConstructors().First();
-                    var parameters = constructInfo.GetParameters().Select(x => Ioc.Default.GetService(x.ParameterType)).ToArray();
-                    return Activator.CreateInstance(viemodel_type, parameters);
-                }
+
+                var constructInfo = viemodel_type.GetConstructors()[0];
+                var parameters = constructInfo.GetParameters().Select(x => Ioc.Default.GetService(x.ParameterType)).ToArray();
+                return Activator.CreateInstance(viemodel_type, parameters);
             }
             return null;
         }

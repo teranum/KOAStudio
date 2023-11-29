@@ -361,7 +361,7 @@ internal sealed partial class BusinessLogic
         }
     }
 
-    private string TR_NextKey = string.Empty;
+    private string _tr_NextKey = string.Empty;
     public void QueryApiAction(string reqText, object parameters, bool bNext)
     {
         string szActionMsg = string.Empty;
@@ -380,7 +380,7 @@ internal sealed partial class BusinessLogic
             }
             if (_axOpenAPI.GetConnectState() != 0)
             {
-                long lRet = _axOpenAPI.CommRqData(OptCode, OptCode, bNext ? TR_NextKey : "", SCR_REQ_TR_BASE);
+                long lRet = _axOpenAPI.CommRqData(OptCode, OptCode, bNext ? _tr_NextKey : "", SCR_REQ_TR_BASE);
                 if (lRet == 0)
                 {
                     szActionMsg = $"<TR ({OptCode}) 요청: 성공> lRet = {lRet}";
