@@ -14,7 +14,7 @@ internal sealed partial class BusinessLogic
         var received_data = _appEncoder.GetBytes(memory_full_data);
         //
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
-        //if (e.sScrNo == SCR_REQ_TR_BASE)
+        //if (e.sScrNo == _scrNum_REQ_TR_BASE)
         {
             _tr_NextKey = e.sPreNext.TrimStart();
             SetPropertyQueryNextEnable(_tr_NextKey.Length > 0);
@@ -132,7 +132,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0 && LoginState != OpenApiLoginState.LoginFailed)
         {
-            _isRealServer = !string.Equals(_axOpenAPI!.GetCommonFunc("GetServerGubunW", ""), "1");
+            _isRealServer = !string.Equals(_axOpenAPI!.GetCommonFunc("GetServerGubunW", string.Empty), "1");
             LoginState = OpenApiLoginState.LoginSucceed;
 
             _apiFolder = _axOpenAPI.GetAPIModulePath();

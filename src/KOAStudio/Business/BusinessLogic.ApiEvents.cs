@@ -11,7 +11,7 @@ internal sealed partial class BusinessLogic
     private void AxKHOpenApi_OnReceiveTrData(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
     {
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
-        //if (e.sScrNo == SCR_REQ_TR_BASE)
+        //if (e.sScrNo == _scrNum_REQ_TR_BASE)
         {
             SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
             // TR코드 필드 찾기
@@ -63,7 +63,7 @@ internal sealed partial class BusinessLogic
         OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrCondition> sScrNo = {e.sScrNo}, strConditionName = {e.strConditionName}, nIndex = {e.nIndex}, nNext = {e.nNext}");
 
         int nScrNo = Convert.ToInt32(e.sScrNo);
-        if (nScrNo >= Convert.ToInt32(SCR_REQ_COND_BASE) && nScrNo <= Convert.ToInt32(SCR_REQ_COND_LAST))
+        if (nScrNo >= Convert.ToInt32(_scrNum_REQ_COND_BASE) && nScrNo <= Convert.ToInt32(_scrNum_REQ_COND_LAST))
         {
             // 조건검색 요청 결과
             string[] szCodeAndPrices = e.strCodeList.Split(';', StringSplitOptions.RemoveEmptyEntries);

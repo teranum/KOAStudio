@@ -38,7 +38,7 @@ public interface IUIRequest
     /// </summary>
     /// <param name="tabIndex"></param>
     /// <param name="selectedItem"></param>
-    void ItemSelectedChanged(int tabIndex, IconTextItem selectedItem);
+    void ItemSelectedChanged(int tabIndex, IdTextItem selectedItem);
 
     /// <summary>
     /// 속성창 조회/다음 버튼 실행

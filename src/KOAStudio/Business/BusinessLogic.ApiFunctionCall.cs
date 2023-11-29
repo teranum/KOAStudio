@@ -43,7 +43,7 @@ internal sealed partial class BusinessLogic
     //    /// <param name="funcName"></param>
     //    /// <param name="Params"></param>
     //    /// <returns></returns>
-    //#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+    //#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable ValueType.
     //#pragma warning disable CS8605 // Unboxing a possibly null value.
     //    private object? CallOcxFunc(string funcName, VariantWrapper[] Params)
     //    {
@@ -186,6 +186,6 @@ internal sealed partial class BusinessLogic
     //        return null;
     //    }
     //#pragma warning restore CS8605 // Unboxing a possibly null value.
-    //#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+    //#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable ValueType.
 
 }

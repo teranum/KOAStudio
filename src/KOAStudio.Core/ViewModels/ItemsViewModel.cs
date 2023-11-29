@@ -6,23 +6,6 @@ using KOAStudio.Core.Services;
 
 namespace KOAStudio.Core.ViewModels
 {
-    internal partial class TreeTabData : ObservableObject
-    {
-        public TreeTabData()
-        {
-            IconId = 0;
-            Text = string.Empty;
-        }
-
-        public int IconId { get; set; }
-        public string Text { get; set; }
-
-        [ObservableProperty]
-        private string _filterText = string.Empty;
-
-        [ObservableProperty]
-        private List<object>? _items;
-    }
 
     internal partial class ItemsViewModel : ObservableObject
     {
@@ -34,12 +17,12 @@ namespace KOAStudio.Core.ViewModels
             // 아이템 탭 등록
             WeakReferenceMessenger.Default.Register(this, (MessageHandler<object, SetTabTreesMessageType>)((r, m) =>
             {
-                if (m.Items is List<IconText> items)
+                if (m.Items is List<IdText> items)
                 {
-                    var newTabDatas = new List<TreeTabData>();
+                    var newTabDatas = new List<TabTreeData>();
                     foreach (var item in items)
                     {
-                        newTabDatas.Add(new TreeTabData() { IconId = item.IconId, Text = item.Text });
+                        newTabDatas.Add(new TabTreeData(item.Id, item.Text));
                         _tab_items.Add(null);
                     }
                     this.TabDatas = newTabDatas;
@@ -63,7 +46,7 @@ namespace KOAStudio.Core.ViewModels
         private readonly List<List<object>?> _tab_items = [];
 
         [ObservableProperty]
-        private List<TreeTabData>? _tabDatas;
+        private List<TabTreeData>? _tabDatas;
 
         [ObservableProperty]
         private int _tabSelectedIndex;
@@ -71,9 +54,9 @@ namespace KOAStudio.Core.ViewModels
         [ObservableProperty]
         private bool _filterOnlyNodeChecked;
 
-        private IconTextItem? _save_selectedItem;
+        private IdTextItem? _save_selectedItem;
         [RelayCommand]
-        private void TreeView_SelectedItemChanged(IconTextItem? selectedItem)
+        private void TreeView_SelectedItemChanged(IdTextItem? selectedItem)
         {
             if (selectedItem is null) return;
             if (_save_selectedItem != selectedItem)
@@ -106,9 +89,9 @@ namespace KOAStudio.Core.ViewModels
                 List<object> newlistItems = [];
                 foreach (var orgItem in orglistItems)
                 {
-                    if (orgItem is IconTextItem imagetitle)
+                    if (orgItem is IdTextItem imagetitle)
                     {
-                        IconTextItem? finded;
+                        IdTextItem? finded;
                         if (bOnlyNode)
                             finded = ItemsViewModel.FindMatchedItemOnlyNode(imagetitle, FilterText);
                         else
@@ -130,20 +113,20 @@ namespace KOAStudio.Core.ViewModels
         }
 
         // sub functions
-        static IconTextItem? FindMatchedItemOnlyNode(IconTextItem orgitem, string text)
+        static IdTextItem? FindMatchedItemOnlyNode(IdTextItem orgitem, string text)
         {
-            IconTextItem? me = null;
+            IdTextItem? me = null;
 
             if (orgitem.Items.Count > 0)
             {
                 foreach (var childitem in orgitem.Items)
                 {
-                    if (childitem is IconTextItem imagetitle)
+                    if (childitem is IdTextItem imagetitle)
                     {
-                        IconTextItem? finded = ItemsViewModel.FindMatchedItemOnlyNode(imagetitle, text);
+                        IdTextItem? finded = ItemsViewModel.FindMatchedItemOnlyNode(imagetitle, text);
                         if (finded != null)
                         {
-                            me ??= new IconTextItem(orgitem.IconId, orgitem.Text)
+                            me ??= new IdTextItem(orgitem.Id, orgitem.Text)
                             {
                                 IsExpanded = true,
                                 IsActived = orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0,
@@ -158,7 +141,7 @@ namespace KOAStudio.Core.ViewModels
             {
                 if (orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    me = new IconTextItem(orgitem.IconId, orgitem.Text)
+                    me = new IdTextItem(orgitem.Id, orgitem.Text)
                     {
                         IsExpanded = true,
                         IsActived = true,
@@ -168,9 +151,9 @@ namespace KOAStudio.Core.ViewModels
             return me;
         }
 
-        static IconTextItem? FindMatchedItem(IconTextItem orgitem, string text)
+        static IdTextItem? FindMatchedItem(IdTextItem orgitem, string text)
         {
-            IconTextItem? me = null;
+            IdTextItem? me = null;
 
             if (orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
             {
@@ -182,12 +165,12 @@ namespace KOAStudio.Core.ViewModels
             {
                 foreach (var childitem in orgitem.Items)
                 {
-                    if (childitem is IconTextItem imagetitle)
+                    if (childitem is IdTextItem imagetitle)
                     {
-                        IconTextItem? finded = FindMatchedItem(imagetitle, text);
+                        IdTextItem? finded = FindMatchedItem(imagetitle, text);
                         if (finded != null)
                         {
-                            me ??= new IconTextItem(orgitem.IconId, orgitem.Text)
+                            me ??= new IdTextItem(orgitem.Id, orgitem.Text)
                             {
                                 IsExpanded = true,
                             };
@@ -200,12 +183,12 @@ namespace KOAStudio.Core.ViewModels
             return me;
         }
 
-        static IconTextItem CopyItem(IconTextItem orgitem)
+        static IdTextItem CopyItem(IdTextItem orgitem)
         {
-            var newItem = new IconTextItem(orgitem.IconId, orgitem.Text);
+            var newItem = new IdTextItem(orgitem.Id, orgitem.Text);
             foreach (var childitem in orgitem.Items)
             {
-                if (childitem is IconTextItem item)
+                if (childitem is IdTextItem item)
                 {
                     newItem.AddChild(ItemsViewModel.CopyItem(item));
                 }

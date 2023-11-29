@@ -9,13 +9,13 @@ using System.Windows.Interop;
 
 namespace WKOAStudio.Business;
 
-internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIRequest, ILogicNotify
+internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppLogic, IUIRequest
 {
     [DllImport("kernel32")] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
     private static string GetProfileString(string section, string key, string file, int buflength = 255)
     {
         StringBuilder temp = new(buflength);
-        _ = GetPrivateProfileString(section, key, "", temp, buflength, file);
+        _ = GetPrivateProfileString(section, key, string.Empty, temp, buflength, file);
         return temp.ToString();
     }
 
@@ -23,7 +23,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
     private string _apiFolder = string.Empty;
     private readonly Encoding _appEncoder = Encoding.GetEncoding("EUC-KR");
 
-    private static readonly string SCR_REQ_TR_BASE = "3000";
+    private static readonly string _scrNum_REQ_TR_BASE = "3000";
 
     private readonly Dictionary<string, string> _map_FidToName = [];
 
@@ -171,7 +171,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
         SetMenuCustomize("리소스", _menu_Customize);
 
         // 아이템 트리뷰 모델 등록
-        var TreeTab_image_Names = new List<IconText>()
+        var TreeTab_image_Names = new List<IdText>()
         {
             new(0, "실시간목록"),
             new(3, "TR목록"),
@@ -269,13 +269,13 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
         Load_개발가이드Async();
     }
 
-    private IconTextItem? _data_실시간목록;
-    private IconTextItem? _data_TR목록;
-    private IconTextItem? _data_개발가이드;
-    private IconTextItem? _data_화면목록;
-    private IconTextItem? _data_선물종목정보;
-    private IconTextItem? _data_옵션종목정보;
-    private IconTextItem? _data_사용자정보;
+    private IdTextItem? _data_실시간목록;
+    private IdTextItem? _data_TR목록;
+    private IdTextItem? _data_개발가이드;
+    private IdTextItem? _data_화면목록;
+    private IdTextItem? _data_선물종목정보;
+    private IdTextItem? _data_옵션종목정보;
+    private IdTextItem? _data_사용자정보;
 
     private async void Load_실시간목록Async()
     {
@@ -283,7 +283,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
 
         var task = Task.Run(() =>
         {
-            var root = new IconTextItem(0, "실시간목록");
+            var root = new IdTextItem(0, "실시간목록");
             if (_map_IniFile_TrInfo.TryGetValue("TRLIST", out List<KEY_VALUE>? trlists))
             {
                 if (trlists != null)
@@ -300,12 +300,12 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
                             {
                                 string name = string.Empty;
                                 List<string> Fids = [];
-                                IconTextItem? hitem = null;
+                                IdTextItem? hitem = null;
                                 foreach (var item in key_values)
                                 {
                                     if (item.Key.Equals("Title"))
                                     {
-                                        hitem = new IconTextItem(1, "Real Type : " + item.Value);
+                                        hitem = new IdTextItem(1, "Real Type : " + item.Value);
                                     }
                                     else if (hitem != null && !item.Key.Equals("Type") && !item.Value.Equals("-1"))
                                     {
@@ -323,7 +323,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
                                                 _map_FidToName[tmpFid] = item.Key;
                                             }
                                             text += $"] = {item.Key}";
-                                            hitem.AddChild(new IconTextItem(2, text));
+                                            hitem.AddChild(new IdTextItem(2, text));
                                         }
                                     }
                                 }
@@ -507,48 +507,48 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
 
             if (_trDatas.Count == 0) return null;
 
-            var root = new IconTextItem(3, "TR목록");
+            var root = new IdTextItem(3, "TR목록");
 
             foreach (var trData in _trDatas)
             {
-                var hitem = new IconTextItem(trData.Caution.Length > 0 ? 14 : 4, $"{trData.Code} : {trData.Name}");
+                var hitem = new IdTextItem(trData.Caution.Length > 0 ? 14 : 4, $"{trData.Code} : {trData.Name}");
                 // Inputs
                 if (trData.Inputs != null)
                 {
-                    var hInputs = new IconTextItem(5, "[INPUT]");
+                    var hInputs = new IdTextItem(5, "[INPUT]");
                     foreach (var item in trData.Inputs)
                     {
-                        hInputs.AddChild(new IconTextItem(6, item));
+                        hInputs.AddChild(new IdTextItem(6, item));
                     }
                     hitem.AddChild(hInputs);
                 }
                 // Outnput
-                var hOutputs = new IconTextItem(7, "[OUTPUT]");
+                var hOutputs = new IdTextItem(7, "[OUTPUT]");
                 // Outnput Single
                 if (trData.OutputSingle != null)
                 {
-                    var hOutputSingle = new IconTextItem(8, "싱글데이터");
+                    var hOutputSingle = new IdTextItem(8, "싱글데이터");
                     for (int i = 0; i < trData.OutputSingle.Count; i++)
                     {
-                        hOutputSingle.AddChild(new IconTextItem(6, $"{trData.OutputSingle[i]}({trData.SizeSingle![i]})"));
+                        hOutputSingle.AddChild(new IdTextItem(6, $"{trData.OutputSingle[i]}({trData.SizeSingle![i]})"));
                     }
                     hOutputs.AddChild(hOutputSingle);
                 }
                 // Outnput Multi
                 if (trData.OutputMuti != null)
                 {
-                    var hOutputMuti = new IconTextItem(8, "멀티데이터");
+                    var hOutputMuti = new IdTextItem(8, "멀티데이터");
                     for (int i = 0; i < trData.OutputMuti.Count; i++)
                     {
-                        hOutputMuti.AddChild(new IconTextItem(9, $"{trData.OutputMuti[i]}({trData.SizeMuti![i]})"));
+                        hOutputMuti.AddChild(new IdTextItem(9, $"{trData.OutputMuti[i]}({trData.SizeMuti![i]})"));
                     }
                     if (trData.OutputMuti_add != null)
                     {
                         hOutputMuti.Text += "1";
-                        var hOutputMuti_add = new IconTextItem(8, "멀티데이터2");
+                        var hOutputMuti_add = new IdTextItem(8, "멀티데이터2");
                         for (int i = 0; i < trData.OutputMuti_add.Count; i++)
                         {
-                            hOutputMuti_add.AddChild(new IconTextItem(9, $"{trData.OutputMuti_add[i]}({trData.SizeMuti_add![i]})"));
+                            hOutputMuti_add.AddChild(new IdTextItem(9, $"{trData.OutputMuti_add[i]}({trData.SizeMuti_add![i]})"));
                         }
                         hOutputs.AddChild(hOutputMuti);
                         hOutputs.AddChild(hOutputMuti_add);
@@ -587,10 +587,10 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
             var SLists = GetProfileString("SAMPLELIST", "SList", file_path).Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (SLists.Length == 0) return null;
 
-            var root = new IconTextItem(3, "샘플 목록");
+            var root = new IdTextItem(3, "샘플 목록");
             foreach (var section in SLists)
             {
-                var hChild = new IconTextItem(4, section);
+                var hChild = new IdTextItem(4, section);
                 var ss = GetProfileString(section, "SrcFile", file_path, 0x800);
                 var SrcFiles = ss.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var item in SrcFiles)
@@ -600,7 +600,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
                     {
                         string Title = item.Substring(0, nPos);
                         string path = item.Substring(nPos + 1, item.Length - nPos - 2);
-                        hChild.AddChild(new IconTextItem(9, Title));
+                        hChild.AddChild(new IdTextItem(9, Title));
                         string Content = string.Empty;
                         try
                         {
@@ -656,16 +656,16 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
                 ScrnSpecial.TRs = GetProfileString(ScrnSpecial.ScreenNumber, "Trlist", path).Split(',', StringSplitOptions.RemoveEmptyEntries);
             }
 
-            var root = new IconTextItem(3, "화면목록");
+            var root = new IdTextItem(3, "화면목록");
 
             foreach (var scrnData in ScrnSpecials)
             {
-                var hitem = new IconTextItem(4, $"[{scrnData.ScreenNumber}] {scrnData.ScreenName}");
+                var hitem = new IdTextItem(4, $"[{scrnData.ScreenNumber}] {scrnData.ScreenName}");
                 if (scrnData.TRs != null)
                 {
                     for (int i = 0; i < scrnData.TRs.Length; i++)
                     {
-                        var hTRName = new IconTextItem(9, scrnData.TRs[i]);
+                        var hTRName = new IdTextItem(9, scrnData.TRs[i]);
                         hitem.AddChild(hTRName);
                     }
                 }
@@ -712,12 +712,12 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
             return result;
         }
 
-        static IconTextItem CopyItem(IconTextItem orgitem)
+        static IdTextItem CopyItem(IdTextItem orgitem)
         {
-            var newItem = new IconTextItem(orgitem.IconId, orgitem.Text);
+            var newItem = new IdTextItem(orgitem.Id, orgitem.Text);
             foreach (var childitem in orgitem.Items)
             {
-                if (childitem is IconTextItem item)
+                if (childitem is IdTextItem item)
                 {
                     newItem.AddChild(CopyItem(item));
                 }
@@ -771,22 +771,22 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
             "전일누적거래량"
         ];
 
-        var root1 = new IconTextItem(10, "해외선물 종목정보");
-        var child최근월물 = new IconTextItem(0, "최근월물");
-        var child액티브월물 = new IconTextItem(0, "액티브월물");
+        var root1 = new IdTextItem(10, "해외선물 종목정보");
+        var child최근월물 = new IdTextItem(0, "최근월물");
+        var child액티브월물 = new IdTextItem(0, "액티브월물");
         for (int i = 0; i < GroupNames.Length; i++)
         {
             string info = _axOpenAPI.GetGlobalFutOpCodeInfoByType(0, GroupCodes[i]);
             var item_infos = ParseTextToInfo(info, nFut_Field_Width);
             if (item_infos.Count > 0)
             {
-                IconTextItem hGroup = new(11, GroupNames[i]);
+                IdTextItem hGroup = new(11, GroupNames[i]);
                 foreach (var item in item_infos)
                 {
-                    IconTextItem hChild = new(12, $"[{item[1]}] : {item[3]}"); // [종목코드] : 품목명
+                    IdTextItem hChild = new(12, $"[{item[1]}] : {item[3]}"); // [종목코드] : 품목명
                     for (int k = 5; k < item.Length; k++)
                     {
-                        hChild.AddChild(new IconTextItem(13, $"{sFut_Field_Name[k]} : {item[k]}"));
+                        hChild.AddChild(new IdTextItem(13, $"{sFut_Field_Name[k]} : {item[k]}"));
                     }
                     hGroup.AddChild(hChild);
                     if (item[15].Equals("1"))
@@ -862,20 +862,20 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
             "옵션type"
         ];
 
-        var root2 = new IconTextItem(10, "해외옵션 종목정보");
+        var root2 = new IdTextItem(10, "해외옵션 종목정보");
         for (int i = 0; i < GroupNames.Length; i++)
         {
             string info = _axOpenAPI.GetGlobalFutOpCodeInfoByType(1, GroupCodes[i]);
             var item_infos = ParseTextToInfo(info, nOpt_Field_Width);
             if (item_infos.Count > 0)
             {
-                IconTextItem hGroup = new(11, GroupNames[i]);
+                IdTextItem hGroup = new(11, GroupNames[i]);
                 foreach (var item in item_infos)
                 {
-                    IconTextItem hChild = new(12, $"[{item[1]}] : {item[3]}"); // [종목코드] : 품목명
+                    IdTextItem hChild = new(12, $"[{item[1]}] : {item[3]}"); // [종목코드] : 품목명
                     for (int k = 5; k < item.Length; k++)
                     {
-                        hChild.AddChild(new IconTextItem(13, $"{sOpt_Field_Name[k]} : {item[k]}"));
+                        hChild.AddChild(new IdTextItem(13, $"{sOpt_Field_Name[k]} : {item[k]}"));
                     }
                     hGroup.AddChild(hChild);
                 }
@@ -900,8 +900,8 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : IUIReque
         if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0) return;
 
         // 사용자기능
-        var rootInfo = new IconTextItem(10, "로그인정보");
-        rootInfo.AddChild(new IconTextItem(13, "사용자정보"));
+        var rootInfo = new IdTextItem(10, "로그인정보");
+        rootInfo.AddChild(new IdTextItem(13, "사용자정보"));
         rootInfo.IsExpanded = true;
 
         _data_사용자정보 = rootInfo;

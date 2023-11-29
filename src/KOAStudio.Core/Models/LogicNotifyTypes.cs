@@ -1,111 +1,48 @@
 ﻿namespace KOAStudio.Core.Models;
 
-#if NET
-
-public record AppStatusChangedMessageType(string Text, bool ChangedLoginState, bool IsRealServer);
-public record SetResultTextMessageType(string Text, bool IsAdd);
-public record SetMenuCustomizeMessageType(string HeaderText, object Items);
-public record SetPropertiesMessageType(string Text, object Items);
-public record QueryNextEnabledMessageType(bool IsEnable);
-public record SetTabLogsMessageType(object Items);
-public record LogOutputMessageType(int TabIndex, object? Content, int MaxLines, bool Focus);
-public record LogOutputResetAllChangeStateMessageType();
-public record SetTabTreesMessageType(object Items);
-public record SetTreeItemsMessageType(int TabIndex, object? Items);
-
-#else
-
-public record AppStatusChangedMessageType
+public class AppStatusChangedMessageType(string Text, bool ChangedLoginState, bool IsRealServer)
 {
-    public string Text;
-    public bool ChangedLoginState;
-    public bool IsRealServer;
-
-    public AppStatusChangedMessageType(string Text, bool ChangedLoginState, bool IsRealServer)
-    {
-        this.Text = Text;
-        this.ChangedLoginState = ChangedLoginState;
-        this.IsRealServer = IsRealServer;
-    }
+    public string Text = Text;
+    public bool ChangedLoginState = ChangedLoginState;
+    public bool IsRealServer = IsRealServer;
 }
-public record SetResultTextMessageType
+public class SetResultTextMessageType(string Text, bool IsAdd)
 {
-    public string Text;
-    public bool IsAdd;
-    public SetResultTextMessageType(string Text, bool IsAdd)
-    {
-        this.Text = Text;
-        this.IsAdd = IsAdd;
-    }
+    public string Text = Text;
+    public bool IsAdd = IsAdd;
 }
-public record SetMenuCustomizeMessageType
+public class SetMenuCustomizeMessageType(string HeaderText, object Items)
 {
-    public string HeaderText;
-    public object Items;
-    public SetMenuCustomizeMessageType(string HeaderText, object Items)
-    {
-        this.HeaderText = HeaderText;
-        this.Items = Items;
-    }
+    public string HeaderText = HeaderText;
+    public object Items = Items;
 }
-public record SetPropertiesMessageType
+public class SetPropertiesMessageType(string Text, object Items)
 {
-    public string Text;
-    public object Items;
-    public SetPropertiesMessageType(string Text, object Items)
-    {
-        this.Text = Text;
-        this.Items = Items;
-    }
+    public string Text = Text;
+    public object Items = Items;
 }
-public record QueryNextEnabledMessageType
+public class QueryNextEnabledMessageType(bool IsEnable)
 {
-    public bool IsEnable;
-    public QueryNextEnabledMessageType(bool IsEnable)
-    {
-        this.IsEnable = IsEnable;
-    }
+    public bool IsEnable = IsEnable;
 }
-public record SetTabLogsMessageType
+public class SetTabLogsMessageType(object Items)
 {
-    public object Items;
-    public SetTabLogsMessageType(object Items)
-    {
-        this.Items = Items;
-    }
+    public object Items = Items;
 }
-public record LogOutputMessageType
+public class LogOutputMessageType(int TabIndex, object? Content, int MaxLines, bool Focus)
 {
-    public int TabIndex;
-    public object? Content;
-    public int MaxLines;
-    public bool Focus;
-    public LogOutputMessageType(int TabIndex, object? Content, int MaxLines, bool Focus)
-    {
-        this.TabIndex = TabIndex;
-        this.Content = Content;
-        this.MaxLines = MaxLines;
-        this.Focus = Focus;
-    }
+    public int TabIndex = TabIndex;
+    public object? Content = Content;
+    public int MaxLines = MaxLines;
+    public bool Focus = Focus;
 }
-public record SetTabTreesMessageType
+public class SetTabTreesMessageType(object Items)
 {
-    public object Items;
-    public SetTabTreesMessageType(object Items)
-    {
-        this.Items = Items;
-    }
+    public object Items = Items;
 }
-public record SetTreeItemsMessageType
+public class SetTreeItemsMessageType(int TabIndex, object? Items)
 {
-    public int TabIndex;
-    public object? Items;
-    public SetTreeItemsMessageType(int TabIndex, object? Items)
-    {
-        this.TabIndex = TabIndex;
-        this.Items = Items;
-    }
+    public int TabIndex = TabIndex;
+    public object? Items = Items;
 }
 public record LogOutputResetAllChangeStateMessageType();
-
-#endif

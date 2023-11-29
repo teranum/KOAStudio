@@ -3,24 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
-using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 
 namespace KOAStudio.Core.ViewModels
 {
-    internal partial class ListTabData : ObservableObject
-    {
-        public ListTabData()
-        {
-            Title = string.Empty;
-            Items = [];
-        }
-        [ObservableProperty]
-        private int _ballImage;
-        public string Title { get; set; }
-        public ObservableCollection<string> Items { get; set; }
-    }
 
     internal partial class LogsViewModel : ObservableObject
     {
@@ -35,10 +22,10 @@ namespace KOAStudio.Core.ViewModels
                 var items = m.Items as List<string>;
                 if (items is not null)
                 {
-                    var newTabDatas = new List<ListTabData>();
+                    var newTabDatas = new List<TabListData>();
                     foreach (var item in items)
                     {
-                        newTabDatas.Add(new ListTabData() { Title = item });
+                        newTabDatas.Add(new TabListData(item));
                     }
                     this.TabDatas = newTabDatas;
                 }
@@ -104,7 +91,7 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [ObservableProperty]
-        private List<ListTabData>? _tabDatas;
+        private List<TabListData>? _tabDatas;
 
         private int _tabSelectedIndex;
         public int TabSelectedIndex

@@ -19,8 +19,8 @@ namespace KOAStudio.Core.ViewModels
             _title = _baseTitle;
 
             _menuCustomizeHeaderText = "Custom";
-            _searchText = "";
-            _resultText = "";
+            _searchText = string.Empty;
+            _resultText = string.Empty;
             _statusText = "준비됨";
 
             WeakReferenceMessenger.Default.Register<AppStatusChangedMessageType>(this, (r, m) =>

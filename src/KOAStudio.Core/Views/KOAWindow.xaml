@@ -1,16 +1,20 @@
-﻿<Window x:Class="KOAStudio.Core.Views.KOAWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:KOAStudio.Core.Views"
-        xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
-        mc:Ignorable="d"
-        xmlns:Helpers="clr-namespace:KOAStudio.Core.Helpers"
-        Helpers:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" Width="1600" Height="1000" WindowStartupLocation="CenterScreen"
-        x:Name="root"
-        >
+﻿<Window
+    x:Class="KOAStudio.Core.Views.KOAWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="clr-namespace:KOAStudio.Core.Controls"
+    xmlns:Helpers="clr-namespace:KOAStudio.Core.Helpers"
+    xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:KOAStudio.Core.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    Title="{Binding Title}"
+    Width="1600"
+    Height="1000"
+    Helpers:ViewModelLocator.AutoWireViewModel="True"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
     <bh:Interaction.Triggers>
         <bh:EventTrigger EventName="Loaded">
             <bh:InvokeCommandAction Command="{Binding LoadedCommand}" />
@@ -18,15 +22,18 @@
     </bh:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <!--menu-->
-        <Menu Height="22" VerticalAlignment="Top" Margin="0,0,2,0">
+        <!--  menu  -->
+        <Menu
+            Height="22"
+            Margin="0,0,2,0"
+            VerticalAlignment="Top">
             <MenuItem Header="파일">
-                <MenuItem Header="OpenApi 접속" Command="{Binding MenuLoginCommand}"/>
-                <MenuItem Header="OpenApi 해지" Command="{Binding MenuLogoutCommand}"/>
-                <Separator/>
-                <MenuItem Header="끝내기" Command="{Binding MenuExitCommand}"/>
+                <MenuItem Command="{Binding MenuLoginCommand}" Header="OpenApi 접속" />
+                <MenuItem Command="{Binding MenuLogoutCommand}" Header="OpenApi 해지" />
+                <Separator />
+                <MenuItem Command="{Binding MenuExitCommand}" Header="끝내기" />
             </MenuItem>
             <MenuItem Header="{Binding MenuCustomizeHeaderText}" ItemsSource="{Binding MenuCustomizeItems}">
                 <MenuItem.ItemContainerStyle>
@@ -39,44 +46,61 @@
         </Menu>
         <Grid Margin="3,23,3,26">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="70*"/>
+                <ColumnDefinition Width="30*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="70*" />
             </Grid.ColumnDefinitions>
-            <local:ItemsView Grid.Column="0">
-            </local:ItemsView>
-            <GridSplitter Grid.Column="1" Background="LightGray" Width="3" HorizontalAlignment="Center"/>
+            <local:ItemsView Grid.Column="0" />
+            <GridSplitter
+                Grid.Column="1"
+                Width="3"
+                HorizontalAlignment="Center"
+                Background="LightGray" />
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="70*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="30*"/>
+                    <RowDefinition Height="70*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="30*"/>
+                        <ColumnDefinition Width="70*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="30*" />
                     </Grid.ColumnDefinitions>
-                    <local:BindableAvalonEditor Grid.Column="0" IsReadOnly="True"
-                                                Text="{Binding ResultText}"
-                                                SyntaxHighlighting="C#">
-                        <local:BindableAvalonEditor.ContextMenu>
+                    <Controls:BindableAvalonEditor
+                        Grid.Column="0"
+                        IsReadOnly="True"
+                        SyntaxHighlighting="C#"
+                        Text="{Binding ResultText}">
+                        <Controls:BindableAvalonEditor.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="복사" Command="ApplicationCommands.Copy"/>
-                                <MenuItem Header="모두 선택" Command="ApplicationCommands.SelectAll"/>
+                                <MenuItem Command="ApplicationCommands.Copy" Header="복사" />
+                                <MenuItem Command="ApplicationCommands.SelectAll" Header="모두 선택" />
                             </ContextMenu>
-                        </local:BindableAvalonEditor.ContextMenu>
-                    </local:BindableAvalonEditor>
-                    <GridSplitter Grid.Column="1" Background="LightGray" Width="3" HorizontalAlignment="Center"/>
+                        </Controls:BindableAvalonEditor.ContextMenu>
+                    </Controls:BindableAvalonEditor>
+                    <GridSplitter
+                        Grid.Column="1"
+                        Width="3"
+                        HorizontalAlignment="Center"
+                        Background="LightGray" />
                     <local:PropertyView Grid.Column="2" />
                 </Grid>
-                <GridSplitter Grid.Row="1" Background="LightGray" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
-                <local:LogsView Grid.Row="2"/>
+                <GridSplitter
+                    Grid.Row="1"
+                    Height="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Background="LightGray" />
+                <local:LogsView Grid.Row="2" />
             </Grid>
         </Grid>
-        <StatusBar Background="#FF0C4B73" Height="26" VerticalAlignment="Bottom">
-            <TextBlock Foreground="White" Text="{Binding StatusText}"/>
+        <StatusBar
+            Height="26"
+            VerticalAlignment="Bottom"
+            Background="#FF0C4B73">
+            <TextBlock Foreground="White" Text="{Binding StatusText}" />
         </StatusBar>
     </Grid>
 </Window>
