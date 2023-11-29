@@ -11,6 +11,11 @@ public interface IUIRequest
     void Initialize();
 
     /// <summary>
+    /// 서비스 종료
+    /// </summary>
+    void Close();
+
+    /// <summary>
     /// OpenApi 연결상태
     /// </summary>
     OpenApiLoginState LoginState { get; }

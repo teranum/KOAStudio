@@ -7,10 +7,10 @@ namespace KOAStudio.Core.ViewModels
 {
     public partial class ChartReqViewModel : ObservableObject
     {
-        public ChartReqViewModel(string TagName)
+        public ChartReqViewModel(string Title)
         {
-            Title = TagName;
-            TitleBarVisibility = Title.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            this.Title = Title;
+            TitleBarVisibility = this.Title.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
             _selectedChartRound = ChartRound.일;
             _selectedChartInterval = string.Empty;
@@ -20,6 +20,7 @@ namespace KOAStudio.Core.ViewModels
 
             _resultText = string.Empty;
             _codeText = string.Empty;
+            _nextText = string.Empty;
             _selected종목 = string.Empty;
         }
         public Action<ChartReqViewModel, string>? ChartReqCommand;
@@ -43,6 +44,7 @@ namespace KOAStudio.Core.ViewModels
         [ObservableProperty] DateTime _receivedTime;
         [ObservableProperty] string _resultText;
         [ObservableProperty] string _codeText;
+        [ObservableProperty] string _nextText;
 
 
         partial void OnSelectedChartRoundChanged(ChartRound value) => UpdateCodeText();

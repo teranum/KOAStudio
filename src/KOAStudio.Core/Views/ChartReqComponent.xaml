@@ -37,7 +37,7 @@
             Margin="0,0,0,10"
             Visibility="{Binding TitleBarVisibility}">
             <StackPanel Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center" Text="종목선택" />
+                <TextBlock VerticalAlignment="Center" Text="종목코드" />
                 <TextBox
                     Width="100"
                     Margin="10,0,0,0"
@@ -71,21 +71,6 @@
                     <ComboBoxItem Content="240" />
                     <ComboBoxItem Content="300" />
                     <ComboBoxItem Content="480" />
-                    <ComboBoxItem Content="600" />
-                    <ComboBoxItem Content="900" />
-                </ComboBox>
-                <TextBlock
-                    Margin="35,0,0,0"
-                    VerticalAlignment="Center"
-                    Text="데이터 개수" />
-                <ComboBox
-                    Width="60"
-                    Margin="10,0,0,0"
-                    IsEditable="True"
-                    Text="{Binding SelectedDataCount, Mode=TwoWay}">
-                    <ComboBoxItem Content="100" IsSelected="True" />
-                    <ComboBoxItem Content="200" />
-                    <ComboBoxItem Content="300" />
                     <ComboBoxItem Content="600" />
                     <ComboBoxItem Content="900" />
                 </ComboBox>
@@ -128,8 +113,8 @@
             <TextBlock Width="100" Text="{Binding ReceivedTime, StringFormat='HH:mm:ss.fff'}" />
             <TextBlock Margin="10,0,0,0" Text="DataCount = " />
             <TextBlock Width="60" Text="{Binding ReceivedDataCount}" />
-            <TextBlock Margin="10,0,0,0" Text="nRqId = " />
-            <TextBlock Width="60" Text="{Binding NRqId}" />
+            <TextBlock Margin="10,0,0,0" Text="sNext = " />
+            <TextBlock Width="60" Text="{Binding NextText}" />
         </StackPanel>
         <Controls:BindableAvalonEditor
             Grid.Row="5"

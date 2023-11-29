@@ -3,18 +3,24 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="clr-namespace:KOAStudio.Core.Controls"
+    xmlns:Converters="clr-namespace:KOAStudio.Core.Converters"
     xmlns:Helpers="clr-namespace:KOAStudio.Core.Helpers"
     xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:KOAStudio.Core.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:KOAStudio.Core.ViewModels"
     x:Name="root"
     Title="{Binding Title}"
     Width="1600"
     Height="1000"
     Helpers:ViewModelLocator.AutoWireViewModel="True"
+    d:DataContext="{d:DesignInstance Type=viewmodels:KOAWindowViewModel}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+    <Window.Resources>
+        <Converters:NullCheckVisibilityConverter x:Key="NullCheckVisibilityConverter" />
+    </Window.Resources>
     <bh:Interaction.Triggers>
         <bh:EventTrigger EventName="Loaded">
             <bh:InvokeCommandAction Command="{Binding LoadedCommand}" />
@@ -87,6 +93,9 @@
                         Background="LightGray" />
                     <local:PropertyView Grid.Column="2" />
                 </Grid>
+
+                <ContentControl Content="{Binding UserContent}" Visibility="{Binding UserContent, Converter={StaticResource NullCheckVisibilityConverter}}" />
+
                 <GridSplitter
                     Grid.Row="1"
                     Height="3"

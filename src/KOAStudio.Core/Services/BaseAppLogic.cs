@@ -1,9 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
+using System.Windows.Controls;
 
 namespace KOAStudio.Core.Services
 {
-    public class BaseAppLogic
+    public class BaseAppLogic: ILogicNotify
     {
         public void SetMenuCustomize(string headerText, object items)
         {
@@ -53,6 +54,11 @@ namespace KOAStudio.Core.Services
         public void SetTreeItems(int tabIndex, object items)
         {
             WeakReferenceMessenger.Default.Send(new SetTreeItemsMessageType(tabIndex, items));
+        }
+
+        public void SetUserContent(ContentControl Control)
+        {
+            WeakReferenceMessenger.Default.Send(new SetUseContentMessageType(Control));
         }
     }
 }

@@ -267,6 +267,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         Load_TR목록Async();
         Load_화면목록Async();
         Load_개발가이드Async();
+        Load_사용자기능();
     }
 
     private IdTextItem? _data_실시간목록;
@@ -895,17 +896,51 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
     private void Load_사용자기능()
     {
-        if (_data_사용자정보 != null) return;
+        List<object> lists = [];
+        // 기본정보 표시
+        var rootInfo = new IdTextItem(9, "Api정보");
+        lists.Add(rootInfo);
 
-        if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0) return;
+        // 로그인 정보
+        if (_data_사용자정보 != null) goto end_proc;
+
+        if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0) goto end_proc;
 
         // 사용자기능
-        var rootInfo = new IdTextItem(10, "로그인정보");
-        rootInfo.AddChild(new IdTextItem(13, "사용자정보"));
-        rootInfo.IsExpanded = true;
+        var rootAccount = new IdTextItem(10, "로그인정보");
+        rootAccount.AddChild(new IdTextItem(13, "사용자정보"));
+        rootAccount.IsExpanded = true;
 
-        _data_사용자정보 = rootInfo;
+        _data_사용자정보 = rootAccount;
 
-        SetTreeItems((int)TREETAB_KIND.사용자기능, new List<object>() { rootInfo });
+        lists.Add(rootAccount);
+
+    end_proc:
+
+        // 기타 tools
+        IdTextItem? rootTools;
+        rootTools = new IdTextItem(11, "차트요청")
+        {
+            IsExpanded = true
+        };
+        lists.Add(rootTools);
+        rootTools.AddChild(new IdTextItem(9, "선물차트요청"));
+        rootTools.AddChild(new IdTextItem(9, "옵션차트요청"));
+
+        rootTools = new IdTextItem(11, "주문요청")
+        {
+            IsExpanded = true
+        };
+        lists.Add(rootTools);
+        rootTools.AddChild(new IdTextItem(9, "선물주문"));
+        rootTools.AddChild(new IdTextItem(9, "옵션주문"));
+
+
+        SetTreeItems((int)TREETAB_KIND.사용자기능, lists);
+    }
+
+    public void Close()
+    {
+        SaveUserContentInfo();
     }
 }

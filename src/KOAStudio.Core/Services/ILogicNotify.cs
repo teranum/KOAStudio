@@ -1,4 +1,6 @@
-﻿namespace KOAStudio.Core.Services;
+﻿using System.Windows.Controls;
+
+namespace KOAStudio.Core.Services;
 
 // default implementation 
 // business logic -> ViewModel, or ViewModel <-> ViewModel
@@ -64,4 +66,10 @@ public interface ILogicNotify
     /// <param name="tabIndex"></param>
     /// <param name="items"></param>
     void SetTreeItems(int tabIndex, object items);
+
+    /// <summary>
+    /// 사용자 틀 설정
+    /// </summary>
+    /// <param name="Control">Tool</param>
+    void SetUserContent(ContentControl Control);
 }

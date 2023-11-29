@@ -777,6 +777,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         lists.Add(rootTools);
         rootTools.AddChild(new IdTextItem(9, "주식차트요청"));
         rootTools.AddChild(new IdTextItem(9, "선물차트요청"));
+        rootTools.AddChild(new IdTextItem(9, "옵션차트요청"));
 
         rootTools = new IdTextItem(11, "주문요청")
         {
@@ -785,8 +786,14 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         lists.Add(rootTools);
         rootTools.AddChild(new IdTextItem(9, "주식주문"));
         rootTools.AddChild(new IdTextItem(9, "선물주문"));
+        rootTools.AddChild(new IdTextItem(9, "옵션주문"));
 
 
         SetTreeItems((int)TREETAB_KIND.사용자기능, lists);
+    }
+
+    public void Close()
+    {
+        SaveUserContentInfo();
     }
 }

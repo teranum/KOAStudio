@@ -223,6 +223,7 @@ internal sealed partial class BusinessLogic
 
                             SetResultText(stringBuilder.ToString());
                         }
+                        else ShowUserContent(SelectedText);
                         return;
                     }
 

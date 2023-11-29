@@ -1,5 +1,6 @@
 ﻿using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -181,6 +182,44 @@ internal sealed partial class BusinessLogic
                 break;
             case TREETAB_KIND.사용자기능:
                 {
+                    if (selectedItem.Id == 9)
+                    {
+                        if (SelectedText.Equals("Api정보"))
+                        {
+                            string ProgID = "KFOPENAPI.KFOPenAPICtrl.1";
+                            string CLSID = OcxPathHelper.GetClassIDFromProgID(ProgID);
+                            string path = OcxPathHelper.GetOcxPathFromCLSID(CLSID);
+
+                            StringBuilder stringBuilder = new();
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine("\t[Api정보]");
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine($"\tProgID : {ProgID}");
+                            stringBuilder.AppendLine($"\tCLSID  : {CLSID}");
+                            if (Environment.Is64BitProcess)
+                            {
+                                stringBuilder.AppendLine($"\t파일 경로(32bit) : {OcxPathHelper.GetOcxPathFromWOW6432NodeCLSID(CLSID)}");
+                                stringBuilder.AppendLine($"\t파일 경로(64bit) : {path}");
+                            }
+                            else
+                                stringBuilder.AppendLine($"\t파일 경로 : {path}");
+
+                            try
+                            {
+                                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
+                                stringBuilder.AppendLine($"\t파일 설명 : {fileVersionInfo.FileDescription}");
+                                stringBuilder.AppendLine($"\t파일 버전 : {fileVersionInfo.FileVersion}");
+                            }
+                            catch
+                            {
+                            }
+
+                            SetResultText(stringBuilder.ToString());
+                        }
+                        else ShowUserContent(SelectedText);
+                        return;
+                    }
+
                     if (_axOpenAPI!.GetConnectState() == 0) return;
                     if (selectedItem.Id == 13)
                     {

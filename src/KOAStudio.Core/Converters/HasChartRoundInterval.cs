@@ -10,7 +10,7 @@ namespace KOAStudio.Core.Converters
         {
             if (value is ChartRound chartRound)
             {
-                return chartRound == ChartRound.일 || chartRound == ChartRound.주 || chartRound == ChartRound.월;
+                return chartRound == ChartRound.틱 || chartRound == ChartRound.분;
             }
             return false;
         }

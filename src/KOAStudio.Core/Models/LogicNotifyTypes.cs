@@ -1,4 +1,6 @@
-﻿namespace KOAStudio.Core.Models;
+﻿using System.Windows.Controls;
+
+namespace KOAStudio.Core.Models;
 
 public class AppStatusChangedMessageType(string Text, bool ChangedLoginState, bool IsRealServer)
 {
@@ -44,5 +46,9 @@ public class SetTreeItemsMessageType(int TabIndex, object? Items)
 {
     public int TabIndex = TabIndex;
     public object? Items = Items;
+}
+public class SetUseContentMessageType(ContentControl Control)
+{
+    public ContentControl Control = Control;
 }
 public record LogOutputResetAllChangeStateMessageType();

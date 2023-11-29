@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
+using System.Windows.Controls;
 
 namespace KOAStudio.Core.ViewModels
 {
@@ -58,6 +59,11 @@ namespace KOAStudio.Core.ViewModels
                     MenuCustomizeItems = lists;
                 }
             });
+
+            WeakReferenceMessenger.Default.Register<SetUseContentMessageType>(this, (r, m) =>
+            {
+                UserContent = m.Control;
+            });
         }
 
         [ObservableProperty]
@@ -75,8 +81,33 @@ namespace KOAStudio.Core.ViewModels
         [ObservableProperty]
         private string _searchText;
 
-        [ObservableProperty]
         private string _resultText;
+        public string ResultText
+        {
+            get => _resultText;
+            set
+            {
+                UserContent = null;
+                SetProperty(ref _resultText, value);
+            }
+        }
+
+        private ContentControl? _userContent;
+        public ContentControl? UserContent
+        {
+            get => _userContent;
+            set
+            {
+                if (_userContent != value)
+                {
+                    if (_userContent is IUserTool userTool)
+                        userTool.CloseTool();
+
+                    _userContent = value;
+                    OnPropertyChanged(nameof(UserContent));
+                }
+            }
+        }
 
         [RelayCommand]
         private void Loaded()
