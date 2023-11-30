@@ -3,7 +3,6 @@ using KOAStudio.Core.Views;
 using System.Text;
 
 namespace KOAStudio.Business;
-
 internal sealed partial class BusinessLogic
 {
     private ChartReqViewModel? _chartReqViewModel_주식;
