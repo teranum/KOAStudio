@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace KOAStudio.Core.Services
 {
-    public class BaseAppLogic: ILogicNotify
+    public class BaseAppLogic : ILogicNotify
     {
         public void SetMenuCustomize(string headerText, object items)
         {

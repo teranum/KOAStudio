@@ -32,13 +32,13 @@ internal sealed partial class BusinessLogic
 
     public void ItemSelectedChanged(int tabIndex, IdTextItem selectedItem)
     {
-        TREETAB_KIND tabKind = (TREETAB_KIND)tabIndex;
+        TAB_TREE_KIND tabKind = (TAB_TREE_KIND)tabIndex;
 
         string SelectedText = selectedItem.Text!;
 
         switch (tabKind)
         {
-            case TREETAB_KIND.실시간목록:
+            case TAB_TREE_KIND.실시간목록:
                 {
                     if (selectedItem.Id != 1 || _data_실시간목록 == null) return;
                     if (_data_실시간목록.Items.FirstOrDefault((t) =>
@@ -67,7 +67,7 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.TR목록:
+            case TAB_TREE_KIND.TR목록:
                 {
                     if (selectedItem.Id != 4 && selectedItem.Id != 14) return;
                     string selected_code = SelectedText.Substring(0, 8);
@@ -92,7 +92,7 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.개발가이드:
+            case TAB_TREE_KIND.개발가이드:
                 {
                     if (selectedItem.Items.Count > 0) return;
                     string FullKey = SelectedText;
@@ -151,7 +151,7 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.화면목록:
+            case TAB_TREE_KIND.화면목록:
                 {
                     if (selectedItem.Id != 9) return;
                     int nFindPos = SelectedText.IndexOf(':');
@@ -180,7 +180,7 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.사용자기능:
+            case TAB_TREE_KIND.사용자기능:
                 {
                     if (selectedItem.Id == 9)
                     {
@@ -359,7 +359,7 @@ internal sealed partial class BusinessLogic
     public void ReqTRHistory(int tabIndex, string text)
     {
         string codeName = string.Empty;
-        if ((LIST_TAB_KIND)tabIndex == LIST_TAB_KIND.조회한TR목록)
+        if ((TAB_LIST_KIND)tabIndex == TAB_LIST_KIND.조회한TR목록)
         {
             if (text != null && text != string.Empty)
             {
@@ -490,7 +490,7 @@ internal sealed partial class BusinessLogic
 
         if (szActionMsg.Length > 0)
         {
-            OutputLog((int)LIST_TAB_KIND.메시지목록, szActionMsg);
+            OutputLog((int)TAB_LIST_KIND.메시지목록, szActionMsg);
         }
     }
 

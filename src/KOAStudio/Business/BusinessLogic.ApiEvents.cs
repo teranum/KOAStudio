@@ -1,6 +1,7 @@
 ﻿using KHOpenApi.NET;
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using KOAStudio.Core.ViewModels;
 using System.Diagnostics;
 using System.Text;
 
@@ -10,8 +11,55 @@ internal sealed partial class BusinessLogic
 {
     private void AxKHOpenApi_OnReceiveTrData(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
     {
+        DateTime Now = DateTime.Now;
         OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
-        //if (e.sScrNo == _scrNum_REQ_TR_BASE)
+
+        if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
+        {
+            ChartReqViewModel? model = null;
+            if (_chartReqViewModel_업종 != null && e.sRQName.StartsWith(_chartReqViewModel_업종.Title))
+            {
+                model = _chartReqViewModel_업종;
+            }
+            else if (_chartReqViewModel_주식 != null && e.sRQName.StartsWith(_chartReqViewModel_주식.Title))
+            {
+                model = _chartReqViewModel_주식;
+            }
+            else if (_chartReqViewModel_선물 != null && e.sRQName.StartsWith(_chartReqViewModel_선물.Title))
+            {
+                model = _chartReqViewModel_선물;
+            }
+            else if (_chartReqViewModel_옵션 != null && e.sRQName.StartsWith(_chartReqViewModel_옵션.Title))
+            {
+                model = _chartReqViewModel_옵션;
+            }
+
+            if (model != null)
+            {
+                bool bFuture = model.Kind == ChartReqViewModel.KIND.선물 || model.Kind == ChartReqViewModel.KIND.옵션;
+                StringBuilder sb = new();
+                int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+                for (int i = 0; i < nRepeatCount; i++)
+                {
+                    bool b분틱 = model.SelectedChartRound == ChartRound.분 || model.SelectedChartRound == ChartRound.틱;
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "체결시간" : "일자"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가"));
+                    sb.AppendLine(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, (bFuture && !b분틱) ? "누적거래량" : "거래량"));
+                }
+
+                model.ReceivedTime = Now;
+                model.ReceivedDataCount = nRepeatCount;
+                model.ResultText = sb.ToString();
+                model.NextText = e.sPrevNext;
+                model.NextEnabled = e.sPrevNext.Equals("2");
+            }
+        }
+
+
         {
             SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
             // TR코드 필드 찾기

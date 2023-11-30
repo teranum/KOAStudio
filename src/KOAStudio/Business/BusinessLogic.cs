@@ -740,8 +740,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
     {
         List<object> lists = [];
         // 기본정보 표시
-        var rootInfo = new IdTextItem(9, "Api정보");
-        lists.Add(rootInfo);
+        lists.Add(new IdTextItem(9, "Api정보"));
 
         // 로그인 정보
         if (_data_사용자정보 != null && _data_조건검색 != null) goto end_proc;
@@ -750,13 +749,13 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 사용자기능
         var rootAccount = new IdTextItem(10, "로그인정보");
-        rootAccount.AddChild(new IdTextItem(13, "사용자정보"));
+        rootAccount.AddChild(new(13, "사용자정보"));
         rootAccount.IsExpanded = true;
 
         var rootCond = new IdTextItem(11, "조건검색");
         foreach (var item in _mapCondNameToIndex)
         {
-            rootCond.AddChild(new IdTextItem(12, item.Key));
+            rootCond.AddChild(new(12, item.Key));
         }
 
         rootCond.Text += $" ({rootCond.Items.Count})";
@@ -771,24 +770,26 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 기타 tools
         IdTextItem? rootTools;
-        rootTools = new IdTextItem(11, "차트요청")
+        rootTools = new(0, "차트요청")
         {
-            IsExpanded = true
+            IsExpanded = true,
         };
         lists.Add(rootTools);
-        rootTools.AddChild(new IdTextItem(9, "주식차트요청"));
-        rootTools.AddChild(new IdTextItem(9, "선물차트요청"));
-        rootTools.AddChild(new IdTextItem(9, "옵션차트요청"));
+        rootTools.AddChild(new(9, "업종차트요청"));
+        rootTools.AddChild(new(9, "주식차트요청"));
+        rootTools.AddChild(new(9, "선물차트요청"));
+        rootTools.AddChild(new(9, "옵션차트요청"));
 
-        rootTools = new IdTextItem(11, "주문요청")
+#if DEBUG
+        rootTools = new (0, "주문요청")
         {
-            IsExpanded = true
+            IsExpanded = true,
         };
         lists.Add(rootTools);
-        rootTools.AddChild(new IdTextItem(9, "주식주문"));
-        rootTools.AddChild(new IdTextItem(9, "선물주문"));
-        rootTools.AddChild(new IdTextItem(9, "옵션주문"));
-
+        rootTools.AddChild(new (9, "주식주문"));
+        rootTools.AddChild(new (9, "선물주문"));
+        rootTools.AddChild(new (9, "옵션주문"));
+#endif
 
         SetTreeItems((int)TAB_TREE_KIND.사용자기능, lists);
     }

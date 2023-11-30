@@ -1,7 +1,9 @@
 ﻿using KFOpenApi.NET;
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using KOAStudio.Core.ViewModels;
 using System.Diagnostics;
+using System.Text;
 
 namespace WKOAStudio.Business;
 
@@ -10,10 +12,46 @@ internal sealed partial class BusinessLogic
     private void AxKFOpenAPI_OnReceiveTrData(object sender, _DKFOpenAPIEvents_OnReceiveTrDataEvent e)
     {
         //
+        DateTime Now = DateTime.Now;
         var memory_full_data = _axOpenAPI!.GetCommFullData(e.sTrCode, e.sRQName, 0);
         var received_data = _appEncoder.GetBytes(memory_full_data);
         //
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
+
+        if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
+        {
+            ChartReqViewModel? model = null;
+            if (_chartReqViewModel_선물 != null && e.sRQName.StartsWith(_chartReqViewModel_선물.Title))
+            {
+                model = _chartReqViewModel_선물;
+            }
+
+            if (model != null)
+            {
+                StringBuilder sb = new();
+                int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+                for (int i = 0; i < nRepeatCount; i++)
+                {
+                    bool b분틱 = model.SelectedChartRound == ChartRound.분 || model.SelectedChartRound == ChartRound.틱;
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "체결시간" : "일자"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가"));
+                    sb.AppendLine(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "거래량" : "누적거래량"));
+                }
+
+                model.ReceivedTime = Now;
+                model.ReceivedDataCount = nRepeatCount;
+                model.ResultText = sb.ToString();
+                model.NextText = e.sPreNext;
+                model.NextEnabled = e.sPreNext.Length > 0;
+            }
+        }
+
+
+
         //if (e.sScrNo == _scrNum_REQ_TR_BASE)
         {
             _tr_NextKey = e.sPreNext.TrimStart();
@@ -89,47 +127,47 @@ internal sealed partial class BusinessLogic
                     , lines[0]
                     , nTotalDataCount
                     , timer.Elapsed.TotalMilliseconds * 1000);
-                OutputLog((int)LIST_TAB_KIND.조회데이터);
-                OutputLog((int)LIST_TAB_KIND.조회데이터, lines, -1, focus: true);
+                OutputLog((int)TAB_LIST_KIND.조회데이터);
+                OutputLog((int)TAB_LIST_KIND.조회데이터, lines, -1, focus: true);
 
                 // 최근 조회목록창에 추가
-                OutputLog((int)LIST_TAB_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
+                OutputLog((int)TAB_LIST_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
             }
         }
     }
 
     private void AxKFOpenAPI_OnReceiveRealData(object sender, _DKFOpenAPIEvents_OnReceiveRealDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, $"sJongmokCode = {e.sJongmokCode}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, focus: false);
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, $"sJongmokCode = {e.sJongmokCode}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, focus: false);
     }
 
     private void AxKFOpenAPI_OnReceiveMsg(object sender, _DKFOpenAPIEvents_OnReceiveMsgEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
         SetStatusText(e.sMsg);
     }
 
     private void AxKFOpenAPI_OnReceiveChejanData(object sender, _DKFOpenAPIEvents_OnReceiveChejanDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"sGubun = {e.sGubun},  nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"sGubun = {e.sGubun},  nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
         string[] szFids = e.sFIdList.Split(';', StringSplitOptions.RemoveEmptyEntries);
         foreach (var sFid in szFids)
         {
             string sVal = _axOpenAPI!.GetChejanData(Convert.ToInt32(sFid));
             if (_map_FidToName.TryGetValue(sFid, out var name))
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
             }
             else
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
             }
         }
     }
 
     private void AxKFOpenAPI_OnEventConnect(object sender, _DKFOpenAPIEvents_OnEventConnectEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0 && LoginState != OpenApiLoginState.LoginFailed)
         {
             _isRealServer = !string.Equals(_axOpenAPI!.GetCommonFunc("GetServerGubunW", string.Empty), "1");

@@ -24,6 +24,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
     private readonly Encoding _appEncoder = Encoding.GetEncoding("EUC-KR");
 
     private static readonly string _scrNum_REQ_TR_BASE = "3000";
+    private static readonly string _scrNum_CHART_CONTENT = "3101";
 
     private readonly Dictionary<string, string> _map_FidToName = [];
 
@@ -70,7 +71,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         "FID 리스트"
     ];
 
-    private enum TREETAB_KIND
+    private enum TAB_TREE_KIND
     {
         실시간목록,
         TR목록,
@@ -80,7 +81,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         사용자기능,
     }
 
-    private enum LIST_TAB_KIND
+    private enum TAB_LIST_KIND
     {
         메시지목록,
         조회데이터,
@@ -184,7 +185,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 로그 리스트뷰 만들기
         var ListTab_Names = new List<string>();
-        foreach (LIST_TAB_KIND item in Enum.GetValues(typeof(LIST_TAB_KIND)))
+        foreach (TAB_LIST_KIND item in Enum.GetValues(typeof(TAB_LIST_KIND)))
             ListTab_Names.Add(item.ToString());
         SetTabLists(ListTab_Names);
 
@@ -205,11 +206,11 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         _axOpenAPI.OnReceiveRealData += AxKFOpenAPI_OnReceiveRealData;
         _axOpenAPI.OnReceiveTrData += AxKFOpenAPI_OnReceiveTrData;
 
-        OutputLog((int)LIST_TAB_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
-        OutputLog((int)LIST_TAB_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
-        OutputLog((int)LIST_TAB_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
+        OutputLog((int)TAB_LIST_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
+        OutputLog((int)TAB_LIST_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
         OutputLogResetAllChangeState();
 
         // FID 네임 가져오기
@@ -349,7 +350,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_실시간목록 = root;
-            SetTreeItems((int)TREETAB_KIND.실시간목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.실시간목록, new List<object>() { root });
         }
     }
 
@@ -572,7 +573,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_TR목록 = root;
-            SetTreeItems((int)TREETAB_KIND.TR목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.TR목록, new List<object>() { root });
         }
     }
 
@@ -624,7 +625,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_개발가이드 = root;
-            SetTreeItems((int)TREETAB_KIND.개발가이드, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.개발가이드, new List<object>() { root });
         }
     }
 
@@ -681,7 +682,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_화면목록 = root;
-            SetTreeItems((int)TREETAB_KIND.화면목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.화면목록, new List<object>() { root });
         }
     }
 
@@ -891,15 +892,14 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         _data_선물종목정보 = root1;
         _data_옵션종목정보 = root2;
 
-        SetTreeItems((int)TREETAB_KIND.종목정보, new List<object>() { root1, root2 });
+        SetTreeItems((int)TAB_TREE_KIND.종목정보, new List<object>() { root1, root2 });
     }
 
     private void Load_사용자기능()
     {
         List<object> lists = [];
         // 기본정보 표시
-        var rootInfo = new IdTextItem(9, "Api정보");
-        lists.Add(rootInfo);
+        lists.Add(new IdTextItem(9, "Api정보"));
 
         // 로그인 정보
         if (_data_사용자정보 != null) goto end_proc;
@@ -908,7 +908,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 사용자기능
         var rootAccount = new IdTextItem(10, "로그인정보");
-        rootAccount.AddChild(new IdTextItem(13, "사용자정보"));
+        rootAccount.AddChild(new(13, "사용자정보"));
         rootAccount.IsExpanded = true;
 
         _data_사용자정보 = rootAccount;
@@ -919,24 +919,25 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 기타 tools
         IdTextItem? rootTools;
-        rootTools = new IdTextItem(11, "차트요청")
+        rootTools = new(0, "차트요청")
         {
-            IsExpanded = true
+            IsExpanded = true,
         };
         lists.Add(rootTools);
-        rootTools.AddChild(new IdTextItem(9, "선물차트요청"));
-        rootTools.AddChild(new IdTextItem(9, "옵션차트요청"));
+        rootTools.AddChild(new(9, "해외선물옵션차트요청"));
 
-        rootTools = new IdTextItem(11, "주문요청")
+#if DEBUG
+        rootTools = new (0, "주문요청")
         {
-            IsExpanded = true
+            IsExpanded = true,
         };
         lists.Add(rootTools);
-        rootTools.AddChild(new IdTextItem(9, "선물주문"));
-        rootTools.AddChild(new IdTextItem(9, "옵션주문"));
+        rootTools.AddChild(new (9, "주식주문"));
+        rootTools.AddChild(new (9, "선물주문"));
+        rootTools.AddChild(new (9, "옵션주문"));
+#endif
 
-
-        SetTreeItems((int)TREETAB_KIND.사용자기능, lists);
+        SetTreeItems((int)TAB_TREE_KIND.사용자기능, lists);
     }
 
     public void Close()

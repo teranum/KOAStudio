@@ -30,6 +30,9 @@ namespace KOAStudio.Core.ViewModels
             _codeText = string.Empty;
             _nextText = string.Empty;
             _selected종목 = string.Empty;
+
+            조회일자 = DateTime.Now;
+            _is수정주가 = null;
         }
 
         public Func<ChartReqViewModel, string, string>? ExtProcedure;
@@ -39,34 +42,43 @@ namespace KOAStudio.Core.ViewModels
         public Visibility TitleBarVisibility { get; }
 
         [ObservableProperty] string _selected종목;
+        [ObservableProperty] DateTime _조회일자;
         [ObservableProperty] ChartRound _selectedChartRound;
         [ObservableProperty] string _selectedChartInterval;
         [ObservableProperty] string _selectedDataCount;
 
         [RelayCommand]
-        void Action(string action_name) => ExtProcedure?.Invoke(this, action_name);
+        void Action(string action_name)
+        {
+            if (ExtProcedure != null)
+            {
+                string result = ExtProcedure.Invoke(this, action_name);
+                CodeText += result;
+            }
+        }
 
-        public bool NextEnabled { get; set; }
+        [ObservableProperty] bool _nextEnabled;
 
         [ObservableProperty] int _nRqId;
-        [ObservableProperty] int _ReceivedDataCount;
+        [ObservableProperty] int _receivedDataCount;
         [ObservableProperty] DateTime _receivedTime;
         [ObservableProperty] string _resultText;
         [ObservableProperty] string _codeText;
         [ObservableProperty] string _nextText;
+        [ObservableProperty] bool? _is수정주가;
 
 
         partial void OnSelectedChartRoundChanged(ChartRound value) => UpdateCodeText();
-
         partial void OnSelectedChartIntervalChanged(string value) => UpdateCodeText();
         partial void OnSelectedDataCountChanged(string value) => UpdateCodeText();
         partial void OnSelected종목Changed(string value) => UpdateCodeText();
+        partial void On조회일자Changed(DateTime value) => UpdateCodeText();
+        partial void OnIs수정주가Changed(bool? value) => UpdateCodeText();
 
         public bool EnableUpdateCodeText;
-
-        private void UpdateCodeText()
+        public void UpdateCodeText()
         {
-            if (EnableUpdateCodeText == false) return;
+            if (!EnableUpdateCodeText) return;
             if (ExtProcedure != null)
                 CodeText = ExtProcedure(this, string.Empty);
         }
