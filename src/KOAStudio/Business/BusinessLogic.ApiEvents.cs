@@ -10,7 +10,7 @@ internal sealed partial class BusinessLogic
 {
     private void AxKHOpenApi_OnReceiveTrData(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
         //if (e.sScrNo == _scrNum_REQ_TR_BASE)
         {
             SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
@@ -49,18 +49,18 @@ internal sealed partial class BusinessLogic
                     , lines[0]
                     , nTotalDataCount
                     , timer.Elapsed.TotalMilliseconds * 1000);
-                OutputLog((int)LIST_TAB_KIND.조회데이터);
-                OutputLog((int)LIST_TAB_KIND.조회데이터, lines, -1, focus: true);
+                OutputLog((int)TAB_LIST_KIND.조회데이터);
+                OutputLog((int)TAB_LIST_KIND.조회데이터, lines, -1, focus: true);
 
                 // 최근 조회목록창에 추가
-                OutputLog((int)LIST_TAB_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
+                OutputLog((int)TAB_LIST_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
             }
         }
     }
 
     private void AxKHOpenApi_OnReceiveTrCondition(object sender, _DKHOpenAPIEvents_OnReceiveTrConditionEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrCondition> sScrNo = {e.sScrNo}, strConditionName = {e.strConditionName}, nIndex = {e.nIndex}, nNext = {e.nNext}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrCondition> sScrNo = {e.sScrNo}, strConditionName = {e.strConditionName}, nIndex = {e.nIndex}, nNext = {e.nNext}");
 
         int nScrNo = Convert.ToInt32(e.sScrNo);
         if (nScrNo >= Convert.ToInt32(_scrNum_REQ_COND_BASE) && nScrNo <= Convert.ToInt32(_scrNum_REQ_COND_LAST))
@@ -106,28 +106,28 @@ internal sealed partial class BusinessLogic
 
     private void AxKHOpenApi_OnReceiveRealData(object sender, _DKHOpenAPIEvents_OnReceiveRealDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, $"sRealKey = {e.sRealKey}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, focus: false);
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, $"sRealKey = {e.sRealKey}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, focus: false);
     }
 
     private void AxKHOpenApi_OnReceiveRealCondition(object sender, _DKHOpenAPIEvents_OnReceiveRealConditionEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.조건검색실시간, $"sTrCode = {e.sTrCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
+        OutputLog((int)TAB_LIST_KIND.조건검색실시간, $"sTrCode = {e.sTrCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
     }
 
     private void AxKHOpenApi_OnReceiveMsg(object sender, _DKHOpenAPIEvents_OnReceiveMsgEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
         SetStatusText(e.sMsg);
     }
 
     private void AxKHOpenApi_OnReceiveInvestRealData(object sender, _DKHOpenAPIEvents_OnReceiveInvestRealDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveInvestRealData> sRealKey = {e.sRealKey}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveInvestRealData> sRealKey = {e.sRealKey}");
     }
 
     private void AxKHOpenApi_OnReceiveConditionVer(object sender, _DKHOpenAPIEvents_OnReceiveConditionVerEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveConditionVer> lRet = {e.lRet}, sMsg = {e.sMsg}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveConditionVer> lRet = {e.lRet}, sMsg = {e.sMsg}");
 
         if (e.lRet == 1) // 정상
         {
@@ -139,7 +139,7 @@ internal sealed partial class BusinessLogic
                 string[] datas = item.Split('^');
                 _mapCondNameToIndex.Add(datas[1], datas[0]);
             }
-            OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveConditionVer> 조건검색식({_mapCondNameToIndex.Count}개) 로딩완료");
+            OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveConditionVer> 조건검색식({_mapCondNameToIndex.Count}개) 로딩완료");
 
             Load_사용자기능();
         }
@@ -147,25 +147,25 @@ internal sealed partial class BusinessLogic
 
     private void AxKHOpenApi_OnReceiveChejanData(object sender, _DKHOpenAPIEvents_OnReceiveChejanDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"sGubun = {e.sGubun}, nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"sGubun = {e.sGubun}, nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
         string[] szFids = e.sFIdList.Split(';', StringSplitOptions.RemoveEmptyEntries);
         foreach (var sFid in szFids)
         {
             string sVal = _axOpenAPI!.GetChejanData(Convert.ToInt32(sFid));
             if (_map_FidToName.TryGetValue(sFid, out var name))
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
             }
             else
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
             }
         }
     }
 
     private void AxKHOpenApi_OnEventConnect(object sender, _DKHOpenAPIEvents_OnEventConnectEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0)
         {
             _isRealServer = !string.Equals(_axOpenAPI!.GetLoginInfo("GetServerGubun"), "1");

@@ -26,6 +26,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
     private readonly Encoding _appEncoder = Encoding.GetEncoding("EUC-KR");
 
     private static readonly string _scrNum_REQ_TR_BASE = "3000";
+    private static readonly string _scrNum_CHART_CONTENT = "3101";
     private static readonly string _scrNum_REQ_COND_BASE = "4000";
     private static readonly string _scrNum_REQ_COND_LAST = "4999";
 
@@ -68,7 +69,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         "FID 리스트",
     ];
 
-    private enum TREETAB_KIND
+    private enum TAB_TREE_KIND
     {
         실시간목록,
         TR목록,
@@ -78,7 +79,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         사용자기능,
     }
 
-    private enum LIST_TAB_KIND
+    private enum TAB_LIST_KIND
     {
         메시지목록,
         조회데이터,
@@ -137,7 +138,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
         // 로그 리스트뷰 만들기
         var ListTab_Names = new List<string>();
-        foreach (LIST_TAB_KIND item in Enum.GetValues(typeof(LIST_TAB_KIND)))
+        foreach (TAB_LIST_KIND item in Enum.GetValues(typeof(TAB_LIST_KIND)))
             ListTab_Names.Add(item.ToString());
         SetTabLists(ListTab_Names);
 
@@ -162,12 +163,12 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         _axOpenAPI.OnReceiveTrCondition += AxKHOpenApi_OnReceiveTrCondition;
         _axOpenAPI.OnReceiveTrData += AxKHOpenApi_OnReceiveTrData;
 
-        OutputLog((int)LIST_TAB_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
-        OutputLog((int)LIST_TAB_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
-        OutputLog((int)LIST_TAB_KIND.조건검색실시간, "여기에 전문 조건검색 실시간 데이터가 표시됩니다 (OnReceiveRealCondition)");
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
-        OutputLog((int)LIST_TAB_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
+        OutputLog((int)TAB_LIST_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
+        OutputLog((int)TAB_LIST_KIND.조건검색실시간, "여기에 전문 조건검색 실시간 데이터가 표시됩니다 (OnReceiveRealCondition)");
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
+        OutputLog((int)TAB_LIST_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
         OutputLogResetAllChangeState();
 
         //
@@ -272,7 +273,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_실시간목록 = root;
-            SetTreeItems((int)TREETAB_KIND.실시간목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.실시간목록, new List<object>() { root });
         }
     }
 
@@ -423,7 +424,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_TR목록 = root;
-            SetTreeItems((int)TREETAB_KIND.TR목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.TR목록, new List<object>() { root });
         }
 
         // sub function
@@ -477,7 +478,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_개발가이드 = root;
-            SetTreeItems((int)TREETAB_KIND.개발가이드, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.개발가이드, new List<object>() { root });
         }
 
         // sub function
@@ -682,7 +683,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             root.IsExpanded = true;
             _data_화면목록 = root;
-            SetTreeItems((int)TREETAB_KIND.화면목록, new List<object>() { root });
+            SetTreeItems((int)TAB_TREE_KIND.화면목록, new List<object>() { root });
         }
 
         // sub function
@@ -732,7 +733,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         root.IsExpanded = true;
         _data_종목정보 = root;
 
-        SetTreeItems((int)TREETAB_KIND.종목정보, new List<object>() { root });
+        SetTreeItems((int)TAB_TREE_KIND.종목정보, new List<object>() { root });
     }
 
     private void Load_사용자기능()
@@ -789,7 +790,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         rootTools.AddChild(new IdTextItem(9, "옵션주문"));
 
 
-        SetTreeItems((int)TREETAB_KIND.사용자기능, lists);
+        SetTreeItems((int)TAB_TREE_KIND.사용자기능, lists);
     }
 
     public void Close()

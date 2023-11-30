@@ -7,8 +7,16 @@ namespace KOAStudio.Core.ViewModels
 {
     public partial class ChartReqViewModel : ObservableObject
     {
-        public ChartReqViewModel(string Title)
+        public enum KIND
         {
+            업종,
+            주식,
+            선물,
+            옵션,
+        }
+        public ChartReqViewModel(KIND Kind, string Title)
+        {
+            this.Kind = Kind;
             this.Title = Title;
             TitleBarVisibility = this.Title.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -23,9 +31,10 @@ namespace KOAStudio.Core.ViewModels
             _nextText = string.Empty;
             _selected종목 = string.Empty;
         }
-        public Action<ChartReqViewModel, string>? ChartReqCommand;
 
-        public Func<ChartReqViewModel, string>? MakeChartReqCode;
+        public Func<ChartReqViewModel, string, string>? ExtProcedure;
+
+        public KIND Kind { get; }
         public string Title { get; }
         public Visibility TitleBarVisibility { get; }
 
@@ -35,7 +44,7 @@ namespace KOAStudio.Core.ViewModels
         [ObservableProperty] string _selectedDataCount;
 
         [RelayCommand]
-        void Action(string action_name) => ChartReqCommand?.Invoke(this, action_name);
+        void Action(string action_name) => ExtProcedure?.Invoke(this, action_name);
 
         public bool NextEnabled { get; set; }
 
@@ -54,11 +63,12 @@ namespace KOAStudio.Core.ViewModels
         partial void OnSelected종목Changed(string value) => UpdateCodeText();
 
         public bool EnableUpdateCodeText;
+
         private void UpdateCodeText()
         {
             if (EnableUpdateCodeText == false) return;
-            if (MakeChartReqCode != null)
-                CodeText = MakeChartReqCode(this);
+            if (ExtProcedure != null)
+                CodeText = ExtProcedure(this, string.Empty);
         }
     }
 }
