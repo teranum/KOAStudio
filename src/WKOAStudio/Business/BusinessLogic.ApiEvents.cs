@@ -35,10 +35,15 @@ internal sealed partial class BusinessLogic
                 {
                     bool b분틱 = model.SelectedChartRound == ChartRound.분 || model.SelectedChartRound == ChartRound.틱;
                     sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "체결시간" : "일자"));
+                    sb.Append('\t');
                     sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가"));
+                    sb.Append('\t');
                     sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가"));
+                    sb.Append('\t');
                     sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가"));
+                    sb.Append('\t');
                     sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가"));
+                    sb.Append('\t');
                     sb.AppendLine(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "거래량" : "누적거래량"));
                 }
 

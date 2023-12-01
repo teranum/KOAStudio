@@ -16,7 +16,7 @@ internal sealed partial class BusinessLogic
             _chartDataReqViewModel_선물 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "10100000"),
+                Selected종목 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
             };
             _chartDataReqViewModel_선물.NextEnabled = false;
             _chartDataReqViewModel_선물.EnableUpdateCodeText = true;
@@ -121,7 +121,7 @@ internal sealed partial class BusinessLogic
     {
         if (_chartDataReqViewModel_선물 != null)
         {
-            //_appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
+            _appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
         }
     }
 }

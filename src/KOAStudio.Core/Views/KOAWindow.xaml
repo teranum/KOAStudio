@@ -25,6 +25,9 @@
         <bh:EventTrigger EventName="Loaded">
             <bh:InvokeCommandAction Command="{Binding LoadedCommand}" />
         </bh:EventTrigger>
+        <bh:EventTrigger EventName="Closed">
+            <bh:InvokeCommandAction Command="{Binding ClosedCommand}" />
+        </bh:EventTrigger>
     </bh:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>

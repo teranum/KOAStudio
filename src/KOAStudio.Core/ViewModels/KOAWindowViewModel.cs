@@ -115,6 +115,12 @@ namespace KOAStudio.Core.ViewModels
             _uiRequest.Initialize();
         }
 
+        [RelayCommand]
+        private void Closed()
+        {
+            _uiRequest.Close();
+        }
+
         [RelayCommand(CanExecute = nameof(CanMenuLogin))]
         private void MenuLogin()
         {

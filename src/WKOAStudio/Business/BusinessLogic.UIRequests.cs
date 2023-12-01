@@ -27,6 +27,7 @@ internal sealed partial class BusinessLogic
         if (LoginState == OpenApiLoginState.LoginSucceed)
         {
             _axOpenAPI?.DisconnectRealData(_scrNum_REQ_TR_BASE);
+            _axOpenAPI?.DisconnectRealData(_scrNum_CHART_CONTENT);
         }
     }
 
