@@ -16,27 +16,27 @@ internal sealed partial class BusinessLogic
 
         if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
         {
-            ChartReqViewModel? model = null;
-            if (_chartReqViewModel_업종 != null && e.sRQName.StartsWith(_chartReqViewModel_업종.Title))
+            CharDataReqViewModel? model = null;
+            if (_chartDataReqViewModel_업종 != null && e.sRQName.StartsWith(_chartDataReqViewModel_업종.Title))
             {
-                model = _chartReqViewModel_업종;
+                model = _chartDataReqViewModel_업종;
             }
-            else if (_chartReqViewModel_주식 != null && e.sRQName.StartsWith(_chartReqViewModel_주식.Title))
+            else if (_chartDataReqViewModel_주식 != null && e.sRQName.StartsWith(_chartDataReqViewModel_주식.Title))
             {
-                model = _chartReqViewModel_주식;
+                model = _chartDataReqViewModel_주식;
             }
-            else if (_chartReqViewModel_선물 != null && e.sRQName.StartsWith(_chartReqViewModel_선물.Title))
+            else if (_chartDataReqViewModel_선물 != null && e.sRQName.StartsWith(_chartDataReqViewModel_선물.Title))
             {
-                model = _chartReqViewModel_선물;
+                model = _chartDataReqViewModel_선물;
             }
-            else if (_chartReqViewModel_옵션 != null && e.sRQName.StartsWith(_chartReqViewModel_옵션.Title))
+            else if (_chartDataReqViewModel_옵션 != null && e.sRQName.StartsWith(_chartDataReqViewModel_옵션.Title))
             {
-                model = _chartReqViewModel_옵션;
+                model = _chartDataReqViewModel_옵션;
             }
 
             if (model != null)
             {
-                bool bFuture = model.Kind == ChartReqViewModel.KIND.선물 || model.Kind == ChartReqViewModel.KIND.옵션;
+                bool bFuture = model.Kind == CharDataReqViewModel.KIND.선물 || model.Kind == CharDataReqViewModel.KIND.옵션;
                 StringBuilder sb = new();
                 int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
 

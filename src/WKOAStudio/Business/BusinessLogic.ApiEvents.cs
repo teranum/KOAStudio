@@ -20,10 +20,10 @@ internal sealed partial class BusinessLogic
 
         if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
         {
-            ChartReqViewModel? model = null;
-            if (_chartReqViewModel_선물 != null && e.sRQName.StartsWith(_chartReqViewModel_선물.Title))
+            CharDataReqViewModel? model = null;
+            if (_chartDataReqViewModel_선물 != null && e.sRQName.StartsWith(_chartDataReqViewModel_선물.Title))
             {
-                model = _chartReqViewModel_선물;
+                model = _chartDataReqViewModel_선물;
             }
 
             if (model != null)

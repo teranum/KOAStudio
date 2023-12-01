@@ -7,66 +7,66 @@ using System.Text;
 namespace KOAStudio.Business;
 internal sealed partial class BusinessLogic
 {
-    private ChartReqViewModel? _chartReqViewModel_업종;
-    private ChartReqViewModel? _chartReqViewModel_주식;
-    private ChartReqViewModel? _chartReqViewModel_선물;
-    private ChartReqViewModel? _chartReqViewModel_옵션;
+    private CharDataReqViewModel? _chartDataReqViewModel_업종;
+    private CharDataReqViewModel? _chartDataReqViewModel_주식;
+    private CharDataReqViewModel? _chartDataReqViewModel_선물;
+    private CharDataReqViewModel? _chartDataReqViewModel_옵션;
     void ShowUserContent(string require)
     {
         if (require.Equals("업종차트요청"))
         {
-            _chartReqViewModel_업종 ??= new ChartReqViewModel(ChartReqViewModel.KIND.업종, require)
+            _chartDataReqViewModel_업종 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.업종, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
                 Selected종목 = _appRegistry.GetValue(require, "종목코드", "001"),
             };
-            _chartReqViewModel_업종.NextEnabled = false;
-            _chartReqViewModel_업종.EnableUpdateCodeText = true;
-            _chartReqViewModel_업종.UpdateCodeText();
-            SetUserContent(new ChartReqView(_chartReqViewModel_업종));
+            _chartDataReqViewModel_업종.NextEnabled = false;
+            _chartDataReqViewModel_업종.EnableUpdateCodeText = true;
+            _chartDataReqViewModel_업종.UpdateCodeText();
+            SetUserContent(new CharDataReqView(_chartDataReqViewModel_업종));
 
         }
         else if (require.Equals("주식차트요청"))
         {
-            _chartReqViewModel_주식 ??= new ChartReqViewModel(ChartReqViewModel.KIND.주식, require)
+            _chartDataReqViewModel_주식 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.주식, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
                 Is수정주가 = true,
                 Selected종목 = _appRegistry.GetValue(require, "종목코드", "005930"),
             };
-            _chartReqViewModel_주식.NextEnabled = false;
-            _chartReqViewModel_주식.EnableUpdateCodeText = true;
-            _chartReqViewModel_주식.UpdateCodeText();
-            SetUserContent(new ChartReqView(_chartReqViewModel_주식));
+            _chartDataReqViewModel_주식.NextEnabled = false;
+            _chartDataReqViewModel_주식.EnableUpdateCodeText = true;
+            _chartDataReqViewModel_주식.UpdateCodeText();
+            SetUserContent(new CharDataReqView(_chartDataReqViewModel_주식));
 
         }
         else if (require.Equals("선물차트요청"))
         {
-            _chartReqViewModel_선물 ??= new ChartReqViewModel(ChartReqViewModel.KIND.선물, require)
+            _chartDataReqViewModel_선물 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
                 Selected종목 = _appRegistry.GetValue(require, "종목코드", "10100000"),
             };
-            _chartReqViewModel_선물.NextEnabled = false;
-            _chartReqViewModel_선물.EnableUpdateCodeText = true;
-            _chartReqViewModel_선물.UpdateCodeText();
-            SetUserContent(new ChartReqView(_chartReqViewModel_선물));
+            _chartDataReqViewModel_선물.NextEnabled = false;
+            _chartDataReqViewModel_선물.EnableUpdateCodeText = true;
+            _chartDataReqViewModel_선물.UpdateCodeText();
+            SetUserContent(new CharDataReqView(_chartDataReqViewModel_선물));
         }
         else if (require.Equals("옵션차트요청"))
         {
-            _chartReqViewModel_옵션 ??= new ChartReqViewModel(ChartReqViewModel.KIND.옵션, require)
+            _chartDataReqViewModel_옵션 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.옵션, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
                 Selected종목 = _appRegistry.GetValue(require, "종목코드", "201TC340"),
             };
-            _chartReqViewModel_옵션.NextEnabled = false;
-            _chartReqViewModel_옵션.EnableUpdateCodeText = true;
-            _chartReqViewModel_옵션.UpdateCodeText();
-            SetUserContent(new ChartReqView(_chartReqViewModel_옵션));
+            _chartDataReqViewModel_옵션.NextEnabled = false;
+            _chartDataReqViewModel_옵션.EnableUpdateCodeText = true;
+            _chartDataReqViewModel_옵션.UpdateCodeText();
+            SetUserContent(new CharDataReqView(_chartDataReqViewModel_옵션));
         }
     }
 
-    string ChartContentExtProcedure(ChartReqViewModel model, string require)
+    string ChartContentExtProcedure(CharDataReqViewModel model, string require)
     {
         string result = string.Empty;
         bool b조회 = require.Equals("조 회");
@@ -80,7 +80,7 @@ internal sealed partial class BusinessLogic
             }
 
             string trCode = string.Empty;
-            if (model.Kind == ChartReqViewModel.KIND.업종)
+            if (model.Kind == CharDataReqViewModel.KIND.업종)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -106,7 +106,7 @@ internal sealed partial class BusinessLogic
                         break;
                 }
             }
-            else if (model.Kind == ChartReqViewModel.KIND.주식)
+            else if (model.Kind == CharDataReqViewModel.KIND.주식)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -136,7 +136,7 @@ internal sealed partial class BusinessLogic
                 }
                 _axOpenAPI.SetInputValue("수정주가구분", (model.Is수정주가 == true) ? "1" : "0");
             }
-            else if (model.Kind == ChartReqViewModel.KIND.선물)
+            else if (model.Kind == CharDataReqViewModel.KIND.선물)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -162,7 +162,7 @@ internal sealed partial class BusinessLogic
                         break;
                 }
             }
-            else if (model.Kind == ChartReqViewModel.KIND.옵션)
+            else if (model.Kind == CharDataReqViewModel.KIND.옵션)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -201,7 +201,7 @@ internal sealed partial class BusinessLogic
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine($"// {model.Title}");
             string trCode = string.Empty;
-            if (model.Kind == ChartReqViewModel.KIND.업종)
+            if (model.Kind == CharDataReqViewModel.KIND.업종)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -227,7 +227,7 @@ internal sealed partial class BusinessLogic
                         break;
                 }
             }
-            else if (model.Kind == ChartReqViewModel.KIND.주식)
+            else if (model.Kind == CharDataReqViewModel.KIND.주식)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -257,7 +257,7 @@ internal sealed partial class BusinessLogic
                 }
                 stringBuilder.AppendLine($"_axOpenAPI.SetInputValue(\"수정주가구분\", \"{((model.Is수정주가 == true) ? "1" : "0")}\");");
             }
-            else if (model.Kind == ChartReqViewModel.KIND.선물)
+            else if (model.Kind == CharDataReqViewModel.KIND.선물)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -283,7 +283,7 @@ internal sealed partial class BusinessLogic
                         break;
                 }
             }
-            else if (model.Kind == ChartReqViewModel.KIND.옵션)
+            else if (model.Kind == CharDataReqViewModel.KIND.옵션)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -316,21 +316,21 @@ internal sealed partial class BusinessLogic
 
     void SaveUserContentInfo()
     {
-        if (_chartReqViewModel_업종 != null)
+        if (_chartDataReqViewModel_업종 != null)
         {
-            _appRegistry.SetValue(_chartReqViewModel_업종.Title, "종목코드", _chartReqViewModel_업종.Selected종목);
+            _appRegistry.SetValue(_chartDataReqViewModel_업종.Title, "종목코드", _chartDataReqViewModel_업종.Selected종목);
         }
-        if (_chartReqViewModel_주식 != null)
+        if (_chartDataReqViewModel_주식 != null)
         {
-            _appRegistry.SetValue(_chartReqViewModel_주식.Title, "종목코드", _chartReqViewModel_주식.Selected종목);
+            _appRegistry.SetValue(_chartDataReqViewModel_주식.Title, "종목코드", _chartDataReqViewModel_주식.Selected종목);
         }
-        if (_chartReqViewModel_선물 != null)
+        if (_chartDataReqViewModel_선물 != null)
         {
-            _appRegistry.SetValue(_chartReqViewModel_선물.Title, "종목코드", _chartReqViewModel_선물.Selected종목);
+            _appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
         }
-        if (_chartReqViewModel_옵션 != null)
+        if (_chartDataReqViewModel_옵션 != null)
         {
-            _appRegistry.SetValue(_chartReqViewModel_옵션.Title, "종목코드", _chartReqViewModel_옵션.Selected종목);
+            _appRegistry.SetValue(_chartDataReqViewModel_옵션.Title, "종목코드", _chartDataReqViewModel_옵션.Selected종목);
         }
     }
 }

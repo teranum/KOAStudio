@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="KOAStudio.Core.Views.ChartReqView"
+    x:Class="KOAStudio.Core.Views.CharDataReqView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="clr-namespace:KOAStudio.Core.Controls"
@@ -8,7 +8,7 @@
     xmlns:local="clr-namespace:KOAStudio.Core.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:KOAStudio.Core.ViewModels"
-    d:DataContext="{d:DesignInstance Type=models:ChartReqViewModel}"
+    d:DataContext="{d:DesignInstance Type=models:CharDataReqViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="600"
     Background="Bisque"

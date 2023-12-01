@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace KOAStudio.Core.ViewModels
 {
-    public partial class ChartReqViewModel : ObservableObject
+    public partial class CharDataReqViewModel : ObservableObject
     {
         public enum KIND
         {
@@ -14,7 +14,7 @@ namespace KOAStudio.Core.ViewModels
             선물,
             옵션,
         }
-        public ChartReqViewModel(KIND Kind, string Title)
+        public CharDataReqViewModel(KIND Kind, string Title)
         {
             this.Kind = Kind;
             this.Title = Title;
@@ -35,7 +35,7 @@ namespace KOAStudio.Core.ViewModels
             _is수정주가 = null;
         }
 
-        public Func<ChartReqViewModel, string, string>? ExtProcedure;
+        public Func<CharDataReqViewModel, string, string>? ExtProcedure;
 
         public KIND Kind { get; }
         public string Title { get; }

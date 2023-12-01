@@ -8,24 +8,24 @@ namespace WKOAStudio.Business;
 
 internal sealed partial class BusinessLogic
 {
-    private ChartReqViewModel? _chartReqViewModel_선물;
+    private CharDataReqViewModel? _chartDataReqViewModel_선물;
     void ShowUserContent(string require)
     {
         if (require.Equals("해외선물옵션차트요청"))
         {
-            _chartReqViewModel_선물 ??= new ChartReqViewModel(ChartReqViewModel.KIND.선물, require)
+            _chartDataReqViewModel_선물 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
             {
                 ExtProcedure = ChartContentExtProcedure,
                 Selected종목 = _appRegistry.GetValue(require, "종목코드", "10100000"),
             };
-            _chartReqViewModel_선물.NextEnabled = false;
-            _chartReqViewModel_선물.EnableUpdateCodeText = true;
-            _chartReqViewModel_선물.UpdateCodeText();
-            SetUserContent(new ChartReqView(_chartReqViewModel_선물));
+            _chartDataReqViewModel_선물.NextEnabled = false;
+            _chartDataReqViewModel_선물.EnableUpdateCodeText = true;
+            _chartDataReqViewModel_선물.UpdateCodeText();
+            SetUserContent(new CharDataReqView(_chartDataReqViewModel_선물));
         }
     }
 
-    string ChartContentExtProcedure(ChartReqViewModel model, string require)
+    string ChartContentExtProcedure(CharDataReqViewModel model, string require)
     {
         string result = string.Empty;
         bool b조회 = require.Equals("조 회");
@@ -39,7 +39,7 @@ internal sealed partial class BusinessLogic
             }
 
             string trCode = string.Empty;
-            if (model.Kind == ChartReqViewModel.KIND.선물)
+            if (model.Kind == CharDataReqViewModel.KIND.선물)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -82,7 +82,7 @@ internal sealed partial class BusinessLogic
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine($"// {model.Title}");
             string trCode = string.Empty;
-            if (model.Kind == ChartReqViewModel.KIND.선물)
+            if (model.Kind == CharDataReqViewModel.KIND.선물)
             {
                 trCode = model.SelectedChartRound switch
                 {
@@ -119,9 +119,9 @@ internal sealed partial class BusinessLogic
 
     void SaveUserContentInfo()
     {
-        if (_chartReqViewModel_선물 != null)
+        if (_chartDataReqViewModel_선물 != null)
         {
-            //_appRegistry.SetValue(_chartReqViewModel_선물.Title, "종목코드", _chartReqViewModel_선물.Selected종목);
+            //_appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
         }
     }
 }

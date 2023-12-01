@@ -5,15 +5,15 @@ using System.Windows.Controls;
 namespace KOAStudio.Core.Views
 {
     /// <summary>
-    /// Interaction logic for ChartReqView.xaml
+    /// Interaction logic for CharDataReqView.xaml
     /// </summary>
-    public partial class ChartReqView : UserControl, IUserTool
+    public partial class CharDataReqView : UserControl, IUserTool
     {
-        public ChartReqView(object ComponentModel)
+        public CharDataReqView(object ControlModel)
         {
             InitializeComponent();
-            DataContext = ComponentModel;
-            if (DataContext is ChartReqViewModel model)
+            DataContext = ControlModel;
+            if (DataContext is CharDataReqViewModel model)
             {
                 model.EnableUpdateCodeText = true;
             }
@@ -21,9 +21,10 @@ namespace KOAStudio.Core.Views
 
         public void CloseTool()
         {
-            if (DataContext is ChartReqViewModel model)
+            if (DataContext is CharDataReqViewModel model)
             {
                 model.EnableUpdateCodeText = false;
+                DataContext = null;
             }
         }
     }
