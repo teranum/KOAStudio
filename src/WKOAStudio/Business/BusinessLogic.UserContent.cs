@@ -13,15 +13,24 @@ internal sealed partial class BusinessLogic
     {
         if (require.Equals("해외선물옵션차트요청"))
         {
-            _chartDataReqViewModel_선물 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+            var model = _chartDataReqViewModel_선물;
+            if (model == null)
             {
-                ExtProcedure = ChartContentExtProcedure,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
-            };
-            _chartDataReqViewModel_선물.NextEnabled = false;
-            _chartDataReqViewModel_선물.EnableUpdateCodeText = true;
-            _chartDataReqViewModel_선물.UpdateCodeText();
-            SetUserContent(new CharDataReqView(_chartDataReqViewModel_선물));
+                _chartDataReqViewModel_선물 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+                {
+                    ExtProcedure = ChartContentExtProcedure,
+                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
+                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
+                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100")
+                };
+                ChartRound chartRound = ChartRound.분;
+                Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                model.SelectedChartRound = chartRound;
+            }
+            model.NextEnabled = false;
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new CharDataReqView(model));
         }
     }
 
@@ -75,7 +84,7 @@ internal sealed partial class BusinessLogic
             int nRet = _axOpenAPI.CommRqData(sRqName, trCode, b다음 ? model.NextText : "", _scrNum_CHART_CONTENT);
             stopwatch.Stop();
 
-            result = $"[{CallTime:HH:mm:ss.fff}] : ({stopwatch.Elapsed.TotalMilliseconds * 1000})uS, nRet={nRet}\r\n";
+            result = $"[{CallTime:HH:mm:ss.fff}] : ({stopwatch.Elapsed.TotalMilliseconds})mS, nRet={nRet}\r\n";
         }
         else
         {
@@ -121,7 +130,12 @@ internal sealed partial class BusinessLogic
     {
         if (_chartDataReqViewModel_선물 != null)
         {
-            _appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
+            var model = _chartDataReqViewModel_선물;
+            string section = model.Title;
+            _appRegistry.SetValue(section, "종목코드", model.Selected종목);
+            _appRegistry.SetValue(section, "시간타입", model.SelectedChartRound);
+            _appRegistry.SetValue(section, "분주기", model.SelectedChartInterval_분);
+            _appRegistry.SetValue(section, "틱주기", model.SelectedChartInterval_틱);
         }
     }
 }

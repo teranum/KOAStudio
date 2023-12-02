@@ -15,54 +15,87 @@ internal sealed partial class BusinessLogic
     {
         if (require.Equals("업종차트요청"))
         {
-            _chartDataReqViewModel_업종 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.업종, require)
+            var model = _chartDataReqViewModel_업종;
+            if (model == null)
             {
-                ExtProcedure = ChartContentExtProcedure,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "001"),
-            };
-            _chartDataReqViewModel_업종.NextEnabled = false;
-            _chartDataReqViewModel_업종.EnableUpdateCodeText = true;
-            _chartDataReqViewModel_업종.UpdateCodeText();
-            SetUserContent(new CharDataReqView(_chartDataReqViewModel_업종));
-
+                _chartDataReqViewModel_업종 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.업종, require)
+                {
+                    ExtProcedure = ChartContentExtProcedure,
+                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "001"),
+                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "10"),
+                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100")
+                };
+                ChartRound chartRound = ChartRound.분;
+                Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                model.SelectedChartRound = chartRound;
+            }
+            model.NextEnabled = false;
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new CharDataReqView(model));
         }
         else if (require.Equals("주식차트요청"))
         {
-            _chartDataReqViewModel_주식 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.주식, require)
+            var model = _chartDataReqViewModel_주식;
+            if (model == null)
             {
-                ExtProcedure = ChartContentExtProcedure,
-                Is수정주가 = true,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "005930"),
-            };
-            _chartDataReqViewModel_주식.NextEnabled = false;
-            _chartDataReqViewModel_주식.EnableUpdateCodeText = true;
-            _chartDataReqViewModel_주식.UpdateCodeText();
-            SetUserContent(new CharDataReqView(_chartDataReqViewModel_주식));
-
+                _chartDataReqViewModel_주식 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.주식, require)
+                {
+                    ExtProcedure = ChartContentExtProcedure,
+                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "005930"),
+                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
+                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100")
+                };
+                ChartRound chartRound = ChartRound.일;
+                Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                model.SelectedChartRound = chartRound;
+            }
+            model.NextEnabled = false;
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new CharDataReqView(model));
         }
         else if (require.Equals("선물차트요청"))
         {
-            _chartDataReqViewModel_선물 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+            var model = _chartDataReqViewModel_선물;
+            if (model == null)
             {
-                ExtProcedure = ChartContentExtProcedure,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "10100000"),
-            };
-            _chartDataReqViewModel_선물.NextEnabled = false;
-            _chartDataReqViewModel_선물.EnableUpdateCodeText = true;
-            _chartDataReqViewModel_선물.UpdateCodeText();
-            SetUserContent(new CharDataReqView(_chartDataReqViewModel_선물));
+                _chartDataReqViewModel_선물 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+                {
+                    ExtProcedure = ChartContentExtProcedure,
+                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "10100000"),
+                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
+                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "300")
+                };
+                ChartRound chartRound = ChartRound.틱;
+                Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                model.SelectedChartRound = chartRound;
+            }
+            model.NextEnabled = false;
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new CharDataReqView(model));
         }
         else if (require.Equals("옵션차트요청"))
         {
-            _chartDataReqViewModel_옵션 ??= new CharDataReqViewModel(CharDataReqViewModel.KIND.옵션, require)
+            var model = _chartDataReqViewModel_옵션;
+            if (model == null)
             {
-                ExtProcedure = ChartContentExtProcedure,
-                Selected종목 = _appRegistry.GetValue(require, "종목코드", "201TC340"),
-            };
-            _chartDataReqViewModel_옵션.NextEnabled = false;
-            _chartDataReqViewModel_옵션.EnableUpdateCodeText = true;
-            _chartDataReqViewModel_옵션.UpdateCodeText();
-            SetUserContent(new CharDataReqView(_chartDataReqViewModel_옵션));
+                _chartDataReqViewModel_옵션 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.옵션, require)
+                {
+                    ExtProcedure = ChartContentExtProcedure,
+                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "201TC340"),
+                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
+                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100")
+                };
+                ChartRound chartRound = ChartRound.분;
+                Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                model.SelectedChartRound = chartRound;
+            }
+            model.NextEnabled = false;
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new CharDataReqView(model));
         }
     }
 
@@ -194,7 +227,7 @@ internal sealed partial class BusinessLogic
             int nRet = _axOpenAPI.CommRqData(sRqName, trCode, b다음 ? 2 : 0, _scrNum_CHART_CONTENT);
             stopwatch.Stop();
 
-            result = $"[{CallTime:HH:mm:ss.fff}] : ({stopwatch.Elapsed.TotalMilliseconds * 1000})uS, nRet={nRet}\r\n";
+            result = $"[{CallTime:HH:mm:ss.fff}] : ({stopwatch.Elapsed.TotalMilliseconds})mS, nRet={nRet}\r\n";
         }
         else
         {
@@ -318,19 +351,39 @@ internal sealed partial class BusinessLogic
     {
         if (_chartDataReqViewModel_업종 != null)
         {
-            _appRegistry.SetValue(_chartDataReqViewModel_업종.Title, "종목코드", _chartDataReqViewModel_업종.Selected종목);
+            var model = _chartDataReqViewModel_업종;
+            string section = model.Title;
+            _appRegistry.SetValue(section, "종목코드", model.Selected종목);
+            _appRegistry.SetValue(section, "시간타입", model.SelectedChartRound);
+            _appRegistry.SetValue(section, "분주기", model.SelectedChartInterval_분);
+            _appRegistry.SetValue(section, "틱주기", model.SelectedChartInterval_틱);
         }
         if (_chartDataReqViewModel_주식 != null)
         {
-            _appRegistry.SetValue(_chartDataReqViewModel_주식.Title, "종목코드", _chartDataReqViewModel_주식.Selected종목);
+            var model = _chartDataReqViewModel_주식;
+            string section = model.Title;
+            _appRegistry.SetValue(section, "종목코드", model.Selected종목);
+            _appRegistry.SetValue(section, "시간타입", model.SelectedChartRound);
+            _appRegistry.SetValue(section, "분주기", model.SelectedChartInterval_분);
+            _appRegistry.SetValue(section, "틱주기", model.SelectedChartInterval_틱);
         }
         if (_chartDataReqViewModel_선물 != null)
         {
-            _appRegistry.SetValue(_chartDataReqViewModel_선물.Title, "종목코드", _chartDataReqViewModel_선물.Selected종목);
+            var model = _chartDataReqViewModel_선물;
+            string section = model.Title;
+            _appRegistry.SetValue(section, "종목코드", model.Selected종목);
+            _appRegistry.SetValue(section, "시간타입", model.SelectedChartRound);
+            _appRegistry.SetValue(section, "분주기", model.SelectedChartInterval_분);
+            _appRegistry.SetValue(section, "틱주기", model.SelectedChartInterval_틱);
         }
         if (_chartDataReqViewModel_옵션 != null)
         {
-            _appRegistry.SetValue(_chartDataReqViewModel_옵션.Title, "종목코드", _chartDataReqViewModel_옵션.Selected종목);
+            var model = _chartDataReqViewModel_옵션;
+            string section = model.Title;
+            _appRegistry.SetValue(section, "종목코드", model.Selected종목);
+            _appRegistry.SetValue(section, "시간타입", model.SelectedChartRound);
+            _appRegistry.SetValue(section, "분주기", model.SelectedChartInterval_분);
+            _appRegistry.SetValue(section, "틱주기", model.SelectedChartInterval_틱);
         }
     }
 }

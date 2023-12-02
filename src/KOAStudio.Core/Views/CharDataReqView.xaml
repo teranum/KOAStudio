@@ -121,16 +121,12 @@
             </Controls:BindableAvalonEditor.ContextMenu>
         </Controls:BindableAvalonEditor>
         <StackPanel Grid.Row="4" Orientation="Horizontal">
-            <TextBlock
-                Margin="10,0,0,0"
-                Foreground="Brown"
-                Text="[날자시간 시가 고가 저가 종가 거래량]" />
-            <TextBlock Margin="30,0,0,0" Text="Received Time = " />
+            <TextBlock Text="Received Time = " />
             <TextBlock Width="100" Text="{Binding ReceivedTime, StringFormat='HH:mm:ss.fff'}" />
             <TextBlock Margin="10,0,0,0" Text="DataCount = " />
             <TextBlock Width="60" Text="{Binding ReceivedDataCount}" />
             <TextBlock Margin="10,0,0,0" Text="sNext = " />
-            <TextBlock Width="60" Text="{Binding NextText}" />
+            <TextBlock Width="260" Text="{Binding NextText}" />
         </StackPanel>
         <Controls:BindableAvalonEditor
             Grid.Row="5"
