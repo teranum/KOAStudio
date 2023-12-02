@@ -15,23 +15,23 @@ namespace KOAStudio.Core.Converters
             throw new NotSupportedException();
         }
 
-        private static List<BitmapSource>? Images;
+        private static List<BitmapSource>? _images;
         public static BitmapSource? GetTreeIcon(int nIndex)
         {
-            if (Images is null)
+            if (_images is null)
             {
-                Images = new List<BitmapSource>();
+                _images = [];
                 var m_Png_dead = new BitmapImage(new Uri("pack://application:,,,/KOAStudio.Core;component/Resources/icons.png"));
                 int nCY = 20;
                 int nCX = 16;
                 int nImgCount = m_Png_dead.PixelWidth / nCX;
                 for (int i = 0; i < nImgCount; i++)
                 {
-                    Images.Add(new CroppedBitmap(m_Png_dead, new System.Windows.Int32Rect(i * nCX, 0, nCX, nCY)));
+                    _images.Add(new CroppedBitmap(m_Png_dead, new System.Windows.Int32Rect(i * nCX, 0, nCX, nCY)));
                 }
             }
-            if (nIndex >= 0 && nIndex < Images.Count)
-                return Images[nIndex];
+            if (nIndex >= 0 && nIndex < _images.Count)
+                return _images[nIndex];
             return null;
         }
     }

@@ -3,25 +3,26 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
+using System.Windows.Controls;
 
 namespace KOAStudio.Core.ViewModels
 {
     internal partial class KOAWindowViewModel : ObservableObject
     {
         private readonly IUIRequest _uiRequest;
-        private readonly string _BaseTitle =
+        private readonly string _baseTitle =
             System.Windows.Application.ResourceAssembly.GetName().Name
             + (Environment.Is64BitProcess ? " - 64비트" : " - 32비트");
 
         public KOAWindowViewModel(IUIRequest uiRequest)
         {
             _uiRequest = uiRequest;
-            _Title = _BaseTitle;
+            _title = _baseTitle;
 
-            _MenuCustomizeHeaderText = "Custom";
-            _SearchText = "";
-            _ResultText = "";
-            _StatusText = "준비됨";
+            _menuCustomizeHeaderText = "Custom";
+            _searchText = string.Empty;
+            _resultText = string.Empty;
+            _statusText = "준비됨";
 
             WeakReferenceMessenger.Default.Register<AppStatusChangedMessageType>(this, (r, m) =>
             {
@@ -32,11 +33,11 @@ namespace KOAStudio.Core.ViewModels
                     MenuLogoutCommand.NotifyCanExecuteChanged();
                     if (_uiRequest.LoginState == OpenApiLoginState.LoginSucceed)
                     {
-                        Title = _BaseTitle + (m.IsRealServer ? " (실투자)" : " (모의투자)");
+                        Title = _baseTitle + (m.IsRealServer ? " (실투자)" : " (모의투자)");
                     }
                     else
                     {
-                        Title = _BaseTitle;
+                        Title = _baseTitle;
                     }
                 }
             });
@@ -58,25 +59,55 @@ namespace KOAStudio.Core.ViewModels
                     MenuCustomizeItems = lists;
                 }
             });
+
+            WeakReferenceMessenger.Default.Register<SetUseContentMessageType>(this, (r, m) =>
+            {
+                UserContent = m.Control;
+            });
         }
 
         [ObservableProperty]
-        private string _Title;
+        private string _title;
 
         [ObservableProperty]
-        private string _MenuCustomizeHeaderText;
+        private string _menuCustomizeHeaderText;
 
         [ObservableProperty]
-        private List<string>? _MenuCustomizeItems;
+        private List<string>? _menuCustomizeItems;
 
         [ObservableProperty]
-        private string _StatusText;
+        private string _statusText;
 
         [ObservableProperty]
-        private string _SearchText;
+        private string _searchText;
 
-        [ObservableProperty]
-        private string _ResultText;
+        private string _resultText;
+        public string ResultText
+        {
+            get => _resultText;
+            set
+            {
+                UserContent = null;
+                SetProperty(ref _resultText, value);
+            }
+        }
+
+        private ContentControl? _userContent;
+        public ContentControl? UserContent
+        {
+            get => _userContent;
+            set
+            {
+                if (_userContent != value)
+                {
+                    if (_userContent is IUserTool userTool)
+                        userTool.CloseTool();
+
+                    _userContent = value;
+                    OnPropertyChanged(nameof(UserContent));
+                }
+            }
+        }
 
         [RelayCommand]
         private void Loaded()
@@ -84,10 +115,16 @@ namespace KOAStudio.Core.ViewModels
             _uiRequest.Initialize();
         }
 
+        [RelayCommand]
+        private void Closed()
+        {
+            _uiRequest.Close();
+        }
+
         [RelayCommand(CanExecute = nameof(CanMenuLogin))]
         private void MenuLogin()
         {
-            _uiRequest.ReqApiLogin(true);
+            _uiRequest.ReqApiLogin(bLogin: true);
         }
 
         private bool CanMenuLogin()
@@ -99,7 +136,7 @@ namespace KOAStudio.Core.ViewModels
         [RelayCommand(CanExecute = nameof(CanMenuLogout))]
         private void MenuLogout()
         {
-            _uiRequest.ReqApiLogin(false);
+            _uiRequest.ReqApiLogin(bLogin: false);
         }
 
         private bool CanMenuLogout()
@@ -109,7 +146,7 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [RelayCommand]
-        private void MenuExit()
+        private static void MenuExit()
         {
             System.Windows.Application.Current.Shutdown();
         }

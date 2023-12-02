@@ -8,8 +8,8 @@
 
     public class AppRegistry : IAppRegistry
     {
-        private static readonly Microsoft.Win32.RegistryKey CurrentUser = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, Microsoft.Win32.RegistryView.Default);
-        private readonly string? CorpAssemKey;
+        private static readonly Microsoft.Win32.RegistryKey _currentUser = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, Microsoft.Win32.RegistryView.Default);
+        private readonly string? _corpAssemKey;
 
         /// <summary>
         /// 
@@ -18,15 +18,15 @@
         public AppRegistry(string? corpName)
         {
             var exeName = System.Windows.Application.ResourceAssembly.GetName().Name;
-            CorpAssemKey = $"Software\\{corpName}\\{exeName}";
+            _corpAssemKey = $"Software\\{corpName}\\{exeName}";
         }
 
         public T GetValue<T>(string SectionName, string KeyName, T DefValue)
         {
             T retValue;
 
-            string subKeyName = $"{CorpAssemKey}\\{SectionName}";
-            using (var regkey = CurrentUser.OpenSubKey(subKeyName))
+            string subKeyName = $"{_corpAssemKey}\\{SectionName}";
+            using (var regkey = _currentUser.OpenSubKey(subKeyName))
             {
                 if (regkey is null) return DefValue;
                 var value = regkey.GetValue(KeyName, DefValue);
@@ -49,11 +49,9 @@
         {
             if (Value is null) return false;
 
-            string subKeyName = $"{CorpAssemKey}\\{SectionName}";
-            using (var regkey = CurrentUser.CreateSubKey(subKeyName))
-            {
-                regkey.SetValue(KeyName, Value, Microsoft.Win32.RegistryValueKind.Unknown);
-            }
+            string subKeyName = $"{_corpAssemKey}\\{SectionName}";
+            using var regkey = _currentUser.CreateSubKey(subKeyName);
+            regkey.SetValue(KeyName, Value, Microsoft.Win32.RegistryValueKind.Unknown);
             return true;
         }
     }

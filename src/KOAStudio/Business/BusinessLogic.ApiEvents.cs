@@ -1,6 +1,7 @@
 ﻿using KHOpenApi.NET;
 using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using KOAStudio.Core.ViewModels;
 using System.Diagnostics;
 using System.Text;
 
@@ -10,16 +11,63 @@ internal sealed partial class BusinessLogic
 {
     private void AxKHOpenApi_OnReceiveTrData(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
-        //if (e.sScrNo == SCR_REQ_TR_BASE)
+        DateTime Now = DateTime.Now;
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
+
+        if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
         {
-            SetPropertyQueryNextEnable(string.Equals(e.sPrevNext, "2"));
+            CharDataReqViewModel? model = null;
+            if (_chartDataReqViewModel_업종 != null && e.sRQName.StartsWith(_chartDataReqViewModel_업종.Title))
+            {
+                model = _chartDataReqViewModel_업종;
+            }
+            else if (_chartDataReqViewModel_주식 != null && e.sRQName.StartsWith(_chartDataReqViewModel_주식.Title))
+            {
+                model = _chartDataReqViewModel_주식;
+            }
+            else if (_chartDataReqViewModel_선물 != null && e.sRQName.StartsWith(_chartDataReqViewModel_선물.Title))
+            {
+                model = _chartDataReqViewModel_선물;
+            }
+            else if (_chartDataReqViewModel_옵션 != null && e.sRQName.StartsWith(_chartDataReqViewModel_옵션.Title))
+            {
+                model = _chartDataReqViewModel_옵션;
+            }
+
+            if (model != null)
+            {
+                bool bFuture = model.Kind == CharDataReqViewModel.KIND.선물 || model.Kind == CharDataReqViewModel.KIND.옵션;
+                StringBuilder sb = new();
+                int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+                for (int i = 0; i < nRepeatCount; i++)
+                {
+                    bool b분틱 = model.SelectedChartRound == ChartRound.분 || model.SelectedChartRound == ChartRound.틱;
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "체결시간" : "일자"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가"));
+                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가"));
+                    sb.AppendLine(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, (bFuture && !b분틱) ? "누적거래량" : "거래량"));
+                }
+
+                model.ReceivedTime = Now;
+                model.ReceivedDataCount = nRepeatCount;
+                model.ResultText = sb.ToString();
+                model.NextText = e.sPrevNext;
+                model.NextEnabled = e.sPrevNext.Equals("2");
+            }
+        }
+
+
+        {
+            SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
             // TR코드 필드 찾기
-            var trData = TrDatas.FirstOrDefault(x => x.Code.Equals(e.sTrCode, StringComparison.CurrentCultureIgnoreCase));
+            var trData = _trDatas.Find(x => x.Code.Equals(e.sTrCode));
             if (trData is not null)
             {
                 Stopwatch timer = Stopwatch.StartNew();
-                int nRepeatCount = axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
+                int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
                 string[] lines = new string[1
                     + (trData.OutputSingle != null ? trData.OutputSingle.Count : 0)
                     + nRepeatCount * (trData.OutputMuti != null ? trData.OutputMuti.Count : 0)];
@@ -29,7 +77,7 @@ internal sealed partial class BusinessLogic
                 if (trData.OutputSingle != null)
                     foreach (var field in trData.OutputSingle)
                     {
-                        string value = axOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, field).Trim();
+                        string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, field).Trim();
                         lines[nLineIndex++] = $"[{e.sTrCode}] {field}={value}";
                     }
                 if (trData.OutputMuti != null)
@@ -37,7 +85,7 @@ internal sealed partial class BusinessLogic
                     {
                         foreach (var field in trData.OutputMuti)
                         {
-                            string value = axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, field).Trim();
+                            string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, field).Trim();
                             lines[nLineIndex++] = $"[{e.sTrCode}][{i}] {field}={value}";
                         }
                     }
@@ -49,25 +97,25 @@ internal sealed partial class BusinessLogic
                     , lines[0]
                     , nTotalDataCount
                     , timer.Elapsed.TotalMilliseconds * 1000);
-                OutputLog((int)LIST_TAB_KIND.조회데이터);
-                OutputLog((int)LIST_TAB_KIND.조회데이터, lines, -1, true);
+                OutputLog((int)TAB_LIST_KIND.조회데이터);
+                OutputLog((int)TAB_LIST_KIND.조회데이터, lines, -1, focus: true);
 
                 // 최근 조회목록창에 추가
-                OutputLog((int)LIST_TAB_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
+                OutputLog((int)TAB_LIST_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
             }
         }
     }
 
     private void AxKHOpenApi_OnReceiveTrCondition(object sender, _DKHOpenAPIEvents_OnReceiveTrConditionEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveTrCondition> sScrNo = {e.sScrNo}, strConditionName = {e.strConditionName}, nIndex = {e.nIndex}, nNext = {e.nNext}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrCondition> sScrNo = {e.sScrNo}, strConditionName = {e.strConditionName}, nIndex = {e.nIndex}, nNext = {e.nNext}");
 
         int nScrNo = Convert.ToInt32(e.sScrNo);
-        if (nScrNo >= Convert.ToInt32(SCR_REQ_COND_BASE) && nScrNo <= Convert.ToInt32(SCR_REQ_COND_LAST))
+        if (nScrNo >= Convert.ToInt32(_scrNum_REQ_COND_BASE) && nScrNo <= Convert.ToInt32(_scrNum_REQ_COND_LAST))
         {
             // 조건검색 요청 결과
             string[] szCodeAndPrices = e.strCodeList.Split(';', StringSplitOptions.RemoveEmptyEntries);
-            StringBuilder szViewText = new StringBuilder();
+            StringBuilder szViewText = new();
             szViewText.AppendLine();
             szViewText.AppendLine("----------------------조건검색 요청 결과----------------------");
             szViewText.AppendLine();
@@ -85,12 +133,12 @@ internal sealed partial class BusinessLogic
                 if (strings.Length > 0)
                 {
                     string code = strings[0];
-                    string name = axOpenAPI!.GetMasterCodeName(code);
+                    string name = _axOpenAPI!.GetMasterCodeName(code);
                     if (strings.Length > 1)
                     {
                         string sPrice = strings[1];
                         double dPrice = Convert.ToDouble(sPrice);
-                        double dLastPrice = Convert.ToDouble(axOpenAPI.GetMasterLastPrice(code));
+                        double dLastPrice = Convert.ToDouble(_axOpenAPI.GetMasterLastPrice(code));
                         szViewText.AppendLine(string.Format("[{0}] : {1} ({2}, {3:N2}%)"
                             , code, name, (int)dPrice, (dPrice - dLastPrice) / dLastPrice * 100.0
                             ));
@@ -106,40 +154,40 @@ internal sealed partial class BusinessLogic
 
     private void AxKHOpenApi_OnReceiveRealData(object sender, _DKHOpenAPIEvents_OnReceiveRealDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, $"sRealKey = {e.sRealKey}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, false);
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, $"sRealKey = {e.sRealKey}, sRealType = {e.sRealType}, sRealData = {e.sRealData}", 100, focus: false);
     }
 
     private void AxKHOpenApi_OnReceiveRealCondition(object sender, _DKHOpenAPIEvents_OnReceiveRealConditionEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.조건검색실시간, $"sTrCode = {e.sTrCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
+        OutputLog((int)TAB_LIST_KIND.조건검색실시간, $"sTrCode = {e.sTrCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
     }
 
     private void AxKHOpenApi_OnReceiveMsg(object sender, _DKHOpenAPIEvents_OnReceiveMsgEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveMsg> sScrNo = {e.sScrNo}, sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sMsg = {e.sMsg}");
         SetStatusText(e.sMsg);
     }
 
     private void AxKHOpenApi_OnReceiveInvestRealData(object sender, _DKHOpenAPIEvents_OnReceiveInvestRealDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveInvestRealData> sRealKey = {e.sRealKey}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveInvestRealData> sRealKey = {e.sRealKey}");
     }
 
     private void AxKHOpenApi_OnReceiveConditionVer(object sender, _DKHOpenAPIEvents_OnReceiveConditionVerEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveConditionVer> lRet = {e.lRet}, sMsg = {e.sMsg}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveConditionVer> lRet = {e.lRet}, sMsg = {e.sMsg}");
 
         if (e.lRet == 1) // 정상
         {
             // 조건검색기 항목 로딩
-            if (MapCondNameToIndex.Count > 0) return;
-            string[] lists = axOpenAPI!.GetConditionNameList().Split(';', StringSplitOptions.RemoveEmptyEntries);
+            if (_mapCondNameToIndex.Count > 0) return;
+            string[] lists = _axOpenAPI!.GetConditionNameList().Split(';', StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in lists)
             {
                 string[] datas = item.Split('^');
-                MapCondNameToIndex.Add(datas[1], datas[0]);
+                _mapCondNameToIndex.Add(datas[1], datas[0]);
             }
-            OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveConditionVer> 조건검색식({MapCondNameToIndex.Count}개) 로딩완료");
+            OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveConditionVer> 조건검색식({_mapCondNameToIndex.Count}개) 로딩완료");
 
             Load_사용자기능();
         }
@@ -147,31 +195,31 @@ internal sealed partial class BusinessLogic
 
     private void AxKHOpenApi_OnReceiveChejanData(object sender, _DKHOpenAPIEvents_OnReceiveChejanDataEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"sGubun = {e.sGubun}, nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"sGubun = {e.sGubun}, nItemCnt = {e.nItemCnt}, sFIdList = {e.sFIdList}", 300);
         string[] szFids = e.sFIdList.Split(';', StringSplitOptions.RemoveEmptyEntries);
         foreach (var sFid in szFids)
         {
-            string sVal = axOpenAPI!.GetChejanData(Convert.ToInt32(sFid));
-            if (Map_FidToName.TryGetValue(sFid, out var name))
+            string sVal = _axOpenAPI!.GetChejanData(Convert.ToInt32(sFid));
+            if (_map_FidToName.TryGetValue(sFid, out var name))
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][{name}] = {sVal}", 300);
             }
             else
             {
-                OutputLog((int)LIST_TAB_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
+                OutputLog((int)TAB_LIST_KIND.실시간주문체결, $"\t[{sFid}][NOFIDNAME] = {sVal}", 300);
             }
         }
     }
 
     private void AxKHOpenApi_OnEventConnect(object sender, _DKHOpenAPIEvents_OnEventConnectEvent e)
     {
-        OutputLog((int)LIST_TAB_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveEventConnect> nErrCode = {e.nErrCode}");
         if (e.nErrCode == 0)
         {
-            _IsRealServer = !string.Equals(axOpenAPI!.GetLoginInfo("GetServerGubun"), "1");
+            _isRealServer = !string.Equals(_axOpenAPI!.GetLoginInfo("GetServerGubun"), "1");
             LoginState = OpenApiLoginState.LoginSucceed;
 
-            ApiFolder = axOpenAPI.GetAPIModulePath();
+            _apiFolder = _axOpenAPI.GetAPIModulePath();
 
             Load_실시간목록Async();
             Load_TR목록Async();
@@ -181,7 +229,7 @@ internal sealed partial class BusinessLogic
             Load_종목정보();
 
             // 조건검색 로딩, 결과 이벤트 OnReceiveConditionVer
-            axOpenAPI.GetConditionLoad();
+            _axOpenAPI.GetConditionLoad();
         }
         else
         {

@@ -5,36 +5,36 @@ using KOAStudio.Core.Services;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Interop;
 using System.Xml;
 
 namespace KOAStudio.Business;
 
-internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
+internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppLogic, IUIRequest
 {
     [DllImport("kernel32")] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
     private static string GetProfileString(string section, string key, string file)
     {
-        StringBuilder temp = new StringBuilder(255);
-        int ret = GetPrivateProfileString(section, key, "", temp, 255, file);
+        StringBuilder temp = new(255);
+        _ = GetPrivateProfileString(section, key, string.Empty, temp, 255, file);
         return temp.ToString();
     }
 
-    private AxKHOpenAPI? axOpenAPI;
-    private string ApiFolder = string.Empty;
-    private readonly Encoding AppEncoder = Encoding.GetEncoding("EUC-KR");
+    private AxKHOpenAPI? _axOpenAPI;
+    private string _apiFolder = string.Empty;
+    private readonly Encoding _appEncoder = Encoding.GetEncoding("EUC-KR");
 
-    private static readonly string SCR_REQ_TR_BASE = "3000";
-    private static readonly string SCR_REQ_COND_BASE = "4000";
-    private static readonly string SCR_REQ_COND_LAST = "4999";
+    private static readonly string _scrNum_REQ_TR_BASE = "3000";
+    private static readonly string _scrNum_CHART_CONTENT = "3101";
+    private static readonly string _scrNum_REQ_COND_BASE = "4000";
+    private static readonly string _scrNum_REQ_COND_LAST = "4999";
 
-    private readonly IDictionary<string, string> MapCondNameToIndex = new Dictionary<string, string>(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _mapCondNameToIndex = new(StringComparer.Ordinal);
 
-    private readonly IDictionary<string, string> Map_FidToName = new Dictionary<string, string>(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _map_FidToName = new(StringComparer.Ordinal);
 
-    private class TR_SPECIAL
+    private sealed class TR_SPECIAL
     {
         public string Code = string.Empty;
         public string Name = string.Empty;
@@ -44,9 +44,9 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         public string Caution = string.Empty;
         public List<string>? InputDescs;
     }
-    private readonly List<TR_SPECIAL> TrDatas = new List<TR_SPECIAL>();
+    private readonly List<TR_SPECIAL> _trDatas = [];
 
-    private readonly IDictionary<string, string> MapDevContentToDescs = new Dictionary<string, string>(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _mapDevContentToDescs = new(StringComparer.Ordinal);
 
     private struct SCRN_SPECIAL
     {
@@ -62,14 +62,14 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         public string Value;
     };
 
-    private readonly List<string> _menu_Customize = new List<string>
-    {
+    private readonly List<string> _menu_Customize =
+    [
         "키움 Open API 서비스",
         "상시모의투자 신청",
-        "FID 리스트"
-    };
+        "FID 리스트",
+    ];
 
-    private enum TREETAB_KIND
+    private enum TAB_TREE_KIND
     {
         실시간목록,
         TR목록,
@@ -79,7 +79,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         사용자기능,
     }
 
-    private enum LIST_TAB_KIND
+    private enum TAB_LIST_KIND
     {
         메시지목록,
         조회데이터,
@@ -89,7 +89,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         조회한TR목록,
     }
 
-    private bool _IsRealServer = false;
+    private bool _isRealServer = false;
     private OpenApiLoginState _login_state = default;
     public OpenApiLoginState LoginState
     {
@@ -110,15 +110,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                     _ => "준비됨",
                 };
 
-                SetStatusText(message, true, _IsRealServer);
+                SetStatusText(message, changedLoginState: true, _isRealServer);
             }
         }
     }
-    private readonly IAppRegistry _appRegistry;
-    public BusinessLogic(IAppRegistry appRegistry)
-    {
-        _appRegistry = appRegistry;
-    }
+    private readonly IAppRegistry _appRegistry = appRegistry;
 
     /// <summary>
     /// 초기데이터 설정
@@ -129,54 +125,54 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         SetMenuCustomize("리소스", _menu_Customize);
 
         // 아이템 트리뷰 모델 등록
-        var TreeTab_image_Names = new List<IconText>()
+        var TreeTab_image_Names = new List<IdText>()
         {
-            new IconText(0, "실시간목록"),
-            new IconText(3, "TR목록"),
-            new IconText(10, "종목정보"),
-            new IconText(3, "개발가이드"),
-            new IconText(10, "화면목록"),
-            new IconText(-1, "사용자기능"),
+            new(0, "실시간목록"),
+            new(3, "TR목록"),
+            new(10, "종목정보"),
+            new(3, "개발가이드"),
+            new(10, "화면목록"),
+            new(-1, "사용자기능"),
         };
         SetTabTrees(TreeTab_image_Names);
 
         // 로그 리스트뷰 만들기
         var ListTab_Names = new List<string>();
-        foreach (LIST_TAB_KIND item in Enum.GetValues(typeof(LIST_TAB_KIND)))
+        foreach (TAB_LIST_KIND item in Enum.GetValues(typeof(TAB_LIST_KIND)))
             ListTab_Names.Add(item.ToString());
         SetTabLists(ListTab_Names);
 
         // Api Creating
         IntPtr Handle = new WindowInteropHelper(Application.Current.MainWindow).EnsureHandle();
-        axOpenAPI = new AxKHOpenAPI(Handle);
-        if (!axOpenAPI.Created)
+        _axOpenAPI = new AxKHOpenAPI(Handle);
+        if (!_axOpenAPI.Created)
         {
             LoginState = OpenApiLoginState.ApiCreateFailed;
             return;
         }
 
-        ApiFolder = axOpenAPI.GetAPIModulePath();
+        _apiFolder = _axOpenAPI.GetAPIModulePath();
 
-        axOpenAPI.OnEventConnect += AxKHOpenApi_OnEventConnect;
-        axOpenAPI.OnReceiveChejanData += AxKHOpenApi_OnReceiveChejanData;
-        axOpenAPI.OnReceiveConditionVer += AxKHOpenApi_OnReceiveConditionVer;
-        axOpenAPI.OnReceiveInvestRealData += AxKHOpenApi_OnReceiveInvestRealData;
-        axOpenAPI.OnReceiveMsg += AxKHOpenApi_OnReceiveMsg;
-        axOpenAPI.OnReceiveRealCondition += AxKHOpenApi_OnReceiveRealCondition;
-        axOpenAPI.OnReceiveRealData += AxKHOpenApi_OnReceiveRealData;
-        axOpenAPI.OnReceiveTrCondition += AxKHOpenApi_OnReceiveTrCondition;
-        axOpenAPI.OnReceiveTrData += AxKHOpenApi_OnReceiveTrData;
+        _axOpenAPI.OnEventConnect += AxKHOpenApi_OnEventConnect;
+        _axOpenAPI.OnReceiveChejanData += AxKHOpenApi_OnReceiveChejanData;
+        _axOpenAPI.OnReceiveConditionVer += AxKHOpenApi_OnReceiveConditionVer;
+        _axOpenAPI.OnReceiveInvestRealData += AxKHOpenApi_OnReceiveInvestRealData;
+        _axOpenAPI.OnReceiveMsg += AxKHOpenApi_OnReceiveMsg;
+        _axOpenAPI.OnReceiveRealCondition += AxKHOpenApi_OnReceiveRealCondition;
+        _axOpenAPI.OnReceiveRealData += AxKHOpenApi_OnReceiveRealData;
+        _axOpenAPI.OnReceiveTrCondition += AxKHOpenApi_OnReceiveTrCondition;
+        _axOpenAPI.OnReceiveTrData += AxKHOpenApi_OnReceiveTrData;
 
-        OutputLog((int)LIST_TAB_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
-        OutputLog((int)LIST_TAB_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
-        OutputLog((int)LIST_TAB_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
-        OutputLog((int)LIST_TAB_KIND.조건검색실시간, "여기에 전문 조건검색 실시간 데이터가 표시됩니다 (OnReceiveRealCondition)");
-        OutputLog((int)LIST_TAB_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
-        OutputLog((int)LIST_TAB_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
+        OutputLog((int)TAB_LIST_KIND.메시지목록, "여기에 수신된 메시지가 표시됩니다");
+        OutputLog((int)TAB_LIST_KIND.조회데이터, "여기에 전문 조회 데이터가 표시됩니다 (OnReceiveTrData)");
+        OutputLog((int)TAB_LIST_KIND.실시간데이터, "여기에 전문 실시간 데이터가 표시됩니다 (OnReceiveRealData)");
+        OutputLog((int)TAB_LIST_KIND.조건검색실시간, "여기에 전문 조건검색 실시간 데이터가 표시됩니다 (OnReceiveRealCondition)");
+        OutputLog((int)TAB_LIST_KIND.실시간주문체결, "여기에 전문 실시간 주문체결 데이터가 표시됩니다 (OnReceiveChejanData)");
+        OutputLog((int)TAB_LIST_KIND.조회한TR목록, "여기에 조회한 전문목록(TR목록)이 최근순으로 표시됩니다. 각TR을 더블클릭하면 조회입력값이 자동으로 설정됩니다");
         OutputLogResetAllChangeState();
 
         //
-        string[] FIDLines = Regex.Split(Properties.Resources.FID_KORNAME, "\r\n|\r|\n");
+        string[] FIDLines = Properties.Resources.FID_KORNAME.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);// Regex.Split(Properties.Resources.FID_KORNAME, "\r\n|\r|\n");
         int nFIDLines = FIDLines.Length;
         foreach (string line in FIDLines)
         {
@@ -185,7 +181,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             {
                 string key = line.Substring(0, nPos);
                 string name = line.Substring(nPos + 1);
-                Map_FidToName.Add(key, name);
+                _map_FidToName.Add(key, name);
             }
         }
         //
@@ -195,24 +191,25 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         Load_TR목록Async();
         Load_화면목록Async();
         Load_개발가이드Async();
+        Load_사용자기능();
     }
 
-    private IconTextItem? _Data_실시간목록;
-    private IconTextItem? _Data_TR목록;
-    private IconTextItem? _Data_개발가이드;
-    private IconTextItem? _Data_화면목록;
-    private IconTextItem? _Data_종목정보;
-    private IconTextItem? _Data_사용자정보;
-    private IconTextItem? _Data_조건검색;
+    private IdTextItem? _data_실시간목록;
+    private IdTextItem? _data_TR목록;
+    private IdTextItem? _data_개발가이드;
+    private IdTextItem? _data_화면목록;
+    private IdTextItem? _data_종목정보;
+    private IdTextItem? _data_사용자정보;
+    private IdTextItem? _data_조건검색;
 
     private async void Load_실시간목록Async()
     {
-        if (_Data_실시간목록 != null) return;
+        if (_data_실시간목록 != null) return;
 
         var task = Task.Run(() =>
         {
-            string filepath = $"{ApiFolder}\\system\\koarealtime.dat";
-            List<byte[]> lines = new List<byte[]>();
+            string filepath = $"{_apiFolder}\\system\\koarealtime.dat";
+            List<byte[]> lines = [];
             try
             {
                 var fileDatas = System.IO.File.ReadAllBytes(filepath);
@@ -240,7 +237,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
             if (lines.Count == 0) return null;
 
-            var root = new IconTextItem(0, "실시간목록");
+            var root = new IdTextItem(0, "실시간목록");
 
             foreach (var line in lines)
             {
@@ -250,39 +247,39 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 byte[] DESC = line.Skip(1).Take(19).ToArray();
                 byte[] NFID = line.Skip(20).Take(3).ToArray();
                 if (GIDC[0] == ';') continue;
-                int FidCount = Convert.ToInt32(AppEncoder.GetString(NFID));
-                string name = AppEncoder.GetString(DESC).Trim();
+                int FidCount = Convert.ToInt32(_appEncoder.GetString(NFID));
+                string name = _appEncoder.GetString(DESC).Trim();
                 if (FidCount == 0 || line.Length < FidCount * 5 + 23)
                     continue;
 
-                var hitem = new IconTextItem(1, "Real Type : " + name);
+                var hitem = new IdTextItem(1, "Real Type : " + name);
                 for (int i = 0; i < FidCount; i++)
                 {
-                    string fid = AppEncoder.GetString(line.Skip(23 + 5 * i).Take(5).ToArray()).Trim();
+                    string fid = _appEncoder.GetString(line.Skip(23 + 5 * i).Take(5).ToArray()).Trim();
                     string fiddesc;
-                    if (Map_FidToName.TryGetValue(fid, out var fid_name))
+                    if (_map_FidToName.TryGetValue(fid, out var fid_name))
                         fiddesc = $"[{fid}] = {fid_name}";
                     else
                         fiddesc = $"[{fid}] = 'Extra Item'";
-                    hitem.AddChild(new IconTextItem(2, fiddesc));
+                    hitem.AddChild(new IdTextItem(2, fiddesc));
                 }
                 root.AddChild(hitem);
             }
-            root.Text = root.Text + $" ({root.Items.Count})";
+            root.Text += $" ({root.Items.Count})";
             return root;
         });
         var root = await task.ConfigureAwait(true);
         if (root != null)
         {
             root.IsExpanded = true;
-            _Data_실시간목록 = root;
-            SetTreeItems((int)TREETAB_KIND.실시간목록, new List<object>() { root });
+            _data_실시간목록 = root;
+            SetTreeItems((int)TAB_TREE_KIND.실시간목록, new List<object>() { root });
         }
     }
 
     private async void Load_TR목록Async()
     {
-        if (_Data_TR목록 != null) return;
+        if (_data_TR목록 != null) return;
 
         var task = Task.Run(() =>
         {
@@ -290,86 +287,83 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             /// 폴더에서 ENC파일 검색후
             /// 압축해제
             /// 파일네임과 동일한 압축파일에서 읽기
-            string path = ApiFolder + "\\data";
+            string path = _apiFolder + "\\data";
             if (!System.IO.Directory.Exists(path)) return null;
 
             string[] files = System.IO.Directory.GetFiles(path, "*.enc");
             if (files.Length == 0) return null;
 
-            string szIniFilePath = ApiFolder + "\\koatrinputlegend.ini";
+            string szIniFilePath = _apiFolder + "\\koatrinputlegend.ini";
             var buffer = new byte[16384];
             foreach (var encfilepath in files)
             {
                 string FileTitle = System.IO.Path.GetFileNameWithoutExtension(encfilepath);
                 try
                 {
-                    using (var file = System.IO.File.OpenRead(encfilepath))
-                    using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
+                    using var file = System.IO.File.OpenRead(encfilepath);
+                    using var zip = new ZipArchive(file, ZipArchiveMode.Read);
+                    foreach (var entry in zip.Entries)
                     {
-                        foreach (var entry in zip.Entries)
+                        string entruTitle = entry.Name.Substring(0, entry.Name.Length - 4);
+                        if (entruTitle.Equals(FileTitle.ToUpper()))
                         {
-                            string entruTitle = entry.Name.Substring(0, entry.Name.Length - 4);
-                            if (string.Equals(entruTitle, FileTitle.ToUpper()))
+                            using var stream = entry.Open();
+                            TR_SPECIAL trData = new()
                             {
-                                using (var stream = entry.Open())
+                                Code = FileTitle,
+                            };
+                            _ = stream.Read(buffer, 0, buffer.Length);
+                            string text = _appEncoder.GetString(buffer);
+                            int nLen = text.Length;
+                            // [INPUT]
+                            int nPos = 0;
+                            int nPosEnd = 0;
+                            nPos = text.IndexOf("[INPUT]", nPos);
+                            nPos = text.IndexOf("@START_", nPos);
+                            nPos += "@START_".Length;
+                            nPosEnd = text.IndexOf("\r\n", nPos);
+                            string TRName = text.Substring(nPos, nPosEnd - nPos);
+                            trData.Name = TRName;
+                            nPos = nPosEnd + "\r\n".Length;
+                            nPosEnd = text.IndexOf("@END_", nPos);
+                            string InputBody = text.Substring(nPos, nPosEnd - nPos);
+                            trData.Inputs = GetKeyNames(InputBody);
+                            // [OUTPUT]
+                            nPos = nPosEnd;
+                            nPos = text.IndexOf("[OUTPUT]", nPos);
+                            nPos = text.IndexOf("@START_", nPos);
+                            nPosEnd = text.IndexOf('=', nPos);
+                            string OutName, OutIdent;
+                            OutName = text.Substring(nPos + 7, nPosEnd - nPos - 7);
+                            nPos = nPosEnd + 1;
+                            nPosEnd = text.IndexOf("\r\n", nPos);
+                            OutIdent = text.Substring(nPos, nPosEnd - nPos);
+                            nPos = nPosEnd + "\r\n".Length;
+                            nPosEnd = text.IndexOf("@END_", nPos);
+                            string namebody = text.Substring(nPos, nPosEnd - nPos);
+                            if (OutIdent.Equals("*,*,*"))
+                            {
+                                trData.OutputSingle = GetKeyNames(namebody);
+                                nPos = nPosEnd + "\r\n".Length;
+                                nPos = text.IndexOf("@START_", nPos);
+                                if (nPos != -1)
                                 {
-                                    TR_SPECIAL trData = new TR_SPECIAL();
-                                    //
-                                    trData.Code = FileTitle;
-                                    _ = stream.Read(buffer, 0, buffer.Length);
-                                    string text = AppEncoder.GetString(buffer);
-                                    int nLen = text.Length;
-                                    // [INPUT]
-                                    int nPos = 0;
-                                    int nPosEnd = 0;
-                                    nPos = text.IndexOf("[INPUT]", nPos);
-                                    nPos = text.IndexOf("@START_", nPos);
-                                    nPos += "@START_".Length;
                                     nPosEnd = text.IndexOf("\r\n", nPos);
-                                    string TRName = text.Substring(nPos, nPosEnd - nPos);
-                                    trData.Name = TRName;
                                     nPos = nPosEnd + "\r\n".Length;
                                     nPosEnd = text.IndexOf("@END_", nPos);
-                                    string InputBody = text.Substring(nPos, nPosEnd - nPos);
-                                    trData.Inputs = GetKeyNames(InputBody);
-                                    // [OUTPUT]
-                                    nPos = nPosEnd;
-                                    nPos = text.IndexOf("[OUTPUT]", nPos);
-                                    nPos = text.IndexOf("@START_", nPos);
-                                    nPosEnd = text.IndexOf("=", nPos);
-                                    string OutName, OutIdent;
-                                    OutName = text.Substring(nPos + 7, nPosEnd - nPos - 7);
-                                    nPos = nPosEnd + 1;
-                                    nPosEnd = text.IndexOf("\r\n", nPos);
-                                    OutIdent = text.Substring(nPos, nPosEnd - nPos);
-                                    nPos = nPosEnd + "\r\n".Length;
-                                    nPosEnd = text.IndexOf("@END_", nPos);
-                                    string namebody = text.Substring(nPos, nPosEnd - nPos);
-                                    if (string.Equals(OutIdent, "*,*,*"))
-                                    {
-                                        trData.OutputSingle = GetKeyNames(namebody);
-                                        nPos = nPosEnd + "\r\n".Length;
-                                        nPos = text.IndexOf("@START_", nPos);
-                                        if (nPos != -1)
-                                        {
-                                            nPosEnd = text.IndexOf("\r\n", nPos);
-                                            nPos = nPosEnd + "\r\n".Length;
-                                            nPosEnd = text.IndexOf("@END_", nPos);
-                                            string ortherbody = text.Substring(nPos, nPosEnd - nPos);
-                                            trData.OutputMuti = GetKeyNames(ortherbody);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        trData.OutputMuti = GetKeyNames(namebody);
-                                    }
-                                    // Caution and InputDescs
-                                    string section = trData.Code.ToUpper() + " : " + trData.Name;
-                                    trData.Caution = GetProfileString(section, "주의", szIniFilePath);
-                                    trData.InputDescs = trData.Inputs.Select(x => GetProfileString(section, x, szIniFilePath)).ToList();
-                                    TrDatas.Add(trData);
+                                    string ortherbody = text.Substring(nPos, nPosEnd - nPos);
+                                    trData.OutputMuti = GetKeyNames(ortherbody);
                                 }
                             }
+                            else
+                            {
+                                trData.OutputMuti = GetKeyNames(namebody);
+                            }
+                            // Caution and InputDescs
+                            string section = trData.Code.ToUpper() + " : " + trData.Name;
+                            trData.Caution = GetProfileString(section, "주의", szIniFilePath);
+                            trData.InputDescs = trData.Inputs.Select(x => GetProfileString(section, x, szIniFilePath)).ToList();
+                            _trDatas.Add(trData);
                         }
                     }
                 }
@@ -378,42 +372,42 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 }
             }
 
-            if (TrDatas.Count == 0) return null;
+            if (_trDatas.Count == 0) return null;
 
-            var root = new IconTextItem(3, "TR목록");
+            var root = new IdTextItem(3, "TR목록");
 
-            foreach (var trData in TrDatas)
+            foreach (var trData in _trDatas)
             {
-                var hitem = new IconTextItem(trData.Caution.Length > 0 ? 14 : 4, $"{trData.Code} : {trData.Name}");
+                var hitem = new IdTextItem(trData.Caution.Length > 0 ? 14 : 4, $"{trData.Code} : {trData.Name}");
                 // Inputs
                 if (trData.Inputs != null)
                 {
-                    var hInputs = new IconTextItem(5, "[INPUT]");
+                    var hInputs = new IdTextItem(5, "[INPUT]");
                     foreach (var item in trData.Inputs)
                     {
-                        hInputs.AddChild(new IconTextItem(6, item));
+                        hInputs.AddChild(new IdTextItem(6, item));
                     }
                     hitem.AddChild(hInputs);
                 }
                 // Outnput
-                var hOutputs = new IconTextItem(7, "[OUTPUT]");
+                var hOutputs = new IdTextItem(7, "[OUTPUT]");
                 // Outnput Single
                 if (trData.OutputSingle != null)
                 {
-                    var hOutputSingle = new IconTextItem(8, $"싱글데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
+                    var hOutputSingle = new IdTextItem(8, $"싱글데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
                     foreach (var item in trData.OutputSingle)
                     {
-                        hOutputSingle.AddChild(new IconTextItem(6, item));
+                        hOutputSingle.AddChild(new IdTextItem(6, item));
                     }
                     hOutputs.AddChild(hOutputSingle);
                 }
                 // Outnput Multi
                 if (trData.OutputMuti != null)
                 {
-                    var hOutputMuti = new IconTextItem(8, $"멀티데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
+                    var hOutputMuti = new IdTextItem(8, $"멀티데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
                     foreach (var item in trData.OutputMuti)
                     {
-                        hOutputMuti.AddChild(new IconTextItem(9, item));
+                        hOutputMuti.AddChild(new IdTextItem(9, item));
                     }
                     hOutputs.AddChild(hOutputMuti);
                 }
@@ -421,7 +415,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                 root.AddChild(hitem);
             }
 
-            root.Text = root.Text + $" ({root.Items.Count})";
+            root.Text += $" ({root.Items.Count})";
             return root;
 
         });
@@ -429,14 +423,14 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         if (root != null)
         {
             root.IsExpanded = true;
-            _Data_TR목록 = root;
-            SetTreeItems((int)TREETAB_KIND.TR목록, new List<object>() { root });
+            _data_TR목록 = root;
+            SetTreeItems((int)TAB_TREE_KIND.TR목록, new List<object>() { root });
         }
 
         // sub function
-        List<string> GetKeyNames(string s)
+        static List<string> GetKeyNames(string s)
         {
-            List<string> sections = new List<string>();
+            List<string> sections = [];
             string[] lines = s.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
@@ -452,24 +446,24 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
     private async void Load_개발가이드Async()
     {
-        if (_Data_개발가이드 != null) return;
+        if (_data_개발가이드 != null) return;
 
         var task = Task.Run(() =>
         {
             /// 개발가이드 파일 koa_devguide.xml
             /// use XML Parser
 
-            string path = ApiFolder + "\\koa_devguide.xml";
+            string path = _apiFolder + "\\koa_devguide.xml";
             if (!System.IO.File.Exists(path)) return null;
 
-            string text = System.IO.File.ReadAllText(path, AppEncoder);
-            XmlDocument xmlDocument = new XmlDocument();
+            string text = System.IO.File.ReadAllText(path, _appEncoder);
+            XmlDocument xmlDocument = new();
             xmlDocument.LoadXml(text);
 
             var nodes = xmlDocument.SelectNodes("/KOA_DevGuideList/*");
             if (nodes == null) return null;
 
-            var root = new IconTextItem(3, "개발 가이드");
+            var root = new IdTextItem(3, "개발 가이드");
 
             string szMapName = "개발 가이드";
             foreach (XmlNode node in nodes)
@@ -483,12 +477,12 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         if (root != null)
         {
             root.IsExpanded = true;
-            _Data_개발가이드 = root;
-            SetTreeItems((int)TREETAB_KIND.개발가이드, new List<object>() { root });
+            _data_개발가이드 = root;
+            SetTreeItems((int)TAB_TREE_KIND.개발가이드, new List<object>() { root });
         }
 
         // sub function
-        bool XMLReadNameAndText(IconTextItem hParent, XmlNode node, string szMapName, int stack)
+        bool XMLReadNameAndText(IdTextItem hParent, XmlNode node, string szMapName, int stack)
         {
             if (node.NodeType == XmlNodeType.Element)
             {
@@ -505,11 +499,11 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         if (pIAttrNode != null)
                         {
                             string bName = pIAttrNode.Name;
-                            if (string.Equals(bName, "type"))
+                            if (bName.Equals("type"))
                             {
                                 szTypeValue = pIAttrNode.InnerText;
                             }
-                            if (string.Equals(bName, "name"))
+                            if (bName.Equals("name"))
                             {
                                 szNameValue = pIAttrNode.InnerText;
                                 break;
@@ -527,14 +521,14 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                         nImg = 7;
                     else if (nImg == 3)
                     {
-                        if (string.Equals(szTypeValue, "event"))
+                        if (szTypeValue.Equals("event"))
                             nImg = 9;
                         else
                             nImg = 6;
                     }
                     if (szNameValue.Length > 0)
                     {
-                        var hLayer = new IconTextItem(nImg, szNameValue);
+                        var hLayer = new IdTextItem(nImg, szNameValue);
                         hParent.AddChild(hLayer);
                         long nChildCount = node.ChildNodes.Count;
                         if (nChildCount > 1)
@@ -557,7 +551,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                 }
                                 else
                                 {
-                                    // Loading Text
+                                    // Loading Title
                                     string szTextWithReturn = node.InnerText;
                                     int nLen = szTextWithReturn.Length;
                                     while (nLen > 0)
@@ -565,10 +559,10 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         nLen--;
                                         if (szTextWithReturn[nLen] == '\n')
                                         {
-                                            szTextWithReturn.Insert(nLen, "\r");
+                                            _ = szTextWithReturn.Insert(nLen, "\r");
                                         }
                                     }
-                                    MapDevContentToDescs.Add(szNewMapName, szTextWithReturn);
+                                    _mapDevContentToDescs.Add(szNewMapName, szTextWithReturn);
                                 }
                             }
                         }
@@ -582,7 +576,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
     private async void Load_화면목록Async()
     {
-        if (_Data_화면목록 != null) return;
+        if (_data_화면목록 != null) return;
 
         var task = Task.Run(() =>
         {
@@ -594,25 +588,25 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
             /// TRCount=1
             /// TR_0=
 
-            string path = ApiFolder + "\\koascreentrmap.ini";
+            string path = _apiFolder + "\\koascreentrmap.ini";
             if (!System.IO.File.Exists(path)) return null;
 
-            string[] lines = System.IO.File.ReadAllLines(path, AppEncoder);
+            string[] lines = System.IO.File.ReadAllLines(path, _appEncoder);
 
             string Section;
             KEY_VALUE KeyAndValue;
             string line = lines[0];
 
 
-            SCRN_SPECIAL[] ScrnSpecials = Array.Empty<SCRN_SPECIAL>();
+            SCRN_SPECIAL[] ScrnSpecials = [];
             if (line[0] == '[')
             {
                 Section = GetSection(line);
-                if (string.Equals(Section, "Info"))
+                if (Section.Equals("Info"))
                 {
                     line = lines[1];
                     KeyAndValue = GetKeyAndValue(line);
-                    if (string.Equals(KeyAndValue.Key, "TotalScreenCount"))
+                    if (KeyAndValue.Key.Equals("TotalScreenCount"))
                     {
                         int TotalScreenCount = Convert.ToInt32(KeyAndValue.Value);
                         ScrnSpecials = new SCRN_SPECIAL[TotalScreenCount];
@@ -645,8 +639,7 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
                                         break;
                                     default:
                                         {
-                                            int nPos = KeyAndValue.Key.IndexOf("TR_");
-                                            if (nPos != -1)
+                                            if (KeyAndValue.Key.Contains("TR_"))
                                             {
                                                 int nIndex = Convert.ToInt32(KeyAndValue.Key.Substring(3, KeyAndValue.Key.Length - 3));
                                                 if (ScrnSpecial.TRs != null && nIndex >= 0 && nIndex < ScrnSpecial.TRs.Length)
@@ -663,24 +656,24 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
             if (ScrnSpecials.Length == 0) return null;
 
-            var root = new IconTextItem(3, "화면목록");
+            var root = new IdTextItem(3, "화면목록");
 
             foreach (var scrnData in ScrnSpecials)
             {
-                var hitem = new IconTextItem(4, $"[{scrnData.ScreenNumber}] {scrnData.ScreenName}");
-                var hCategory = new IconTextItem(6, $"화면분류= {scrnData.Catagory}");
+                var hitem = new IdTextItem(4, $"[{scrnData.ScreenNumber}] {scrnData.ScreenName}");
+                var hCategory = new IdTextItem(6, $"화면분류= {scrnData.Catagory}");
                 hitem.AddChild(hCategory);
                 if (scrnData.TRs != null)
                 {
                     for (int i = 0; i < scrnData.TRs.Length; i++)
                     {
-                        var hTRName = new IconTextItem(9, $"TR이름={scrnData.TRs[i]}");
+                        var hTRName = new IdTextItem(9, $"TR이름={scrnData.TRs[i]}");
                         hitem.AddChild(hTRName);
                     }
                 }
                 root.AddChild(hitem);
             }
-            root.Text = root.Text + $" ({root.Items.Count})";
+            root.Text += $" ({root.Items.Count})";
 
             return root;
         });
@@ -689,8 +682,8 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
         if (root != null)
         {
             root.IsExpanded = true;
-            _Data_화면목록 = root;
-            SetTreeItems((int)TREETAB_KIND.화면목록, new List<object>() { root });
+            _data_화면목록 = root;
+            SetTreeItems((int)TAB_TREE_KIND.화면목록, new List<object>() { root });
         }
 
         // sub function
@@ -712,59 +705,86 @@ internal sealed partial class BusinessLogic : IUIRequest, ILogicNotify
 
     private void Load_종목정보()
     {
-        if (_Data_종목정보 != null) return;
+        if (_data_종목정보 != null) return;
 
-        if (axOpenAPI == null || axOpenAPI.GetConnectState() == 0) return;
+        if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0) return;
 
         // 주식종목
-        string[] market_codes = { "0", "10", "3", "8", "50", "4", "5", "6", "9", "30" };
-        string[] market_names = { "코스피", "코스닥", "ELW", "ETF", "KONEX", "뮤추얼펀드", "신주인수권", "리츠", "하이얼펀드", "K-OTC" };
+        string[] market_codes = ["0", "10", "3", "8", "50", "4", "5", "6", "9", "30"];
+        string[] market_names = ["코스피", "코스닥", "ELW", "ETF", "KONEX", "뮤추얼펀드", "신주인수권", "리츠", "하이얼펀드", "K-OTC"];
 
-        var root = new IconTextItem(10, "상장 종목정보");
+        var root = new IdTextItem(10, "상장 종목정보");
         for (int i = 0; i < market_codes.Length; i++)
         {
-            string[] codes = axOpenAPI.GetCodeListByMarket(market_codes[i]).Split(';', StringSplitOptions.RemoveEmptyEntries);
-            var hGroup = new IconTextItem(11, $"{market_names[i]} ({codes.Length})");
+            string[] codes = _axOpenAPI.GetCodeListByMarket(market_codes[i]).Split(';', StringSplitOptions.RemoveEmptyEntries);
+            var hGroup = new IdTextItem(11, $"{market_names[i]} ({codes.Length})");
             foreach (string code in codes)
             {
-                var hItem = new IconTextItem(12, $"[{code}] : {axOpenAPI.GetMasterCodeName(code)}");
-                hItem.AddChild(new IconTextItem(13, string.Format("전일가 : {0:n0} 원", Convert.ToInt32(axOpenAPI.GetMasterLastPrice(code)))));
-                hItem.AddChild(new IconTextItem(13, $"상장일 : {axOpenAPI.GetMasterListedStockDate(code)}"));
-                hItem.AddChild(new IconTextItem(13, string.Format("상장주식수 : {0:n0}", Convert.ToInt32(axOpenAPI.GetMasterListedStockCnt(code)))));
-                hItem.AddChild(new IconTextItem(13, $"감리구분 : {axOpenAPI.GetMasterStockState(code)}"));
+                var hItem = new IdTextItem(12, $"[{code}] : {_axOpenAPI.GetMasterCodeName(code)}");
+                hItem.AddChild(new IdTextItem(13, string.Format("전일가 : {0:n0} 원", Convert.ToInt32(_axOpenAPI.GetMasterLastPrice(code)))));
+                hItem.AddChild(new IdTextItem(13, $"상장일 : {_axOpenAPI.GetMasterListedStockDate(code)}"));
+                hItem.AddChild(new IdTextItem(13, string.Format("상장주식수 : {0:n0}", Convert.ToInt32(_axOpenAPI.GetMasterListedStockCnt(code)))));
+                hItem.AddChild(new IdTextItem(13, $"감리구분 : {_axOpenAPI.GetMasterStockState(code)}"));
                 hGroup.AddChild(hItem);
             }
             root.AddChild(hGroup);
         }
 
         root.IsExpanded = true;
-        _Data_종목정보 = root;
+        _data_종목정보 = root;
 
-        SetTreeItems((int)TREETAB_KIND.종목정보, new List<object>() { root });
+        SetTreeItems((int)TAB_TREE_KIND.종목정보, new List<object>() { root });
     }
 
     private void Load_사용자기능()
     {
-        if (_Data_사용자정보 != null && _Data_조건검색 != null) return;
+        List<object> lists = [];
+        // 기본정보 표시
+        lists.Add(new IdTextItem(9, "Api정보"));
 
-        if (axOpenAPI == null || axOpenAPI.GetConnectState() == 0) return;
+        // 로그인 정보
+        if (_data_사용자정보 != null && _data_조건검색 != null) goto end_proc;
+
+        if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0) goto end_proc;
 
         // 사용자기능
-        var rootInfo = new IconTextItem(10, "로그인정보");
-        rootInfo.AddChild(new IconTextItem(13, "사용자정보"));
-        rootInfo.IsExpanded = true;
+        var rootAccount = new IdTextItem(10, "로그인정보");
+        rootAccount.AddChild(new(13, "사용자정보"));
+        rootAccount.IsExpanded = true;
 
-        var rootCond = new IconTextItem(11, "조건검색");
-        foreach (var item in MapCondNameToIndex)
+        var rootCond = new IdTextItem(11, "조건검색");
+        foreach (var item in _mapCondNameToIndex)
         {
-            rootCond.AddChild(new IconTextItem(12, item.Key));
+            rootCond.AddChild(new(12, item.Key));
         }
 
-        rootCond.Text = rootCond.Text + $" ({rootCond.Items.Count})";
-        rootCond.IsExpanded = true;
-        _Data_사용자정보 = rootInfo;
-        _Data_조건검색 = rootCond;
+        rootCond.Text += $" ({rootCond.Items.Count})";
+        _data_사용자정보 = rootAccount;
+        _data_조건검색 = rootCond;
 
-        SetTreeItems((int)TREETAB_KIND.사용자기능, new List<object>() { rootInfo, rootCond });
+        lists.Add(rootAccount);
+        lists.Add(rootCond);
+
+
+    end_proc:
+
+        // 기타 tools
+        IdTextItem? rootTools;
+        rootTools = new(0, "차트요청")
+        {
+            IsExpanded = true,
+        };
+        lists.Add(rootTools);
+        rootTools.AddChild(new(9, "업종차트요청"));
+        rootTools.AddChild(new(9, "주식차트요청"));
+        rootTools.AddChild(new(9, "선물차트요청"));
+        rootTools.AddChild(new(9, "옵션차트요청"));
+
+        SetTreeItems((int)TAB_TREE_KIND.사용자기능, lists);
+    }
+
+    public void Close()
+    {
+        SaveUserContentInfo();
     }
 }

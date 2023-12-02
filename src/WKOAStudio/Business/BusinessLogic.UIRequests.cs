@@ -1,5 +1,6 @@
 ﻿using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,13 +14,11 @@ internal sealed partial class BusinessLogic
         if (bLogin)
         {
             LoginState = OpenApiLoginState.LoginProcess;
-            return axOpenAPI?.CommConnect(0) ?? -1;
+            return _axOpenAPI?.CommConnect(0) ?? -1;
         }
-        else
-        {
-            LoginState = OpenApiLoginState.LoginOuted;
-            axOpenAPI?.CommTerminate();
-        }
+
+        LoginState = OpenApiLoginState.LoginOuted;
+        _axOpenAPI?.CommTerminate();
         return 0;
     }
 
@@ -27,29 +26,29 @@ internal sealed partial class BusinessLogic
     {
         if (LoginState == OpenApiLoginState.LoginSucceed)
         {
-            axOpenAPI?.DisconnectRealData(SCR_REQ_TR_BASE);
+            _axOpenAPI?.DisconnectRealData(_scrNum_REQ_TR_BASE);
+            _axOpenAPI?.DisconnectRealData(_scrNum_CHART_CONTENT);
         }
     }
 
-    public void ItemSelectedChanged(int tabIndex, IconTextItem selectedItem)
+    public void ItemSelectedChanged(int tabIndex, IdTextItem selectedItem)
     {
-        TREETAB_KIND tabKind = (TREETAB_KIND)tabIndex;
+        TAB_TREE_KIND tabKind = (TAB_TREE_KIND)tabIndex;
 
         string SelectedText = selectedItem.Text!;
 
         switch (tabKind)
         {
-            case TREETAB_KIND.실시간목록:
+            case TAB_TREE_KIND.실시간목록:
                 {
-                    if (selectedItem.IconId != 1 || _Data_실시간목록 == null) return;
-                    var org_item = _Data_실시간목록.Items.FirstOrDefault((t) =>
+                    if (selectedItem.Id != 1 || _data_실시간목록 == null) return;
+                    if (_data_실시간목록.Items.FirstOrDefault((t) =>
                     {
-                        var image_text = t as IconText;
+                        var image_text = t as IdText;
                         return image_text?.Text.Equals(selectedItem.Text) ?? false;
-                    }) as IconTextItem;
-                    if (org_item != null)
+                    }) is IdTextItem org_item)
                     {
-                        StringBuilder stringBuilder = new StringBuilder();
+                        StringBuilder stringBuilder = new();
                         stringBuilder.AppendLine();
                         stringBuilder.AppendLine("/********************************************************************/");
                         stringBuilder.AppendLine("/// ########## 실시간타입 FID 리스트 입니다.");
@@ -58,8 +57,7 @@ internal sealed partial class BusinessLogic
                         stringBuilder.AppendLine();
                         foreach (var item in org_item.Items)
                         {
-                            IconTextItem? iconTextItem = item as IconTextItem;
-                            if (iconTextItem != null)
+                            if (item is IdTextItem iconTextItem)
                             {
                                 stringBuilder.AppendLine($"\t{iconTextItem.Text}");
                             }
@@ -70,11 +68,11 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.TR목록:
+            case TAB_TREE_KIND.TR목록:
                 {
-                    if (selectedItem.IconId != 4 && selectedItem.IconId != 14) return;
+                    if (selectedItem.Id != 4 && selectedItem.Id != 14) return;
                     string selected_code = SelectedText.Substring(0, 8);
-                    TR_SPECIAL? trData = TrDatas.FirstOrDefault(t => t.Code.Equals(selected_code, StringComparison.CurrentCultureIgnoreCase));
+                    TR_SPECIAL? trData = _trDatas.Find(t => t.Code.Equals(selected_code, StringComparison.CurrentCultureIgnoreCase));
                     if (trData != null)
                     {
                         SetResultText(GetTrDescript(trData));
@@ -95,26 +93,26 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.개발가이드:
+            case TAB_TREE_KIND.개발가이드:
                 {
                     if (selectedItem.Items.Count > 0) return;
                     string FullKey = SelectedText;
-                    IconTextItem? _parent = selectedItem.Parent;
+                    IdTextItem? _parent = selectedItem.Parent;
                     while (_parent != null)
                     {
                         FullKey = _parent.Text + "/" + FullKey;
                         _parent = _parent.Parent;
                     }
-                    if (MapDevContentToDescs.ContainsKey(FullKey))
+                    if (_mapDevContentToDescs.TryGetValue(FullKey, out string? value))
                     {
-                        SetResultText(MapDevContentToDescs[FullKey]);
+                        SetResultText(value);
                     }
 
                     // 함수 선택 확정
-                    if (selectedItem.Parent != null && string.Equals(selectedItem.Parent.Text, "함수들") && selectedItem.IconId == 9 && axOpenAPI != null)
+                    if (selectedItem.Parent != null && selectedItem.Parent.Text.Equals("함수들") && selectedItem.Id == 9 && _axOpenAPI != null)
                     {
                         string szFuncName = SelectedText;
-                        MethodInfo? theMethod = axOpenAPI.GetType().GetMethod(szFuncName);
+                        MethodInfo? theMethod = _axOpenAPI.GetType().GetMethod(szFuncName);
                         if (theMethod != null)
                         {
                             var inner_parameters = theMethod.GetParameters();
@@ -154,14 +152,14 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.화면목록:
+            case TAB_TREE_KIND.화면목록:
                 {
-                    if (selectedItem.IconId != 9) return;
+                    if (selectedItem.Id != 9) return;
                     int nFindPos = SelectedText.IndexOf(':');
                     if (nFindPos > 0)
                     {
                         string trCode = SelectedText.Substring(0, nFindPos).Trim();
-                        var trData = TrDatas.FirstOrDefault(tr => string.Equals(tr.Code, trCode, StringComparison.OrdinalIgnoreCase));
+                        var trData = _trDatas.Find(tr => tr.Code.Equals(trCode, StringComparison.OrdinalIgnoreCase));
                         if (trData != null)
                         {
                             SetResultText(GetTrDescript(trData));
@@ -183,27 +181,65 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.사용자기능:
+            case TAB_TREE_KIND.사용자기능:
                 {
-                    if (axOpenAPI!.GetConnectState() == 0) return;
-                    if (selectedItem.IconId == 13)
+                    if (selectedItem.Id == 9)
                     {
-                        if (string.Equals(SelectedText, "사용자정보"))
+                        if (SelectedText.Equals("Api정보"))
                         {
-                            StringBuilder stringBuilder = new StringBuilder();
+                            string ProgID = "KFOPENAPI.KFOPenAPICtrl.1";
+                            string CLSID = OcxPathHelper.GetClassIDFromProgID(ProgID);
+                            string path = OcxPathHelper.GetOcxPathFromCLSID(CLSID);
+
+                            StringBuilder stringBuilder = new();
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine("\t[Api정보]");
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine($"\tProgID : {ProgID}");
+                            stringBuilder.AppendLine($"\tCLSID  : {CLSID}");
+                            if (Environment.Is64BitProcess)
+                            {
+                                stringBuilder.AppendLine($"\t파일 경로(32bit) : {OcxPathHelper.GetOcxPathFromWOW6432NodeCLSID(CLSID)}");
+                                stringBuilder.AppendLine($"\t파일 경로(64bit) : {path}");
+                            }
+                            else
+                                stringBuilder.AppendLine($"\t파일 경로 : {path}");
+
+                            try
+                            {
+                                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
+                                stringBuilder.AppendLine($"\t파일 설명 : {fileVersionInfo.FileDescription}");
+                                stringBuilder.AppendLine($"\t파일 버전 : {fileVersionInfo.FileVersion}");
+                            }
+                            catch
+                            {
+                            }
+
+                            SetResultText(stringBuilder.ToString());
+                        }
+                        else ShowUserContent(SelectedText);
+                        return;
+                    }
+
+                    if (_axOpenAPI!.GetConnectState() == 0) return;
+                    if (selectedItem.Id == 13)
+                    {
+                        if (SelectedText.Equals("사용자정보"))
+                        {
+                            StringBuilder stringBuilder = new();
                             stringBuilder.AppendLine();
                             stringBuilder.AppendLine("\t[사용자정보]");
                             stringBuilder.AppendLine();
-                            stringBuilder.AppendLine($"\t사용자 ID : {axOpenAPI.GetLoginInfo("USER_ID")}");
-                            stringBuilder.AppendLine($"\t사용자 이름 : {axOpenAPI.GetLoginInfo("USER_NAME")}");
-                            stringBuilder.AppendLine($"\t보유계좌수 : {axOpenAPI.GetLoginInfo("ACCOUNT_CNT")}");
-                            var 계좌s = axOpenAPI.GetLoginInfo("ACCNO").Split(';', StringSplitOptions.RemoveEmptyEntries);
+                            stringBuilder.AppendLine($"\t사용자 ID : {_axOpenAPI.GetLoginInfo("USER_ID")}");
+                            stringBuilder.AppendLine($"\t사용자 이름 : {_axOpenAPI.GetLoginInfo("USER_NAME")}");
+                            stringBuilder.AppendLine($"\t보유계좌수 : {_axOpenAPI.GetLoginInfo("ACCOUNT_CNT")}");
+                            var 계좌s = _axOpenAPI.GetLoginInfo("ACCNO").Split(';', StringSplitOptions.RemoveEmptyEntries);
                             for (int i = 0; i < 계좌s.Length; i++)
                             {
                                 stringBuilder.AppendLine($"\t\t계좌{i + 1} : {계좌s[i]}");
                             }
-                            stringBuilder.AppendLine($"\t계좌비밀번호 설정여부 : {axOpenAPI.GetCommonFunc("GetAcnoPswdState", "")}");
-                            string server = _IsRealServer ? "실서버" : "모의투자";
+                            stringBuilder.AppendLine($"\t계좌비밀번호 설정여부 : {_axOpenAPI.GetCommonFunc("GetAcnoPswdState", string.Empty)}");
+                            string server = _isRealServer ? "실서버" : "모의투자";
                             stringBuilder.AppendLine();
                             stringBuilder.AppendLine($"\t접속서버구분 : {server}");
                             SetResultText(stringBuilder.ToString());
@@ -216,9 +252,9 @@ internal sealed partial class BusinessLogic
         }
 
         // sub function
-        string GetTrDescript(TR_SPECIAL trData)
+        static string GetTrDescript(TR_SPECIAL trData)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
             stringBuilder.Append("\r\n/********************************************************************/\r\n/// ########## Open API 함수를 이용한 전문처리 샘플코드 예제입니다. \r\n\r\n");
             stringBuilder.Append(" [ ");
             stringBuilder.Append($"{trData.Code} : {trData.Name}");
@@ -249,7 +285,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -268,7 +304,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -290,7 +326,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -307,7 +343,7 @@ internal sealed partial class BusinessLogic
                         if (i % 8 == 0)
                         {
                             stringBuilder.AppendLine();
-                            stringBuilder.Append("\t");
+                            stringBuilder.Append('\t');
                         }
                         if (i != 0)
                             stringBuilder.Append(", ");
@@ -324,7 +360,7 @@ internal sealed partial class BusinessLogic
     public void ReqTRHistory(int tabIndex, string text)
     {
         string codeName = string.Empty;
-        if ((LIST_TAB_KIND)tabIndex == LIST_TAB_KIND.조회한TR목록)
+        if ((TAB_LIST_KIND)tabIndex == TAB_LIST_KIND.조회한TR목록)
         {
             if (text != null && text != string.Empty)
             {
@@ -340,10 +376,10 @@ internal sealed partial class BusinessLogic
         if (nPos != -1)
         {
             string code = codeName.Substring(0, nPos);
-            for (int i = 0; i < TrDatas.Count; i++)
+            for (int i = 0; i < _trDatas.Count; i++)
             {
-                var trData = TrDatas[i];
-                if (string.Equals(trData.Code, code))
+                var trData = _trDatas[i];
+                if (trData.Code.Equals(code))
                 {
                     // property
                     var prop_items = new List<PropertyItem>();
@@ -365,14 +401,13 @@ internal sealed partial class BusinessLogic
         }
     }
 
-    private string TR_NextKey = string.Empty;
+    private string _tr_NextKey = string.Empty;
     public void QueryApiAction(string reqText, object parameters, bool bNext)
     {
         string szActionMsg = string.Empty;
         string SelectedText = reqText;
         if (SelectedText.Length < 7) return;
-        var datagrid_PropertiesItems = parameters as IList<PropertyItem>;
-        if (datagrid_PropertiesItems == null || axOpenAPI == null || axOpenAPI.Created == false)
+        if (parameters is not IList<PropertyItem> datagrid_PropertiesItems || _axOpenAPI == null || !_axOpenAPI.Created)
             return;
         if (string.Equals(SelectedText.Substring(0, 2).ToUpper(), "OP")) // TR요청
         {
@@ -381,11 +416,11 @@ internal sealed partial class BusinessLogic
             {
                 var nvd = datagrid_PropertiesItems[i];
                 _appRegistry.SetValue(OptCode, nvd.Name, nvd.Value);
-                axOpenAPI.SetInputValue(nvd.Name, nvd.Value);
+                _axOpenAPI.SetInputValue(nvd.Name, nvd.Value);
             }
-            if (axOpenAPI.GetConnectState() != 0)
+            if (_axOpenAPI.GetConnectState() != 0)
             {
-                long lRet = axOpenAPI.CommRqData(OptCode, OptCode, bNext ? TR_NextKey : "", SCR_REQ_TR_BASE);
+                long lRet = _axOpenAPI.CommRqData(OptCode, OptCode, bNext ? _tr_NextKey : string.Empty, _scrNum_REQ_TR_BASE);
                 if (lRet == 0)
                 {
                     szActionMsg = $"<TR ({OptCode}) 요청: 성공> lRet = {lRet}";
@@ -405,7 +440,7 @@ internal sealed partial class BusinessLogic
                 var nvd = datagrid_PropertiesItems[i];
 
                 if (i > 0) parameter_text += ", ";
-                if (nvd.type == PropertyItem.VALUE_TYPE.VALUE_STRING)
+                if (nvd.ValueType == PropertyItem.VALUE_TYPE.VALUE_STRING)
                 {
                     parameter_text += "\"";
                     parameter_text += nvd.Value;
@@ -430,12 +465,12 @@ internal sealed partial class BusinessLogic
                 }
             }
 
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch stopwatch = new();
             stopwatch.Start();
             object? obj;
             try
             {
-                obj = CallInstanceFunc(axOpenAPI, szFuncName, Params);
+                obj = CallInstanceFunc(_axOpenAPI, szFuncName, Params);
             }
             catch (Exception ex)
             {
@@ -451,12 +486,12 @@ internal sealed partial class BusinessLogic
                 szAddText += obj.ToString();
                 szAddText += "\r\n";
             }
-            SetResultText(szAddText, true);
+            SetResultText(szAddText, bAdd: true);
         }
 
         if (szActionMsg.Length > 0)
         {
-            OutputLog((int)LIST_TAB_KIND.메시지목록, szActionMsg);
+            OutputLog((int)TAB_LIST_KIND.메시지목록, szActionMsg);
         }
     }
 
@@ -487,10 +522,10 @@ internal sealed partial class BusinessLogic
                 break;
             case "FID 리스트":
                 {
-                    StringBuilder stringBuilder = new StringBuilder();
+                    StringBuilder stringBuilder = new();
                     // sort
-                    var array = Map_FidToName.ToArray();
-                    Comparison<KeyValuePair<string, string>> value = (v1, v2) => Convert.ToInt32(v1.Key) - Convert.ToInt32(v2.Key);
+                    var array = _map_FidToName.ToArray();
+                    static int value(KeyValuePair<string, string> v1, KeyValuePair<string, string> v2) => Convert.ToInt32(v1.Key) - Convert.ToInt32(v2.Key);
                     Array.Sort(array, value);
 
                     foreach (var item in array)

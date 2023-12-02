@@ -13,7 +13,7 @@ internal sealed partial class BusinessLogic
     /// <param name="funcName"></param>
     /// <param name="Params"></param>
     /// <returns></returns>
-    private object? CallInstanceFunc(object instance, string funcName, VariantWrapper[] Params)
+    private static object? CallInstanceFunc(object instance, string funcName, VariantWrapper[] Params)
     {
         if (instance == null) return null;
         object? result = null;

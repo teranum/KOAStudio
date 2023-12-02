@@ -35,8 +35,8 @@
         <TabControl.ItemTemplate>
             <DataTemplate>
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="{Binding IconId, Converter={StaticResource IconIdToImage}}" />
-                    <TextBlock VerticalAlignment="Center" Text="{Binding Text}" />
+                    <Image Source="{Binding Id, Converter={StaticResource IconIdToImage}}" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
                 </StackPanel>
             </DataTemplate>
         </TabControl.ItemTemplate>
@@ -113,7 +113,7 @@
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Items}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Margin="-1,-1" Source="{Binding IconId, Converter={StaticResource IconIdToImage}}" />
+                                    <Image Margin="-1,-1" Source="{Binding Id, Converter={StaticResource IconIdToImage}}" />
                                     <TextBlock
                                         Margin="5,0,0,0"
                                         VerticalAlignment="Center"

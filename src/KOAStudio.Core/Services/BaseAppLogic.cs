@@ -1,12 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using KOAStudio.Core.Models;
+using System.Windows.Controls;
 
-namespace WKOAStudio.Business
+namespace KOAStudio.Core.Services
 {
-    internal sealed partial class BusinessLogic
+    public class BaseAppLogic : ILogicNotify
     {
-        // Implements ILogicNotify interface
-
         public void SetMenuCustomize(string headerText, object items)
         {
             WeakReferenceMessenger.Default.Send(new SetMenuCustomizeMessageType(headerText, items));
@@ -55,6 +54,11 @@ namespace WKOAStudio.Business
         public void SetTreeItems(int tabIndex, object items)
         {
             WeakReferenceMessenger.Default.Send(new SetTreeItemsMessageType(tabIndex, items));
+        }
+
+        public void SetUserContent(ContentControl Control)
+        {
+            WeakReferenceMessenger.Default.Send(new SetUseContentMessageType(Control));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,13 +14,11 @@ internal sealed partial class BusinessLogic
         if (bLogin)
         {
             LoginState = OpenApiLoginState.LoginProcess;
-            return axOpenAPI?.CommConnect() ?? -1;
+            return _axOpenAPI?.CommConnect() ?? -1;
         }
-        else
-        {
-            LoginState = OpenApiLoginState.LoginOuted;
-            axOpenAPI?.CommTerminate();
-        }
+
+        LoginState = OpenApiLoginState.LoginOuted;
+        _axOpenAPI?.CommTerminate();
         return 0;
     }
 
@@ -27,29 +26,28 @@ internal sealed partial class BusinessLogic
     {
         if (LoginState == OpenApiLoginState.LoginSucceed)
         {
-            axOpenAPI?.SetRealRemove("ALL", "ALL");
+            _axOpenAPI?.SetRealRemove("ALL", "ALL");
         }
     }
 
-    public void ItemSelectedChanged(int tabIndex, IconTextItem selectedItem)
+    public void ItemSelectedChanged(int tabIndex, IdTextItem selectedItem)
     {
-        TREETAB_KIND tabKind = (TREETAB_KIND)tabIndex;
+        TAB_TREE_KIND tabKind = (TAB_TREE_KIND)tabIndex;
 
         string SelectedText = selectedItem.Text!;
 
         switch (tabKind)
         {
-            case TREETAB_KIND.실시간목록:
+            case TAB_TREE_KIND.실시간목록:
                 {
-                    if (selectedItem.IconId != 1 || _Data_실시간목록 == null) return;
-                    var org_item = _Data_실시간목록.Items.FirstOrDefault((t) =>
+                    if (selectedItem.Id != 1 || _data_실시간목록 == null) return;
+                    if (_data_실시간목록.Items.FirstOrDefault((t) =>
                     {
-                        var image_text = t as IconText;
+                        var image_text = t as IdText;
                         return image_text?.Text.Equals(selectedItem.Text) ?? false;
-                    }) as IconTextItem;
-                    if (org_item != null)
+                    }) is IdTextItem org_item)
                     {
-                        StringBuilder stringBuilder = new StringBuilder();
+                        StringBuilder stringBuilder = new();
                         stringBuilder.AppendLine();
                         stringBuilder.AppendLine("/********************************************************************/");
                         stringBuilder.AppendLine("/// ########## 실시간타입 FID 리스트 입니다.");
@@ -58,8 +56,7 @@ internal sealed partial class BusinessLogic
                         stringBuilder.AppendLine();
                         foreach (var item in org_item.Items)
                         {
-                            IconTextItem? iconTextItem = item as IconTextItem;
-                            if (iconTextItem != null)
+                            if (item is IdTextItem iconTextItem)
                             {
                                 stringBuilder.AppendLine($"\t{iconTextItem.Text}");
                             }
@@ -70,11 +67,11 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.TR목록:
+            case TAB_TREE_KIND.TR목록:
                 {
-                    if (selectedItem.IconId != 4 && selectedItem.IconId != 14) return;
+                    if (selectedItem.Id != 4 && selectedItem.Id != 14) return;
                     string selected_code = SelectedText.Substring(0, 8);
-                    TR_SPECIAL? trData = TrDatas.FirstOrDefault(t => t.Code.Equals(selected_code, StringComparison.CurrentCultureIgnoreCase));
+                    TR_SPECIAL? trData = _trDatas.Find(t => t.Code.Equals(selected_code, StringComparison.CurrentCultureIgnoreCase));
                     if (trData != null)
                     {
                         SetResultText(GetTrDescript(trData));
@@ -95,23 +92,23 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.개발가이드:
+            case TAB_TREE_KIND.개발가이드:
                 {
                     if (selectedItem.Items.Count > 0) return;
                     string FullKey = SelectedText;
-                    IconTextItem? _parent = selectedItem.Parent;
+                    IdTextItem? _parent = selectedItem.Parent;
                     while (_parent != null)
                     {
                         FullKey = _parent.Text + "/" + FullKey;
                         _parent = _parent.Parent;
                     }
-                    if (MapDevContentToDescs.ContainsKey(FullKey))
+                    if (_mapDevContentToDescs.TryGetValue(FullKey, out string? value))
                     {
-                        SetResultText(MapDevContentToDescs[FullKey]);
+                        SetResultText(value);
                     }
 
                     // 함수 선택 확정
-                    if (selectedItem.IconId == 6 && axOpenAPI != null)
+                    if (selectedItem.Id == 6 && _axOpenAPI != null)
                     {
                         int nFuncNameSpaceIndex = SelectedText.IndexOf(' ');
                         int nFuncNameLastIndex = SelectedText.IndexOf('(');
@@ -119,7 +116,7 @@ internal sealed partial class BusinessLogic
                         {
                             string szFuncName = SelectedText.Substring(nFuncNameSpaceIndex + 1, nFuncNameLastIndex - nFuncNameSpaceIndex - 1);
 
-                            MethodInfo? theMethod = axOpenAPI.GetType().GetMethod(szFuncName);
+                            MethodInfo? theMethod = _axOpenAPI.GetType().GetMethod(szFuncName);
                             if (theMethod != null)
                             {
                                 var inner_parameters = theMethod.GetParameters();
@@ -160,15 +157,15 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.화면목록:
+            case TAB_TREE_KIND.화면목록:
                 {
-                    if (selectedItem.IconId != 9) return;
+                    if (selectedItem.Id != 9) return;
                     int nFindPos1 = SelectedText.IndexOf('=');
                     int nFindPos2 = SelectedText.IndexOf(':');
                     if (nFindPos1 > 0 && nFindPos2 > nFindPos1)
                     {
                         string trCode = SelectedText.Substring(nFindPos1 + 1, nFindPos2 - nFindPos1 - 1).Trim();
-                        var trData = TrDatas.FirstOrDefault(tr => string.Equals(tr.Code, trCode, StringComparison.OrdinalIgnoreCase));
+                        var trData = _trDatas.Find(tr => tr.Code.Equals(trCode, StringComparison.OrdinalIgnoreCase));
                         if (trData != null)
                         {
                             SetResultText(GetTrDescript(trData));
@@ -190,21 +187,59 @@ internal sealed partial class BusinessLogic
                     }
                 }
                 break;
-            case TREETAB_KIND.사용자기능:
+            case TAB_TREE_KIND.사용자기능:
                 {
-                    if (axOpenAPI!.GetConnectState() == 0) return;
-                    if (selectedItem.IconId == 13)
+                    if (selectedItem.Id == 9)
                     {
-                        if (string.Equals(SelectedText, "사용자정보"))
+                        if (SelectedText.Equals("Api정보"))
                         {
-                            StringBuilder stringBuilder = new StringBuilder();
+                            string ProgID = "KHOPENAPI.KHOPenAPICtrl.1";
+                            string CLSID = OcxPathHelper.GetClassIDFromProgID(ProgID);
+                            string path = OcxPathHelper.GetOcxPathFromCLSID(CLSID);
+
+                            StringBuilder stringBuilder = new();
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine("\t[Api정보]");
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine($"\tProgID : {ProgID}");
+                            stringBuilder.AppendLine($"\tCLSID  : {CLSID}");
+                            if (Environment.Is64BitProcess)
+                            {
+                                stringBuilder.AppendLine($"\t파일 경로(32bit) : {OcxPathHelper.GetOcxPathFromWOW6432NodeCLSID(CLSID)}");
+                                stringBuilder.AppendLine($"\t파일 경로(64bit) : {path}");
+                            }
+                            else
+                                stringBuilder.AppendLine($"\t파일 경로 : {path}");
+
+                            try
+                            {
+                                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(path);
+                                stringBuilder.AppendLine($"\t파일 설명 : {fileVersionInfo.FileDescription}");
+                                stringBuilder.AppendLine($"\t파일 버전 : {fileVersionInfo.FileVersion}");
+                            }
+                            catch
+                            {
+                            }
+
+                            SetResultText(stringBuilder.ToString());
+                        }
+                        else ShowUserContent(SelectedText);
+                        return;
+                    }
+
+                    if (_axOpenAPI!.GetConnectState() == 0) return;
+                    if (selectedItem.Id == 13)
+                    {
+                        if (SelectedText.Equals("사용자정보"))
+                        {
+                            StringBuilder stringBuilder = new();
                             stringBuilder.AppendLine();
                             stringBuilder.AppendLine("\t[사용자정보]");
                             stringBuilder.AppendLine();
-                            stringBuilder.AppendLine($"\t사용자 ID : {axOpenAPI.GetLoginInfo("USER_ID")}");
-                            stringBuilder.AppendLine($"\t사용자 이름 : {axOpenAPI.GetLoginInfo("USER_NAME")}");
-                            stringBuilder.AppendLine($"\t보유계좌수 : {axOpenAPI.GetLoginInfo("ACCOUNT_CNT")}");
-                            var 계좌s = axOpenAPI.GetLoginInfo("ACCTLIST_DETAIL").Split(';', StringSplitOptions.RemoveEmptyEntries);
+                            stringBuilder.AppendLine($"\t사용자 ID : {_axOpenAPI.GetLoginInfo("USER_ID")}");
+                            stringBuilder.AppendLine($"\t사용자 이름 : {_axOpenAPI.GetLoginInfo("USER_NAME")}");
+                            stringBuilder.AppendLine($"\t보유계좌수 : {_axOpenAPI.GetLoginInfo("ACCOUNT_CNT")}");
+                            var 계좌s = _axOpenAPI.GetLoginInfo("ACCTLIST_DETAIL").Split(';', StringSplitOptions.RemoveEmptyEntries);
                             for (int i = 0; i < 계좌s.Length; i++)
                             {
                                 var detail = 계좌s[i].Split(',');
@@ -213,43 +248,39 @@ internal sealed partial class BusinessLogic
                                 else
                                     stringBuilder.AppendLine($"\t\t계좌{i + 1} : 타입오류");
                             }
-                            string server = _IsRealServer ? "실서버" : "모의투자";
+                            string server = _isRealServer ? "실서버" : "모의투자";
                             stringBuilder.AppendLine();
                             stringBuilder.AppendLine($"\t접속서버구분 : {server}");
                             SetResultText(stringBuilder.ToString());
                         }
                     }
-                    else if (selectedItem.IconId == 12)
+                    else if (selectedItem.Id == 12) // 조건검색
                     {
-                        if (MapCondNameToIndex.TryGetValue(SelectedText, out var condIndex))
+                        if (_mapCondNameToIndex.TryGetValue(SelectedText, out var condIndex))
                         {
                             // property
-                            string scrNum = (Convert.ToInt32(SCR_REQ_COND_BASE) + Convert.ToInt32(condIndex)).ToString();
+                            string scrNum = (Convert.ToInt32(_scrNum_REQ_COND_BASE) + Convert.ToInt32(condIndex)).ToString();
                             var prop_items = new List<PropertyItem>
                             {
-                                new PropertyItem
-                                (
+                                new(
                                     "화면번호",
                                     scrNum,
-                                    $"문자열, 읽기 전용입니다.\r\n(앱 내부에서 {SCR_REQ_COND_BASE} - {SCR_REQ_COND_LAST} 사이 설정)",
+                                    $"문자열, 읽기 전용입니다.\r\n(앱 내부에서 {_scrNum_REQ_COND_BASE} - {_scrNum_REQ_COND_LAST} 사이 설정)",
                                     IsValueReadOnly:true
                                 ),
-                                new PropertyItem
-                                (
+                                new(
                                     "조건식 이름",
                                     SelectedText,
                                     "문자열, 읽기 전용입니다.\r\n(조건식 고유 이름)",
                                     IsValueReadOnly: true
                                 ),
-                                new PropertyItem
-                                (
+                                new(
                                     "조건식 고유번호",
                                     condIndex,
                                     "숫자, 읽기 전용입니다.\r\n(조건식 고유 번호)",
                                     IsValueReadOnly: true
                                 ),
-                                new PropertyItem
-                                (
+                                new(
                                     "실시간옵션",
                                     "0",
                                     "숫자, 0:조건검색만, 1:조건검색+실시간 조건검색"
@@ -265,15 +296,16 @@ internal sealed partial class BusinessLogic
         }
 
         // sub function
-        string GetTrDescript(TR_SPECIAL trData)
+        static string GetTrDescript(TR_SPECIAL trData)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("/********************************************************************/");
-            stringBuilder.AppendLine("/// ########## Open API 함수를 이용한 전문처리 샘플코드 예제입니다.");
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine($" [ {trData.Code} : {trData.Name} ]");
-            stringBuilder.AppendLine();
+            StringBuilder stringBuilder = new();
+            stringBuilder
+                .AppendLine()
+                .AppendLine("/********************************************************************/")
+                .AppendLine("/// ########## Open API 함수를 이용한 전문처리 샘플코드 예제입니다.")
+                .AppendLine()
+                .AppendLine($" [ {trData.Code} : {trData.Name} ]")
+                .AppendLine();
             if (trData.Caution.Length > 0)
             {
                 stringBuilder.AppendLine(" [ 주의 ]");
@@ -303,7 +335,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -322,7 +354,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -341,7 +373,7 @@ internal sealed partial class BusinessLogic
                     if (i % 8 == 0)
                     {
                         stringBuilder.AppendLine();
-                        stringBuilder.Append("\t");
+                        stringBuilder.Append('\t');
                     }
                     if (i != 0)
                         stringBuilder.Append(", ");
@@ -357,7 +389,7 @@ internal sealed partial class BusinessLogic
     public void ReqTRHistory(int tabIndex, string text)
     {
         string codeName = string.Empty;
-        if ((LIST_TAB_KIND)tabIndex == LIST_TAB_KIND.조회한TR목록)
+        if ((TAB_LIST_KIND)tabIndex == TAB_LIST_KIND.조회한TR목록)
         {
             if (text != null && text != string.Empty)
             {
@@ -373,10 +405,10 @@ internal sealed partial class BusinessLogic
         if (nPos != -1)
         {
             string code = codeName.Substring(0, nPos);
-            for (int i = 0; i < TrDatas.Count; i++)
+            for (int i = 0; i < _trDatas.Count; i++)
             {
-                var trData = TrDatas[i];
-                if (string.Equals(trData.Code, code))
+                var trData = _trDatas[i];
+                if (trData.Code.Equals(code))
                 {
                     // property
                     var prop_items = new List<PropertyItem>();
@@ -403,8 +435,7 @@ internal sealed partial class BusinessLogic
         string szActionMsg = string.Empty;
         string SelectedText = reqText;
         if (SelectedText.Length < 7) return;
-        var datagrid_PropertiesItems = parameters as IList<PropertyItem>;
-        if (datagrid_PropertiesItems == null || axOpenAPI == null || axOpenAPI.Created == false)
+        if (parameters is not IList<PropertyItem> datagrid_PropertiesItems || _axOpenAPI == null || !_axOpenAPI.Created)
             return;
         if (string.Equals(SelectedText.Substring(0, 2).ToUpper(), "OP")) // TR요청
         {
@@ -413,11 +444,11 @@ internal sealed partial class BusinessLogic
             {
                 var nvd = datagrid_PropertiesItems[i];
                 _appRegistry.SetValue(OptCode, nvd.Name, nvd.Value);
-                axOpenAPI.SetInputValue(nvd.Name, nvd.Value);
+                _axOpenAPI.SetInputValue(nvd.Name, nvd.Value);
             }
-            if (axOpenAPI.GetConnectState() != 0)
+            if (_axOpenAPI.GetConnectState() != 0)
             {
-                long lRet = axOpenAPI.CommRqData(OptCode, OptCode, bNext ? 2 : 0, SCR_REQ_TR_BASE);
+                long lRet = _axOpenAPI.CommRqData(OptCode, OptCode, bNext ? 2 : 0, _scrNum_REQ_TR_BASE);
                 if (lRet == 0)
                 {
                     szActionMsg = $"<TR ({OptCode}) 요청: 성공> lRet = {lRet}";
@@ -436,7 +467,7 @@ internal sealed partial class BusinessLogic
                 szActionMsg = "<조건검색 : 요청실패> 변수타입 오류";
             else
             {
-                long lRet = axOpenAPI.SendCondition(szScrNum,
+                long lRet = _axOpenAPI.SendCondition(szScrNum,
                     szCondName,
                     Convert.ToInt32(szIndex),
                     Convert.ToInt32(szSearch));
@@ -457,7 +488,7 @@ internal sealed partial class BusinessLogic
                 var nvd = datagrid_PropertiesItems[i];
 
                 if (i > 0) parameter_text += ", ";
-                if (nvd.type == PropertyItem.VALUE_TYPE.VALUE_STRING)
+                if (nvd.ValueType == PropertyItem.VALUE_TYPE.VALUE_STRING)
                 {
                     parameter_text += "\"";
                     parameter_text += nvd.Value;
@@ -482,12 +513,12 @@ internal sealed partial class BusinessLogic
                 }
             }
 
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch stopwatch = new();
             stopwatch.Start();
             object? obj;
             try
             {
-                obj = CallInstanceFunc(axOpenAPI, szFuncName, Params);
+                obj = CallInstanceFunc(_axOpenAPI, szFuncName, Params);
             }
             catch (Exception ex)
             {
@@ -502,12 +533,12 @@ internal sealed partial class BusinessLogic
                 szAddText += obj.ToString();
                 szAddText += "\r\n";
             }
-            SetResultText(szAddText, true);
+            SetResultText(szAddText, bAdd: true);
         }
 
         if (szActionMsg.Length > 0)
         {
-            OutputLog((int)LIST_TAB_KIND.메시지목록, szActionMsg);
+            OutputLog((int)TAB_LIST_KIND.메시지목록, szActionMsg);
         }
     }
 
