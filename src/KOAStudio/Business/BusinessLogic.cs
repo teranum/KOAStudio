@@ -780,6 +780,14 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         rootTools.AddChild(new(9, "선물차트요청"));
         rootTools.AddChild(new(9, "옵션차트요청"));
 
+        rootTools = new(0, "주문요청")
+        {
+            IsExpanded = true,
+        };
+        lists.Add(rootTools);
+        rootTools.AddChild(new(9, "주식주문요청"));
+        rootTools.AddChild(new(9, "선물옵션주문요청"));
+
         SetTreeItems((int)TAB_TREE_KIND.사용자기능, lists);
     }
 

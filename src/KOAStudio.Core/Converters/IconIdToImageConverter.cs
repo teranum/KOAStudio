@@ -1,9 +1,9 @@
 ﻿using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace SI_DevCenter.Converters
+namespace KOAStudio.Core.Converters
 {
-    internal class BallIdToImage : IValueConverter
+    internal class IconIdToImageConverter : IValueConverter
     {
         public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -21,10 +21,10 @@ namespace SI_DevCenter.Converters
             if (_images is null)
             {
                 _images = [];
-                var m_Png_dead = new BitmapImage(new Uri("pack://application:,,,/KOAStudio.Core;component/Resources/Balls_3.png"));
-                int nCY = m_Png_dead.PixelHeight;
-                int nImgCount = m_Png_dead.PixelWidth / nCY;
-                int nCX = nCY;
+                var m_Png_dead = new BitmapImage(new Uri("pack://application:,,,/KOAStudio.Core;component/Resources/icons.png"));
+                int nCY = 20;
+                int nCX = 16;
+                int nImgCount = m_Png_dead.PixelWidth / nCX;
                 for (int i = 0; i < nImgCount; i++)
                 {
                     _images.Add(new CroppedBitmap(m_Png_dead, new System.Windows.Int32Rect(i * nCX, 0, nCX, nCY)));

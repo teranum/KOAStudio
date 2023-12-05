@@ -32,7 +32,28 @@ internal sealed partial class BusinessLogic
             model.UpdateCodeText();
             SetUserContent(new CharDataReqView(model));
         }
+        else if (require.Equals("해외선물옵션주문요청"))
+        {
+            var model = _orderViewModel_선물옵션;
+            if (model == null)
+            {
+                _orderViewModel_선물옵션 = model = new OrderViewModel(require, [], OrderExtCallProc)
+                {
+                };
+            }
+            model.EnableUpdateCodeText = true;
+            model.UpdateCodeText();
+            SetUserContent(new OrderView(model));
+        }
     }
+
+    private string OrderExtCallProc(OrderViewModel model, string action)
+    {
+        string result = string.Empty;
+        return result;
+    }
+
+    OrderViewModel? _orderViewModel_선물옵션;
 
     string ChartContentExtProcedure(CharDataReqViewModel model, string require)
     {
