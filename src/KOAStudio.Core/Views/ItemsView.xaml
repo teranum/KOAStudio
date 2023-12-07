@@ -16,7 +16,7 @@
     <UserControl.Resources>
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DodgerBlue" />
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White" />
-        <Converters:IconIdToImage x:Key="IconIdToImage" />
+        <Converters:IconIdToImageConverter x:Key="IconIdToImageConverter" />
     </UserControl.Resources>
     <TabControl
         ItemsSource="{Binding TabDatas}"
@@ -35,7 +35,7 @@
         <TabControl.ItemTemplate>
             <DataTemplate>
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="{Binding Id, Converter={StaticResource IconIdToImage}}" />
+                    <Image Source="{Binding Id, Converter={StaticResource IconIdToImageConverter}}" />
                     <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
                 </StackPanel>
             </DataTemplate>
@@ -113,7 +113,7 @@
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Items}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Margin="-1,-1" Source="{Binding Id, Converter={StaticResource IconIdToImage}}" />
+                                    <Image Margin="-1,-1" Source="{Binding Id, Converter={StaticResource IconIdToImageConverter}}" />
                                     <TextBlock
                                         Margin="5,0,0,0"
                                         VerticalAlignment="Center"

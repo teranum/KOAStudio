@@ -1,0 +1,50 @@
+﻿<Window
+    x:Class="KOAStudio.Core.Views.MessageOkCancel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:KOAStudio.Core.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="Auto"
+    Height="Auto"
+    ResizeMode="NoResize"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock
+                Name="MsgText"
+                MinWidth="260"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+        </StackPanel>
+        <Grid
+            Grid.Row="1"
+            Height="22"
+            Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Column="0"
+                Width="60"
+                Margin="0,0,10,0"
+                HorizontalAlignment="Right"
+                Click="BtnOkClicked"
+                Content="확인" />
+            <Button
+                Grid.Column="1"
+                Width="60"
+                Margin="10,0,0,0"
+                HorizontalAlignment="Left"
+                Click="BtnCancleClicked"
+                Content="취소" />
+        </Grid>
+    </Grid>
+</Window>

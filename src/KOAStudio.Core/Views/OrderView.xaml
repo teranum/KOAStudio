@@ -1,0 +1,414 @@
+﻿<UserControl
+    x:Class="KOAStudio.Core.Views.OrderView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="clr-namespace:KOAStudio.Core.Controls"
+    xmlns:Converters="clr-namespace:KOAStudio.Core.Converters"
+    xmlns:Models="clr-namespace:KOAStudio.Core.Models"
+    xmlns:ViewModels="clr-namespace:KOAStudio.Core.ViewModels"
+    xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:KOAStudio.Core.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=ViewModels:OrderViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Converters:EqualsConverter x:Key="EqualsConverter" />
+        <Converters:EnumToValuesConverter x:Key="EnumToValuesConverter" />
+        <Converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <Converters:InvertBooleanToVisibilityConverter x:Key="InvertBooleanToVisibilityConverter" />
+        <Converters:RadioBooleanToNamedBrushConverter x:Key="RadioBooleanToNamedBrushConverter" />
+        <Converters:BooleanToStringConverter x:Key="BooleanToStringConverter" />
+        <Converters:BooleanToNamedBrushConverter x:Key="BooleanToNamedBrushConverter" />
+        <Converters:ValueCompareToBrushConverter x:Key="ValueCompareToBrushConverter" />
+
+        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="RadioButton">
+            <Setter Property="Background" Value="DarkGray" />
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderBrush" Value="Gray" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    d:Text="Model Name"
+                    FontSize="22"
+                    Text="{Binding Title}" />
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,5,0,0">
+                        <TextBlock
+                            Width="60"
+                            HorizontalAlignment="Left"
+                            Text="계좌번호" />
+                        <ComboBox
+                            Margin="70,0,0,0"
+                            IsEnabled="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}}"
+                            ItemsSource="{Binding 계좌리스트}"
+                            SelectedItem="{Binding Selected계좌}" />
+                    </Grid>
+                    <Grid
+                        Grid.Row="1"
+                        Height="23"
+                        Margin="0,5,0,0">
+                        <TextBlock
+                            Width="60"
+                            HorizontalAlignment="Left"
+                            Text="종목코드" />
+                        <TextBox
+                            Width="80"
+                            Margin="70,0,0,0"
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}}"
+                            Text="{Binding 종목코드}" />
+                        <Label Margin="160,0,0,0" Content="{Binding 종목명}" />
+                    </Grid>
+                    <StackPanel
+                        Grid.Row="2"
+                        Height="22"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal">
+                        <RadioButton
+                            x:Name="radio_매수"
+                            Grid.Column="0"
+                            Width="70"
+                            d:IsChecked="True"
+                            Content="매수"
+                            GroupName="주문모드"
+                            IsChecked="{Binding 매매구분, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static Models:OrderType.매수}}" />
+                        <RadioButton
+                            x:Name="radio_매도"
+                            Grid.Column="1"
+                            Width="70"
+                            Content="매도"
+                            GroupName="주문모드"
+                            IsChecked="{Binding 매매구분, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static Models:OrderType.매도}}" />
+                        <RadioButton
+                            x:Name="radio_정정취소"
+                            Grid.Column="1"
+                            Width="70"
+                            Content="정정/취소"
+                            GroupName="주문모드"
+                            IsChecked="{Binding 매매구분, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static Models:OrderType.정정취소}}" />
+                        <CheckBox
+                            Margin="30,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="주문확인창 생략"
+                            IsChecked="{Binding 주문확인생략}" />
+                    </StackPanel>
+                    <StackPanel
+                        x:Name="panel_전략"
+                        Grid.Row="3"
+                        Height="22"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal"
+                        Visibility="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource InvertBooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Width="60"
+                            HorizontalAlignment="Left"
+                            Text="주문종류" />
+                        <ComboBox
+                            x:Name="combo_지정구분"
+                            Width="100"
+                            Margin="10,0,0,0"
+                            ItemsSource="{Binding 주문종류, Mode=OneTime, Converter={StaticResource EnumToValuesConverter}}"
+                            SelectedItem="{Binding 주문종류}" />
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Row="3"
+                        Height="22"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal"
+                        Visibility="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Width="60"
+                            HorizontalAlignment="Left"
+                            Text="주문번호" />
+                        <Label
+                            Width="140"
+                            Margin="10,0,0,0"
+                            Content="{Binding 주문번호}" />
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Row="4"
+                        Height="22"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal">
+                        <TextBlock
+                            Width="60"
+                            HorizontalAlignment="Left"
+                            Text="{Binding ElementName=radio_정정취소, Path=IsChecked, ConverterParameter='주문가격,정정가격', Converter={StaticResource BooleanToStringConverter}}" />
+                        <TextBox
+                            Width="100"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding 주문가격Enabled}"
+                            Text="{Binding 주문가격}"
+                            TextAlignment="Right" />
+                        <TextBlock
+                            Width="60"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment="Left"
+                            Text="{Binding ElementName=radio_정정취소, Path=IsChecked, ConverterParameter='주문수량,정정수량', Converter={StaticResource BooleanToStringConverter}}"
+                            TextAlignment="Right" />
+                        <TextBox
+                            Width="60"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment="Left"
+                            Text="{Binding 주문수량}"
+                            TextAlignment="Right" />
+                        <Button
+                            Width="20"
+                            Command="{Binding UpButtonCommand}"
+                            CommandParameter="주문수량"
+                            Content="▼">
+                            <Button.LayoutTransform>
+                                <TransformGroup>
+                                    <ScaleTransform />
+                                    <SkewTransform />
+                                    <RotateTransform Angle="180" />
+                                    <TranslateTransform />
+                                </TransformGroup>
+                            </Button.LayoutTransform>
+                        </Button>
+                        <Button
+                            Width="20"
+                            Command="{Binding DownButtonCommand}"
+                            CommandParameter="주문수량"
+                            Content="▼" />
+                    </StackPanel>
+                    <Grid
+                        Grid.Row="5"
+                        Height="28"
+                        Margin="0,30,0,0">
+                        <Label Width="120" HorizontalAlignment="Left" />
+                        <Button
+                            Margin="125,0,0,0"
+                            Background="{Binding ElementName=radio_매수, Path=IsChecked, ConverterParameter='Blue,Red', Converter={StaticResource BooleanToNamedBrushConverter}}"
+                            Command="{Binding ReqActionCommand}"
+                            CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                            Content="{Binding ElementName=radio_매수, Path=IsChecked, ConverterParameter='매도주문,매수주문', Converter={StaticResource BooleanToStringConverter}}"
+                            Foreground="White"
+                            Visibility="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource InvertBooleanToVisibilityConverter}}" />
+                        <Grid Margin="125,0,0,0" Visibility="{Binding ElementName=radio_정정취소, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                Grid.Column="0"
+                                Margin="0,0,5,0"
+                                Background="#E46C2A"
+                                Command="{Binding ReqActionCommand}"
+                                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                                Content="정정주문"
+                                Foreground="White" />
+                            <Button
+                                Grid.Column="1"
+                                Margin="5,0,0,0"
+                                Background="#57A696"
+                                Command="{Binding ReqActionCommand}"
+                                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                                Content="취소주문"
+                                Foreground="White" />
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+            </Grid>
+            <Controls:BindableAvalonEditor
+                Grid.Column="1"
+                Margin="10,0,0,0"
+                Padding="0,3,0,0"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                FontFamily="Consolas"
+                IsReadOnly="True"
+                SyntaxHighlighting="C#"
+                Text="{Binding CodeText}" />
+        </Grid>
+        <TabControl
+            Grid.Row="1"
+            Margin="0,5,0,0"
+            SelectedIndex="{Binding SelectedTabIndex, Mode=OneWayToSource}">
+            <TabItem Header="미체결">
+                <DataGrid
+                    d:ItemsSource="{d:SampleData}"
+                    AutoGenerateColumns="False"
+                    CanUserSortColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding MicheItems}"
+                    SelectedItem="{Binding SelectedMicheItem}"
+                    SelectionMode="Single">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="MouseDoubleClick" Handler="미체결Row_DoubleClick" />
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="140"
+                            Binding="{Binding 주문번호}"
+                            Header="주문번호" />
+                        <DataGridTextColumn
+                            Width="140"
+                            Binding="{Binding 원주문번호}"
+                            Header="원주문번호" />
+                        <DataGridTextColumn
+                            Width="120"
+                            Binding="{Binding 종목코드}"
+                            Header="종목코드" />
+                        <DataGridTextColumn
+                            Width="220"
+                            Binding="{Binding 종목명}"
+                            Header="종목명" />
+                        <DataGridTemplateColumn Width="60" Header="구분">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Foreground="{Binding 매도수구분, Converter={StaticResource BooleanToNamedBrushConverter}, ConverterParameter='Red,Blue'}"
+                                        Text="{Binding 매도수구분, Converter={StaticResource BooleanToStringConverter}, ConverterParameter='매수,매도'}"
+                                        TextAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Width="60"
+                            Binding="{Binding 주문수량}"
+                            Header="주문" />
+                        <DataGridTextColumn
+                            Width="60"
+                            Binding="{Binding 미체결수량}"
+                            Header="미체결" />
+                        <DataGridTextColumn
+                            Width="80*"
+                            Binding="{Binding 주문가격}"
+                            Header="주문가격" />
+                        <DataGridTextColumn
+                            Width="60"
+                            Binding="{Binding 통화코드}"
+                            Header="통화" />
+                        <DataGridTextColumn
+                            Width="140"
+                            Binding="{Binding 주문시각}"
+                            Header="주문시각" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="잔고" IsSelected="True">
+                <DataGrid
+                    d:ItemsSource="{d:SampleData}"
+                    AutoGenerateColumns="False"
+                    CanUserSortColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding JangoItems}"
+                    SelectedItem="{Binding SelectedJangoItem}"
+                    SelectionMode="Single">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="MouseDoubleClick" Handler="잔고Row_DoubleClick" />
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="120"
+                            Binding="{Binding 종목코드}"
+                            Header="종목코드" />
+                        <DataGridTextColumn
+                            Width="220"
+                            Binding="{Binding 종목명}"
+                            Header="종목명" />
+                        <DataGridTemplateColumn Width="60" Header="포지션">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Foreground="{Binding 매도수구분, Converter={StaticResource BooleanToNamedBrushConverter}, ConverterParameter='Red,Blue'}"
+                                        Text="{Binding 매도수구분, Converter={StaticResource BooleanToStringConverter}, ConverterParameter='매수,매도'}"
+                                        TextAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Width="60"
+                            Binding="{Binding 보유수량}"
+                            Header="보유" />
+                        <DataGridTextColumn
+                            Width="100*"
+                            Binding="{Binding 평균단가, StringFormat=N}"
+                            Header="매입가" />
+                        <DataGridTextColumn
+                            Width="100*"
+                            Binding="{Binding 현재가}"
+                            Header="현재가" />
+                        <DataGridTemplateColumn Width="120*" Header="손익금">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="{Binding 평가손익, Converter={StaticResource ValueCompareToBrushConverter}}" Text="{Binding 평가손익, StringFormat='#,##0.##'}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Width="60"
+                            Binding="{Binding 통화코드}"
+                            Header="통화" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </TabItem>
+        </TabControl>
+        <Button
+            Grid.Row="1"
+            Width="50"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Command="{Binding ReqActionCommand}"
+            CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+            Content="조 회" />
+    </Grid>
+    <UserControl.Background>
+        <MultiBinding
+            Converter="{StaticResource RadioBooleanToNamedBrushConverter}"
+            ConverterParameter="PaleVioletRed,LightSkyBlue,LightGoldenrodYellow"
+            Mode="OneWay">
+            <Binding ElementName="radio_매수" Path="IsChecked" />
+            <Binding ElementName="radio_매도" Path="IsChecked" />
+            <Binding ElementName="radio_정정취소" Path="IsChecked" />
+        </MultiBinding>
+    </UserControl.Background>
+</UserControl>

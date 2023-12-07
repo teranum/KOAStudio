@@ -14,7 +14,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <Converters:BallIdToImage x:Key="BallIdToImage" />
+        <Converters:BallIdToImageConverter x:Key="BallIdToImageConverter" />
     </UserControl.Resources>
     <TabControl
         Grid.Row="2"
@@ -26,6 +26,8 @@
                 <MenuItem Command="{Binding Popup_CopyCommand}" Header="복사" />
                 <MenuItem Command="{Binding Popup_ClearCommand}" Header="지우기" />
                 <Separator />
+                <MenuItem Command="{Binding Popup_AllClearCommand}" Header="전체 탭 지우기" />
+                <Separator Height="5" />
                 <MenuItem Command="{Binding Popup_Stop_RTCommand}" Header="실시간 중지" />
             </ContextMenu>
         </TabControl.ContextMenu>
@@ -37,7 +39,7 @@
                         Width="8"
                         Margin="2,0,0,0"
                         VerticalAlignment="Top"
-                        Source="{Binding BallImage, Converter={StaticResource BallIdToImage}}" />
+                        Source="{Binding BallImage, Converter={StaticResource BallIdToImageConverter}}" />
                 </StackPanel>
             </DataTemplate>
         </TabControl.ItemTemplate>

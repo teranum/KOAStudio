@@ -13,12 +13,13 @@ internal sealed partial class BusinessLogic
     {
         //
         DateTime Now = DateTime.Now;
-        var memory_full_data = _axOpenAPI!.GetCommFullData(e.sTrCode, e.sRQName, 0);
+        int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
+        var memory_full_data = _axOpenAPI.GetCommFullData(e.sTrCode, e.sRQName, 0);
         var received_data = _appEncoder.GetBytes(memory_full_data);
         //
         OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPreNext}, received size = {received_data.Length}");
 
-        if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
+        if (e.sScrNo.Equals(_scrNum_CHART_CONTENT))
         {
             CharDataReqViewModel? model = null;
             if (_chartDataReqViewModel_선물 != null && e.sRQName.StartsWith(_chartDataReqViewModel_선물.Title))
@@ -29,7 +30,6 @@ internal sealed partial class BusinessLogic
             if (model != null)
             {
                 StringBuilder sb = new();
-                int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
 
                 for (int i = 0; i < nRepeatCount; i++)
                 {
@@ -54,8 +54,52 @@ internal sealed partial class BusinessLogic
                 model.NextEnabled = e.sPreNext.Length > 0;
             }
         }
+        else if (e.sScrNo.Equals(_scrNum_ORDER_CONTENT) && _orderViewModel_선물옵션 != null)
+        {
+            if (e.sTrCode.Equals("opw30001") || e.sTrCode.Equals("opw30024")) // 미체결
+            {
+                var model = _orderViewModel_선물옵션;
+                model.MicheItems.Clear();
 
+                for (int i = 0; i < nRepeatCount; i++)
+                {
+                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+                    string 주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문번호").Trim();
+                    string 원주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "원주문번호").Trim();
+                    bool 매도수구분 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도수구분").Trim().Equals("1");
+                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문수량").Trim(), out int 주문수량);
+                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "미체결수량").Trim(), out int 미체결수량);
+                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문표시가격").Trim(), out double 주문가격);
+                    string 통화코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "통화코드").Trim();
+                    string 주문시각 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문시각").Trim();
+                    model.MicheItems.Add(new MicheItem(
+                        종목코드, 종목명, 주문번호, 원주문번호, 매도수구분, 주문수량, 미체결수량, 주문가격, 통화코드, 주문시각
+                        ));
+                }
+            }
+            else if (e.sTrCode.Equals("opw30003") || e.sTrCode.Equals("opw30026")) // 잔고
+            {
+                var model = _orderViewModel_선물옵션;
+                model.JangoItems.Clear();
 
+                for (int i = 0; i < nRepeatCount; i++)
+                {
+                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+                    bool 매도수구분 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도수구분").Trim().Equals("1");
+                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "수량").Trim(), out int 수량);
+                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "평균단가").Trim(), out double 평균단가);
+                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가격").Trim(), out double 현재가격);
+                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "평가손익").Trim(), out double 평가손익);
+                    평가손익 /= 100;
+                    string 통화코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "통화코드").Trim();
+                    model.JangoItems.Add(new JangoItem(
+                        종목코드, 종목명, 매도수구분, 수량, 평균단가, 현재가격, 평가손익, 통화코드
+                        ));
+                }
+            }
+        }
 
         //if (e.sScrNo == _scrNum_REQ_TR_BASE)
         {
@@ -64,7 +108,6 @@ internal sealed partial class BusinessLogic
             var trData = _trDatas.Find(x => x.Code.Equals(e.sTrCode, StringComparison.CurrentCultureIgnoreCase));
             if (trData != null)
             {
-                int nRepeatCount = _axOpenAPI.GetRepeatCnt(e.sTrCode, e.sRQName);
                 int nReqCount = (trData.OutputSingle != null ? trData.OutputSingle.Count : 0)
                     + nRepeatCount * (trData.OutputMuti != null ? trData.OutputMuti.Count : 0);
 

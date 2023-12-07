@@ -138,6 +138,18 @@ namespace KOAStudio.Core.ViewModels
             TabDatas?[TabSelectedIndex].Items.Clear();
         }
 
+        // 전체 탭 지우기
+        [RelayCommand]
+        private void Popup_AllClear()
+        {
+            if (TabDatas == null) return;
+            foreach (var list in TabDatas)
+            {
+                list.Items.Clear();
+                list.BallImage = 0;
+            }
+        }
+
         // 실시간 중지
         [RelayCommand]
         private void Popup_Stop_RT()
