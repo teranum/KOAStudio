@@ -41,7 +41,7 @@ namespace KOAStudio.Core.Services
             WeakReferenceMessenger.Default.Send(new LogOutputMessageType(tabIndex, content, maxLines, focus));
         }
 
-        public void OutputLogResetAllChangeState()
+        public static void OutputLogResetAllChangeState()
         {
             WeakReferenceMessenger.Default.Send(new LogOutputResetAllChangeStateMessageType());
         }

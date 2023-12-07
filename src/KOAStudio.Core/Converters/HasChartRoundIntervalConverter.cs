@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace KOAStudio.Core.Converters
 {
-    internal class HasChartRoundInterval : IValueConverter
+    internal class HasChartRoundIntervalConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

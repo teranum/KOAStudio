@@ -26,6 +26,8 @@
                 <MenuItem Command="{Binding Popup_CopyCommand}" Header="복사" />
                 <MenuItem Command="{Binding Popup_ClearCommand}" Header="지우기" />
                 <Separator />
+                <MenuItem Command="{Binding Popup_AllClearCommand}" Header="전체 탭 지우기" />
+                <Separator Height="5" />
                 <MenuItem Command="{Binding Popup_Stop_RTCommand}" Header="실시간 중지" />
             </ContextMenu>
         </TabControl.ContextMenu>

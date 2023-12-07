@@ -13,10 +13,6 @@ namespace KOAStudio.Core.Views
         {
             InitializeComponent();
             DataContext = ControlModel;
-            if (DataContext is CharDataReqViewModel model)
-            {
-                model.EnableUpdateCodeText = true;
-            }
         }
 
         public void CloseTool()

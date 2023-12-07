@@ -25,11 +25,12 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
     private static readonly string _scrNum_REQ_TR_BASE = "3000";
     private static readonly string _scrNum_CHART_CONTENT = "3101";
+    private static readonly string _scrNum_ORDER_CONTENT = "3102";
 
     private readonly Dictionary<string, string> _map_FidToName = [];
 
 
-    private class TR_SPECIAL
+    private sealed class TR_SPECIAL
     {
         public string Code = string.Empty;
         public string Name = string.Empty;
@@ -68,7 +69,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
     [
         "키움 Open API 서비스",
         "상시모의투자 신청",
-        "FID 리스트"
+        "FID 리스트",
     ];
 
     private enum TAB_TREE_KIND
@@ -749,7 +750,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
             10,
             1,
             1,
-            16
+            16,
         ];
         string[] sFut_Field_Name =
         [
@@ -770,7 +771,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
             "소숫점자리수",
             "최근월물구분",
             "액티브월물구분",
-            "전일누적거래량"
+            "전일누적거래량",
         ];
 
         var root1 = new IdTextItem(10, "해외선물 종목정보");
@@ -834,7 +835,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
             15,
             4,
             5,
-            1
+            1,
         ];
         string[] sOpt_Field_Name =
         [
@@ -861,7 +862,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
             "over tick price",
             "vtt code",
             "yymmd",
-            "옵션type"
+            "옵션type",
         ];
 
         var root2 = new IdTextItem(10, "해외옵션 종목정보");

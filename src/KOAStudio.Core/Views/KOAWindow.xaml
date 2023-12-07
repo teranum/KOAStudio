@@ -30,9 +30,6 @@
         </bh:EventTrigger>
     </bh:Interaction.Triggers>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <!--  menu  -->
         <Menu
             Height="22"
@@ -55,9 +52,9 @@
         </Menu>
         <Grid Margin="3,23,3,26">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30*" />
+                <ColumnDefinition Width="480" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="70*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <local:ItemsView Grid.Column="0" />
             <GridSplitter
@@ -67,15 +64,15 @@
                 Background="LightGray" />
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="70*" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="300" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="30*" />
+                        <ColumnDefinition Width="300" />
                     </Grid.ColumnDefinitions>
                     <Controls:BindableAvalonEditor
                         Grid.Column="0"

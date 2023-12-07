@@ -15,7 +15,7 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <Converters:EnumToValuesConverter x:Key="EnumToValuesConverter" />
-        <Converters:HasChartRoundInterval x:Key="HasChartRoundInterval" />
+        <Converters:HasChartRoundIntervalConverter x:Key="HasChartRoundIntervalConverter" />
         <Converters:NullCheckVisibilityConverter x:Key="NullCheckVisibilityConverter" />
     </UserControl.Resources>
     <Grid Margin="10">
@@ -68,7 +68,7 @@
                     Width="60"
                     Margin="10,0,0,0"
                     IsEditable="True"
-                    IsEnabled="{Binding SelectedChartRound, Mode=OneWay, Converter={StaticResource HasChartRoundInterval}}"
+                    IsEnabled="{Binding SelectedChartRound, Mode=OneWay, Converter={StaticResource HasChartRoundIntervalConverter}}"
                     Text="{Binding SelectedChartInterval, Mode=TwoWay}">
                     <ComboBoxItem Content="1" IsSelected="True" />
                     <ComboBoxItem Content="3" />

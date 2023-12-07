@@ -5,8 +5,6 @@ namespace KOAStudio.Core.Converters
     [ValueConversion(typeof(bool), typeof(bool))]
     internal class InverseBooleanConverter : IValueConverter
     {
-        #region IValueConverter Members
-
         public object Convert(object value, Type targetType, object parameter,
             System.Globalization.CultureInfo culture)
         {
@@ -21,7 +19,5 @@ namespace KOAStudio.Core.Converters
         {
             throw new NotSupportedException();
         }
-
-        #endregion
     }
 }

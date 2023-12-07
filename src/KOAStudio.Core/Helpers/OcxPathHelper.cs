@@ -2,7 +2,7 @@
 
 namespace KOAStudio.Core.Helpers
 {
-    public class OcxPathHelper
+    public static class OcxPathHelper
     {
         public static string GetOcxPathFromClassID(string classID)
         {

@@ -17,9 +17,9 @@ namespace KOAStudio.Core.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             bool flag = false;
-            if (value is bool)
+            if (value is bool v)
             {
-                flag = (bool)value;
+                flag = v;
             }
             else if (value is bool?)
             {
@@ -32,9 +32,9 @@ namespace KOAStudio.Core.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Visibility)
+            if (value is Visibility visibility)
             {
-                return (Visibility)value != Visibility.Visible;
+                return visibility != Visibility.Visible;
             }
 
             return false;

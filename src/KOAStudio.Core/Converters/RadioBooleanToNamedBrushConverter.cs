@@ -8,8 +8,7 @@ namespace KOAStudio.Core.Converters
     {
         public object? Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string? retVals = parameter as string;
-            if (retVals != null)
+            if (parameter is string retVals)
             {
                 var true_false = retVals.Split(',');
                 if (true_false.Length == values.Length)
