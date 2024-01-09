@@ -10,12 +10,13 @@ namespace KOAStudio.Core.ViewModels
     internal partial class KOAWindowViewModel : ObservableObject
     {
         private readonly IUIRequest _uiRequest;
-        private readonly string _baseTitle =
-            System.Windows.Application.ResourceAssembly.GetName().Name
-            + (Environment.Is64BitProcess ? " - 64비트" : " - 32비트");
+        private readonly string _baseTitle;
 
         public KOAWindowViewModel(IUIRequest uiRequest)
         {
+            var assemblyName = System.Windows.Application.ResourceAssembly.GetName();
+            _baseTitle = $"{assemblyName.Name} v{assemblyName.Version.Major}.{assemblyName.Version.Minor} - {(Environment.Is64BitProcess ? "64비트" : "32비트")}";
+
             _uiRequest = uiRequest;
             _title = _baseTitle;
 

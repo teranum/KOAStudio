@@ -11,6 +11,7 @@
 		<ApplicationIcon>app.ico</ApplicationIcon>
 		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
 		<Platforms>x86;x64</Platforms>
+		<Version>1.1</Version>
 		<PreserveCompilationContext>false</PreserveCompilationContext>
 		<NoWarn>$(NoWarn);MA0048</NoWarn>
 	</PropertyGroup>

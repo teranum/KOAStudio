@@ -68,6 +68,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         "키움 Open API 서비스",
         "상시모의투자 신청",
         "FID 리스트",
+        "KOAStudio 오픈소스",
     ];
 
     private enum TAB_TREE_KIND
