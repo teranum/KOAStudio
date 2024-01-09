@@ -572,6 +572,15 @@ internal sealed partial class BusinessLogic
                     SetResultText(Properties.Resources.FID_KORNAME);
                 }
                 break;
+            case "KOAStudio 오픈소스":
+                {
+                    var sInfo = new System.Diagnostics.ProcessStartInfo("https://github.com/teranum/KOAStudio")
+                    {
+                        UseShellExecute = true,
+                    };
+                    System.Diagnostics.Process.Start(sInfo);
+                }
+                break;
             default:
                 break;
         }

@@ -535,6 +535,15 @@ internal sealed partial class BusinessLogic
                     SetResultText(stringBuilder.ToString());
                 }
                 break;
+            case "WKOAStudio 오픈소스":
+                {
+                    var sInfo = new System.Diagnostics.ProcessStartInfo("https://github.com/teranum/KOAStudio")
+                    {
+                        UseShellExecute = true,
+                    };
+                    System.Diagnostics.Process.Start(sInfo);
+                }
+                break;
             default:
                 break;
         }

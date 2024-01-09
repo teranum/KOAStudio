@@ -41,6 +41,12 @@
                 <Separator />
                 <MenuItem Command="{Binding MenuExitCommand}" Header="끝내기" />
             </MenuItem>
+            <MenuItem Header="보기">
+                <MenuItem
+                    Header="항상위"
+                    IsCheckable="True"
+                    IsChecked="{Binding ElementName=root, Path=Topmost, Mode=TwoWay}" />
+            </MenuItem>
             <MenuItem Header="{Binding MenuCustomizeHeaderText}" ItemsSource="{Binding MenuCustomizeItems}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="{x:Type MenuItem}">
