@@ -13,7 +13,7 @@ namespace KOAStudio.Business;
 
 internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppLogic, IUIRequest
 {
-    [DllImport("kernel32")] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+    [DllImport("kernel32", CharSet = CharSet.Unicode)] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
     private static string GetProfileString(string section, string key, string file)
     {
         StringBuilder temp = new(255);
@@ -174,15 +174,16 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         OutputLogResetAllChangeState();
 
         //
-        string[] FIDLines = Properties.Resources.FID_KORNAME.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        char[] separator = ['\r', '\n'];
+        string[] FIDLines = Properties.Resources.FID_KORNAME.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         int nFIDLines = FIDLines.Length;
         foreach (string line in FIDLines)
         {
             int nPos = line.IndexOf('=');
             if (nPos > 0)
             {
-                string key = line.Substring(0, nPos);
-                string name = line.Substring(nPos + 1);
+                string key = line[..nPos];
+                string name = line[(nPos + 1)..];
                 _map_FidToName.Add(key, name);
             }
         }
@@ -306,7 +307,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                     using var zip = new ZipArchive(file, ZipArchiveMode.Read);
                     foreach (var entry in zip.Entries)
                     {
-                        string entruTitle = entry.Name.Substring(0, entry.Name.Length - 4);
+                        string entruTitle = entry.Name[..^4];
                         if (entruTitle.Equals(FileTitle.ToUpper()))
                         {
                             using var stream = entry.Open();
@@ -324,11 +325,11 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                             nPos = text.IndexOf("@START_", nPos);
                             nPos += "@START_".Length;
                             nPosEnd = text.IndexOf("\r\n", nPos);
-                            string TRName = text.Substring(nPos, nPosEnd - nPos);
+                            string TRName = text[nPos..nPosEnd];
                             trData.Name = TRName;
                             nPos = nPosEnd + "\r\n".Length;
                             nPosEnd = text.IndexOf("@END_", nPos);
-                            string InputBody = text.Substring(nPos, nPosEnd - nPos);
+                            string InputBody = text[nPos..nPosEnd];
                             trData.Inputs = GetKeyNames(InputBody);
                             // [OUTPUT]
                             nPos = nPosEnd;
@@ -339,10 +340,10 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                             OutName = text.Substring(nPos + 7, nPosEnd - nPos - 7);
                             nPos = nPosEnd + 1;
                             nPosEnd = text.IndexOf("\r\n", nPos);
-                            OutIdent = text.Substring(nPos, nPosEnd - nPos);
+                            OutIdent = text[nPos..nPosEnd];
                             nPos = nPosEnd + "\r\n".Length;
                             nPosEnd = text.IndexOf("@END_", nPos);
-                            string namebody = text.Substring(nPos, nPosEnd - nPos);
+                            string namebody = text[nPos..nPosEnd];
                             if (OutIdent.Equals("*,*,*"))
                             {
                                 trData.OutputSingle = GetKeyNames(namebody);
@@ -353,7 +354,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                     nPosEnd = text.IndexOf("\r\n", nPos);
                                     nPos = nPosEnd + "\r\n".Length;
                                     nPosEnd = text.IndexOf("@END_", nPos);
-                                    string ortherbody = text.Substring(nPos, nPosEnd - nPos);
+                                    string ortherbody = text[nPos..nPosEnd];
                                     trData.OutputMuti = GetKeyNames(ortherbody);
                                 }
                             }
@@ -396,7 +397,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                 // Outnput Single
                 if (trData.OutputSingle != null)
                 {
-                    var hOutputSingle = new IdTextItem(8, $"싱글데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
+                    var hOutputSingle = new IdTextItem(8, $"싱글데이터 [{trData.Name[..^2]}]");
                     foreach (var item in trData.OutputSingle)
                     {
                         hOutputSingle.AddChild(new IdTextItem(6, item));
@@ -406,7 +407,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                 // Outnput Multi
                 if (trData.OutputMuti != null)
                 {
-                    var hOutputMuti = new IdTextItem(8, $"멀티데이터 [{trData.Name.Substring(0, trData.Name.Length - 2)}]");
+                    var hOutputMuti = new IdTextItem(8, $"멀티데이터 [{trData.Name[..^2]}]");
                     foreach (var item in trData.OutputMuti)
                     {
                         hOutputMuti.AddChild(new IdTextItem(9, item));
@@ -439,7 +440,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                 int pos = line.IndexOf('=');
                 if (pos != -1)
                 {
-                    sections.Add(line.Substring(0, pos).Trim());
+                    sections.Add(line[..pos].Trim());
                 }
             }
             return sections;
@@ -643,7 +644,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                         {
                                             if (KeyAndValue.Key.Contains("TR_"))
                                             {
-                                                int nIndex = Convert.ToInt32(KeyAndValue.Key.Substring(3, KeyAndValue.Key.Length - 3));
+                                                int nIndex = Convert.ToInt32(KeyAndValue.Key[3..]);
                                                 if (ScrnSpecial.TRs != null && nIndex >= 0 && nIndex < ScrnSpecial.TRs.Length)
                                                     ScrnSpecial.TRs[nIndex] = KeyAndValue.Value;
                                             }
@@ -693,7 +694,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         {
             KEY_VALUE result;
             int nEndPos = s.IndexOf('=');
-            result.Key = s.Substring(0, nEndPos);
+            result.Key = s[..nEndPos];
             result.Value = s.Substring(nEndPos + 1, s.Length - nEndPos - 1);
             return result;
         }
@@ -701,7 +702,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
         string GetSection(string s)
         {
             int nEndPos = s.IndexOf(']');
-            return s.Substring(1, nEndPos - 1);
+            return s[1..nEndPos];
         }
     }
 

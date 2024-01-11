@@ -20,6 +20,7 @@
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="*" />
 		<PackageReference Include="AvalonEdit" Version="*" />
 		<PackageReference Include="KHOpenApi.NET" Version="*" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
