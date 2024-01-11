@@ -29,6 +29,7 @@ namespace KOAStudio.Core.ViewModels
 
             WeakReferenceMessenger.Default.Register<AppStatusChangedMessageType>(this, (r, m) =>
             {
+                StatusUrl = string.Empty;
                 StatusText = m.Text;
                 if (m.ChangedLoginState)
                 {
