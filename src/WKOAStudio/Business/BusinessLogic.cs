@@ -11,7 +11,7 @@ namespace WKOAStudio.Business;
 
 internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppLogic, IUIRequest
 {
-    [DllImport("kernel32")] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+    [DllImport("kernel32", CharSet = CharSet.Unicode)] private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
     private static string GetProfileString(string section, string key, string file, int buflength = 255)
     {
         StringBuilder temp = new(buflength);
@@ -145,7 +145,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                     {
                         IniFile_Info[section] = key_vals;
                     }
-                    section = line.Substring(1, line.Length - 2);
+                    section = line[1..^1];
                     key_vals = [];
                 }
                 else
@@ -427,7 +427,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                         int size = 0;
                                         int pos = key_value.Value.IndexOf(',');
                                         if (pos >= 0)
-                                            size = Convert.ToInt32(key_value.Value.Substring(0, pos));
+                                            size = Convert.ToInt32(key_value.Value[..pos]);
                                         trData.SizeSingle.Add(size);
                                     }
                                 }
@@ -453,7 +453,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                             int size = 0;
                                             int pos = key_value.Value.IndexOf(',');
                                             if (pos >= 0)
-                                                size = Convert.ToInt32(key_value.Value.Substring(0, pos));
+                                                size = Convert.ToInt32(key_value.Value[..pos]);
                                             trData.SizeMuti.Add(size);
                                         }
                                     }
@@ -477,7 +477,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                                 int size = 0;
                                                 int pos = key_value.Value.IndexOf(',');
                                                 if (pos >= 0)
-                                                    size = Convert.ToInt32(key_value.Value.Substring(0, pos));
+                                                    size = Convert.ToInt32(key_value.Value[..pos]);
                                                 trData.SizeMuti.Add(size);
                                             }
                                         }
@@ -495,7 +495,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                                 int size = 0;
                                                 int pos = key_value.Value.IndexOf(',');
                                                 if (pos >= 0)
-                                                    size = Convert.ToInt32(key_value.Value.Substring(0, pos));
+                                                    size = Convert.ToInt32(key_value.Value[..pos]);
                                                 trData.SizeMuti_add.Add(size);
                                             }
                                         }
@@ -602,7 +602,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                     int nPos = item.IndexOf('(');
                     if (nPos > 0)
                     {
-                        string Title = item.Substring(0, nPos);
+                        string Title = item[..nPos];
                         string path = item.Substring(nPos + 1, item.Length - nPos - 2);
                         hChild.AddChild(new IdTextItem(9, Title));
                         string Content = string.Empty;

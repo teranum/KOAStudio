@@ -1,5 +1,4 @@
-﻿using KOAStudio.Core.Helpers;
-using KOAStudio.Core.Models;
+﻿using KOAStudio.Core.Models;
 using KOAStudio.Core.ViewModels;
 using KOAStudio.Core.Views;
 using System.Diagnostics;

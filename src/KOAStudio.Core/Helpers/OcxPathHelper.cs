@@ -23,7 +23,7 @@ namespace KOAStudio.Core.Helpers
                 using var regKey = rootKey.OpenSubKey(regPath);
                 if (regKey != null)
                 {
-                    string defaultValue = (string)regKey.GetValue("");
+                    if (regKey.GetValue("") is string defaultValue)
                     {
                         return defaultValue;
                     }

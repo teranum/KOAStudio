@@ -3,6 +3,7 @@ using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Services;
 using KOAStudio.Core.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 using System.Windows;
 using WKOAStudio.Business;
 
@@ -15,6 +16,7 @@ namespace WKOAStudio
     {
         public App()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
 

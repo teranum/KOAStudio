@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using KOAStudio.Core.Helpers;
 using KOAStudio.Core.Models;
 using KOAStudio.Core.Services;
+using KOAStudio.Core.Views;
 using System.Windows.Controls;
 
 namespace KOAStudio.Core.ViewModels
@@ -11,19 +13,19 @@ namespace KOAStudio.Core.ViewModels
     {
         private readonly IUIRequest _uiRequest;
         private readonly string _baseTitle;
+        private readonly string _appVersion;
+        private IList<GithubTagInfo>? _releaseTags;
 
         public KOAWindowViewModel(IUIRequest uiRequest)
         {
             var assemblyName = System.Windows.Application.ResourceAssembly.GetName();
-            _baseTitle = $"{assemblyName.Name} v{assemblyName.Version.Major}.{assemblyName.Version.Minor} - {(Environment.Is64BitProcess ? "64비트" : "32비트")}";
+            _appVersion = $"{assemblyName.Version!.Major}.{assemblyName.Version.Minor}";
+            _baseTitle = $"{assemblyName.Name} v{_appVersion} - {(Environment.Is64BitProcess ? "64비트" : "32비트")}";
 
             _uiRequest = uiRequest;
             _title = _baseTitle;
 
             _menuCustomizeHeaderText = "Custom";
-            _searchText = string.Empty;
-            _resultText = string.Empty;
-            _statusText = "준비됨";
 
             WeakReferenceMessenger.Default.Register<AppStatusChangedMessageType>(this, (r, m) =>
             {
@@ -65,6 +67,8 @@ namespace KOAStudio.Core.ViewModels
             {
                 UserContent = m.Control;
             });
+
+            _ = CheckVersionAsync();
         }
 
         [ObservableProperty]
@@ -77,12 +81,15 @@ namespace KOAStudio.Core.ViewModels
         private List<string>? _menuCustomizeItems;
 
         [ObservableProperty]
-        private string _statusText;
+        private string _statusText = "준비됨";
 
         [ObservableProperty]
-        private string _searchText;
+        private string _statusUrl = string.Empty;
 
-        private string _resultText;
+        [ObservableProperty]
+        private string _searchText = string.Empty;
+
+        private string _resultText = string.Empty;
         public string ResultText
         {
             get => _resultText;
@@ -120,6 +127,47 @@ namespace KOAStudio.Core.ViewModels
         private void Closed()
         {
             _uiRequest.Close();
+        }
+
+        [RelayCommand]
+        static void Hyperlink_RequestNavigate(Uri url)
+        {
+            var sInfo = new System.Diagnostics.ProcessStartInfo(url.AbsoluteUri)
+            {
+                UseShellExecute = true,
+            };
+            System.Diagnostics.Process.Start(sInfo);
+        }
+
+        private async Task CheckVersionAsync()
+        {
+            // 깃헙에서 최신 버전 정보 가져오기
+
+            _releaseTags = await GithubVersion.GetRepoTagInfos("teranum", "KOAStudio").ConfigureAwait(true);
+            if (_releaseTags != null && _releaseTags.Count > 0)
+            {
+                var lastTag = _releaseTags[0];
+                if (string.Equals(lastTag.tag_name, _appVersion))
+                {
+                    StatusText = "최신 버전입니다.";
+                }
+                else
+                {
+                    StatusUrl = lastTag.html_url;
+                    StatusText = $"새로운 버전({lastTag.tag_name})이 있습니다.";
+                }
+            }
+        }
+
+        [RelayCommand]
+        void Menu_Version()
+        {
+            // 버젼 정보
+            if (_releaseTags != null && _releaseTags.Count != 0)
+            {
+                var versionView = new VersionView(_releaseTags);
+                versionView.ShowDialog();
+            }
         }
 
         [RelayCommand(CanExecute = nameof(CanMenuLogin))]

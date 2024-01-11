@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<LangVersion>default</LangVersion>
 		<!--<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>-->
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x86;x64</Platforms>
-		<NoWarn>$(NoWarn);MA0048;MA0053;MA0069</NoWarn>
+		<NoWarn>$(NoWarn);MA0048;MA0053;MA0069;IDE1006</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,6 +20,7 @@
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="*" />
 		<PackageReference Include="AvalonEdit" Version="*" />
 		<PackageReference Include="KHOpenApi.NET" Version="*" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
