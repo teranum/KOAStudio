@@ -7,7 +7,7 @@
 		<UseWPF>true</UseWPF>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x86;x64</Platforms>
-		<NoWarn>$(NoWarn);MA0048;MA0053;MA0069</NoWarn>
+		<NoWarn>$(NoWarn);MA0048;MA0053;MA0069;IDE1006</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
