@@ -2,8 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<LangVersion>default</LangVersion>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<!--<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>-->
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -11,17 +10,13 @@
 		<ApplicationIcon>app.ico</ApplicationIcon>
 		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
 		<Platforms>x86;x64</Platforms>
-		<Version>1.1</Version>
+		<Version>1.2</Version>
 		<PreserveCompilationContext>false</PreserveCompilationContext>
 		<NoWarn>$(NoWarn);MA0048</NoWarn>
 	</PropertyGroup>
 	
 	<ItemGroup>
 		<ProjectReference Include="..\KOAStudio.Core\KOAStudio.Core.csproj"/>
-	</ItemGroup>
-
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-		<Reference Include="System.IO.Compression" />
 	</ItemGroup>
 
 	<ItemGroup>
