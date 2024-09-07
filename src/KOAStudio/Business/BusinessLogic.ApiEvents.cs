@@ -244,7 +244,7 @@ internal sealed partial class BusinessLogic
 
     private void AxKHOpenApi_OnReceiveRealCondition(object sender, _DKHOpenAPIEvents_OnReceiveRealConditionEvent e)
     {
-        OutputLog((int)TAB_LIST_KIND.조건검색실시간, $"sTrCode = {e.sTrCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
+        OutputLog((int)TAB_LIST_KIND.조건검색실시간, $"strCode = {e.strCode}, strType = {e.strType}, strConditionName = {e.strConditionName}, strConditionIndex = {e.strConditionIndex}");
     }
 
     private void AxKHOpenApi_OnReceiveMsg(object sender, _DKHOpenAPIEvents_OnReceiveMsgEvent e)

@@ -19,7 +19,7 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="*" />
 		<PackageReference Include="AvalonEdit" Version="*" />
-		<PackageReference Include="KHOpenApi.NET" Version="*" />
+		<PackageReference Include="KHOpenApi.NET" Version="1.5.4" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
 

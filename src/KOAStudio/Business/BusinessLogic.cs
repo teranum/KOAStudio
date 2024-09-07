@@ -638,13 +638,14 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                                         ScrnSpecial.ScreenName = KeyAndValue.Value;
                                         break;
                                     case "TRCount":
-                                        ScrnSpecial.TRs = new string[Convert.ToInt32(KeyAndValue.Value)];
+                                        _ = int.TryParse(KeyAndValue.Value, out int nTRCount);
+                                        ScrnSpecial.TRs = new string[nTRCount];
                                         break;
                                     default:
                                         {
                                             if (KeyAndValue.Key.Contains("TR_"))
                                             {
-                                                int nIndex = Convert.ToInt32(KeyAndValue.Key[3..]);
+                                                _ = int.TryParse(KeyAndValue.Key[3..], out int nIndex);
                                                 if (ScrnSpecial.TRs != null && nIndex >= 0 && nIndex < ScrnSpecial.TRs.Length)
                                                     ScrnSpecial.TRs[nIndex] = KeyAndValue.Value;
                                             }
