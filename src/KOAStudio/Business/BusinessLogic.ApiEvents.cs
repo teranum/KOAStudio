@@ -1,6 +1,5 @@
 ﻿using KHOpenApi.NET;
 using KOAStudio.Core.Models;
-using KOAStudio.Core.ViewModels;
 using System.Diagnostics;
 using System.Text;
 
@@ -14,180 +13,46 @@ internal sealed partial class BusinessLogic
         int nRepeatCount = _axOpenAPI!.GetRepeatCnt(e.sTrCode, e.sRQName);
         OutputLog((int)TAB_LIST_KIND.메시지목록, $"<OnReceiveTrData> sScrNo = {e.sScrNo},  sRQName = {e.sRQName}, sTrCode = {e.sTrCode}, sRecordName = {e.sRecordName}, sPrevNext = {e.sPrevNext}");
 
-        if (string.Equals(e.sScrNo, _scrNum_CHART_CONTENT))
+        SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
+        // TR코드 필드 찾기
+        var trData = _trDatas.Find(x => x.Code.Equals(e.sTrCode));
+        if (trData is not null)
         {
-            CharDataReqViewModel? model = null;
-            if (_chartDataReqViewModel_업종 != null && e.sRQName.StartsWith(_chartDataReqViewModel_업종.Title))
-            {
-                model = _chartDataReqViewModel_업종;
-            }
-            else if (_chartDataReqViewModel_주식 != null && e.sRQName.StartsWith(_chartDataReqViewModel_주식.Title))
-            {
-                model = _chartDataReqViewModel_주식;
-            }
-            else if (_chartDataReqViewModel_선물 != null && e.sRQName.StartsWith(_chartDataReqViewModel_선물.Title))
-            {
-                model = _chartDataReqViewModel_선물;
-            }
-            else if (_chartDataReqViewModel_옵션 != null && e.sRQName.StartsWith(_chartDataReqViewModel_옵션.Title))
-            {
-                model = _chartDataReqViewModel_옵션;
-            }
-
-            if (model != null)
-            {
-                bool bFuture = model.Kind == CharDataReqViewModel.KIND.선물 || model.Kind == CharDataReqViewModel.KIND.옵션;
-                StringBuilder sb = new();
-
+            Stopwatch timer = Stopwatch.StartNew();
+            string[] lines = new string[1
+                + (trData.OutputSingle != null ? trData.OutputSingle.Count : 0)
+                + nRepeatCount * (trData.OutputMuti != null ? trData.OutputMuti.Count : 0)];
+            string TimeLine = DateTime.Now.ToString("HH:mm:ss.fff : ");
+            int nLineIndex = 0;
+            lines[nLineIndex++] = $"{TimeLine}[{trData.Name}] [{e.sRQName}] Count={nRepeatCount} PrevNext={e.sPrevNext}";
+            if (trData.OutputSingle != null)
+                foreach (var field in trData.OutputSingle)
+                {
+                    string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, field).Trim();
+                    lines[nLineIndex++] = $"[{e.sTrCode}] {field}={value}";
+                }
+            if (trData.OutputMuti != null)
                 for (int i = 0; i < nRepeatCount; i++)
                 {
-                    bool b분틱 = model.SelectedChartRound == ChartRound.분 || model.SelectedChartRound == ChartRound.틱;
-                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, b분틱 ? "체결시간" : "일자"));
-                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가"));
-                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가"));
-                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가"));
-                    sb.Append(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가"));
-                    sb.AppendLine(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, (bFuture && !b분틱) ? "누적거래량" : "거래량"));
-                }
-
-                model.ReceivedTime = Now;
-                model.ReceivedDataCount = nRepeatCount;
-                model.ResultText = sb.ToString();
-                model.NextText = e.sPrevNext;
-                model.NextEnabled = e.sPrevNext.Equals("2");
-            }
-        }
-        else if (e.sScrNo.Equals(_scrNum_ORDER_CONTENT))
-        {
-            if (_orderViewModel_주식 != null && e.sTrCode.Equals("opt10076")) // 미체결
-            {
-                var model = _orderViewModel_주식;
-                model.MicheItems.Clear();
-
-                for (int i = 0; i < nRepeatCount; i++)
-                {
-                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-                    string 주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문번호").Trim();
-                    string 원주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "원주문번호").Trim();
-                    bool 매도수구분 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매매구분").Trim().Equals("1");
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문수량").Trim(), out int 주문수량);
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "미체결수량").Trim(), out int 미체결수량);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문가격").Trim(), out double 주문가격);
-                    string 통화코드 = "KRW";
-                    string 주문시각 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문시간").Trim();
-                    model.MicheItems.Add(new MicheItem(
-                        종목코드, 종목명, 주문번호, 원주문번호, 매도수구분, 주문수량, 미체결수량, 주문가격, 통화코드, 주문시각
-                        ));
-                }
-            }
-            else if (_orderViewModel_주식 != null && e.sTrCode.Equals("opt10085")) // 잔고
-            {
-                var model = _orderViewModel_주식;
-                model.JangoItems.Clear();
-
-                for (int i = 0; i < nRepeatCount; i++)
-                {
-                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-                    bool 매도수구분 = false;
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "보유수량").Trim(), out int 수량);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매입가").Trim(), out double 평균단가);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim(), out double 현재가격);
-                    double 평가손익 = 0;
-                    string 통화코드 = "KRW";
-                    model.JangoItems.Add(new JangoItem(
-                        종목코드, 종목명, 매도수구분, 수량, 평균단가, 현재가격, 평가손익, 통화코드
-                        ));
-                }
-            }
-            else if (_orderViewModel_선물옵션 != null && e.sTrCode.Equals("OPT50026")) // 미체결
-            {
-                var model = _orderViewModel_선물옵션;
-                model.MicheItems.Clear();
-
-                for (int i = 0; i < nRepeatCount; i++)
-                {
-                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-                    string 주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문번호").Trim();
-                    string 원주문번호 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "원주문번호").Trim();
-                    bool 매도수구분 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매매구분").Trim().Equals("1");
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문수량").Trim(), out int 주문수량);
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "미체결수량").Trim(), out int 미체결수량);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문가격").Trim(), out double 주문가격);
-                    string 통화코드 = "KRW";
-                    string 주문시각 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주문체결시간").Trim();
-                    model.MicheItems.Add(new MicheItem(
-                        종목코드, 종목명, 주문번호, 원주문번호, 매도수구분, 주문수량, 미체결수량, 주문가격, 통화코드, 주문시각
-                        ));
-                }
-            }
-            else if (_orderViewModel_선물옵션 != null && e.sTrCode.Equals("OPT50027")) // 잔고
-            {
-                var model = _orderViewModel_선물옵션;
-                model.JangoItems.Clear();
-
-                for (int i = 0; i < nRepeatCount; i++)
-                {
-                    string 종목코드 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                    string 종목명 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-                    bool 매도수구분 = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매매구분").Trim().Equals("1");
-                    int.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "보유수량").Trim(), out int 수량);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매입단가").Trim(), out double 평균단가);
-                    double.TryParse(_axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim(), out double 현재가격);
-                    double 평가손익 = 0;
-                    string 통화코드 = "KRW";
-                    model.JangoItems.Add(new JangoItem(
-                        종목코드, 종목명, 매도수구분, 수량, 평균단가, 현재가격, 평가손익, 통화코드
-                        ));
-                }
-            }
-        }
-
-
-        {
-            SetPropertyQueryNextEnable(e.sPrevNext.Equals("2"));
-            // TR코드 필드 찾기
-            var trData = _trDatas.Find(x => x.Code.Equals(e.sTrCode));
-            if (trData is not null)
-            {
-                Stopwatch timer = Stopwatch.StartNew();
-                string[] lines = new string[1
-                    + (trData.OutputSingle != null ? trData.OutputSingle.Count : 0)
-                    + nRepeatCount * (trData.OutputMuti != null ? trData.OutputMuti.Count : 0)];
-                string TimeLine = DateTime.Now.ToString("HH:mm:ss.fff : ");
-                int nLineIndex = 0;
-                lines[nLineIndex++] = $"{TimeLine}[{trData.Name}] [{e.sRQName}] Count={nRepeatCount} PrevNext={e.sPrevNext}";
-                if (trData.OutputSingle != null)
-                    foreach (var field in trData.OutputSingle)
+                    foreach (var field in trData.OutputMuti)
                     {
-                        string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, field).Trim();
-                        lines[nLineIndex++] = $"[{e.sTrCode}] {field}={value}";
+                        string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, field).Trim();
+                        lines[nLineIndex++] = $"[{e.sTrCode}][{i}] {field}={value}";
                     }
-                if (trData.OutputMuti != null)
-                    for (int i = 0; i < nRepeatCount; i++)
-                    {
-                        foreach (var field in trData.OutputMuti)
-                        {
-                            string value = _axOpenAPI.GetCommData(e.sTrCode, e.sRQName, i, field).Trim();
-                            lines[nLineIndex++] = $"[{e.sTrCode}][{i}] {field}={value}";
-                        }
-                    }
-                timer.Stop();
-                int nTotalDataCount = 0;
-                if (trData.OutputSingle != null) nTotalDataCount += trData.OutputSingle.Count;
-                if (trData.OutputMuti != null) nTotalDataCount += (trData.OutputMuti.Count * nRepeatCount);
-                lines[0] = string.Format("{0}, 데이터수집 ({1:n0}개, {2:n0}uS)"
-                    , lines[0]
-                    , nTotalDataCount
-                    , timer.Elapsed.TotalMilliseconds * 1000);
-                OutputLog((int)TAB_LIST_KIND.조회데이터);
-                OutputLog((int)TAB_LIST_KIND.조회데이터, lines, -1, focus: true);
+                }
+            timer.Stop();
+            int nTotalDataCount = 0;
+            if (trData.OutputSingle != null) nTotalDataCount += trData.OutputSingle.Count;
+            if (trData.OutputMuti != null) nTotalDataCount += (trData.OutputMuti.Count * nRepeatCount);
+            lines[0] = string.Format("{0}, 데이터수집 ({1:n0}개, {2:n0}uS)"
+                , lines[0]
+                , nTotalDataCount
+                , timer.Elapsed.TotalMilliseconds * 1000);
+            OutputLog((int)TAB_LIST_KIND.조회데이터);
+            OutputLog((int)TAB_LIST_KIND.조회데이터, lines, -1, focus: true);
 
-                // 최근 조회목록창에 추가
-                OutputLog((int)TAB_LIST_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
-            }
+            // 최근 조회목록창에 추가
+            OutputLog((int)TAB_LIST_KIND.조회한TR목록, $"{trData.Code} : {trData.Name}");
         }
     }
 
@@ -224,9 +89,10 @@ internal sealed partial class BusinessLogic
                         string sPrice = strings[1];
                         double dPrice = Convert.ToDouble(sPrice);
                         double dLastPrice = Convert.ToDouble(_axOpenAPI.GetMasterLastPrice(code));
-                        szViewText.AppendLine(string.Format("[{0}] : {1} ({2}, {3:N2}%)"
+                        szViewText.AppendFormat("[{0}] : {1} ({2}, {3:N2}%)"
                             , code, name, (int)dPrice, (dPrice - dLastPrice) / dLastPrice * 100.0
-                            ));
+                            );
+                        szViewText.AppendLine();
                     }
                     else
                         szViewText.AppendLine($"[{code}] : {name}");

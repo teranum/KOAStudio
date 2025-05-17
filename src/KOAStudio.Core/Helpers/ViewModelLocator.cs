@@ -16,7 +16,7 @@ namespace KOAStudio.Core.Helpers
         /// <summary>
         /// The AutoWireViewModel attached property.
         /// </summary>
-        public static DependencyProperty AutoWireViewModelProperty = DependencyProperty.RegisterAttached("AutoWireViewModel", typeof(bool?), typeof(ViewModelLocator), new PropertyMetadata(defaultValue: null, propertyChangedCallback: AutoWireViewModelChanged));
+        private static readonly DependencyProperty AutoWireViewModelProperty = DependencyProperty.RegisterAttached("AutoWireViewModel", typeof(bool?), typeof(ViewModelLocator), new PropertyMetadata(defaultValue: null, propertyChangedCallback: AutoWireViewModelChanged));
 
         /// <summary>
         /// Gets the value for the <see cref="AutoWireViewModelProperty"/> attached property.
@@ -112,7 +112,7 @@ namespace KOAStudio.Core.Helpers
         {
             var viewType = view.GetType();
             var viewModelFullName = name;
-            if (name.IndexOf(',') == -1)
+            if (!name.Contains(','))
             {
                 var viewAssemblyName = viewType.GetTypeInfo().Assembly.FullName;
                 viewModelFullName += ", " + viewAssemblyName;

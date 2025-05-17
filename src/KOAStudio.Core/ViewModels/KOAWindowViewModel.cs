@@ -23,9 +23,8 @@ namespace KOAStudio.Core.ViewModels
             _baseTitle = $"{assemblyName.Name} v{_appVersion} - {(Environment.Is64BitProcess ? "64비트" : "32비트")}";
 
             _uiRequest = uiRequest;
-            _title = _baseTitle;
-
-            _menuCustomizeHeaderText = "Custom";
+            Title = _baseTitle;
+            MenuCustomizeHeaderText = "Custom";
 
             WeakReferenceMessenger.Default.Register<AppStatusChangedMessageType>(this, (r, m) =>
             {
@@ -73,22 +72,22 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [ObservableProperty]
-        private string _title;
+        public partial string Title { get; set; }
 
         [ObservableProperty]
-        private string _menuCustomizeHeaderText;
+        public partial string MenuCustomizeHeaderText { get; set; }
 
         [ObservableProperty]
-        private List<string>? _menuCustomizeItems;
+        public partial List<string>? MenuCustomizeItems { get; set; }
 
         [ObservableProperty]
-        private string _statusText = "준비됨";
+        public partial string StatusText { get; set; } = "준비됨";
 
         [ObservableProperty]
-        private string _statusUrl = string.Empty;
+        public partial string StatusUrl { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private string _searchText = string.Empty;
+        public partial string SearchText { get; set; } = string.Empty;
 
         private string _resultText = string.Empty;
         public string ResultText

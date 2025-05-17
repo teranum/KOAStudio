@@ -5,28 +5,45 @@ using System.Collections.ObjectModel;
 
 namespace KOAStudio.Core.ViewModels
 {
-    public partial class OrderViewModel(string title, Action<OrderViewModel, string> extCallProc) : ObservableObject
+    public partial class OrderViewModel(string title, Func<OrderViewModel, string, Task> extCallProc) : ObservableObject
     {
         public bool EnableUpdateCodeText;
-        [ObservableProperty] IEnumerable<string>? _계좌리스트;
-        [ObservableProperty] string _selected계좌 = string.Empty;
-        [ObservableProperty] string _종목코드 = string.Empty;
-        [ObservableProperty] string _종목명 = string.Empty;
+        [ObservableProperty]
+        public partial IEnumerable<string>? 계좌리스트 { get; set; }
 
+        [ObservableProperty]
+        public partial string Selected계좌 { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string 종목코드 { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string 종목명 { get; set; } = string.Empty;
         public string Title { get; } = title;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(주문가격Enabled))]
-        OrderType _매매구분;
+        public partial OrderType 매매구분 { get; set; }
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(주문가격Enabled))]
-        OrderKind _주문종류;
+        public partial OrderKind 주문종류 { get; set; }
+
         public bool 원주문매도수구분;
-        [ObservableProperty] string _주문번호 = string.Empty;
-        [ObservableProperty] string _주문가격 = "0";
+        [ObservableProperty]
+        public partial string 주문번호 { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string 주문가격 { get; set; } = "0";
+
         public bool 주문가격Enabled => 매매구분 == OrderType.정정취소 || 주문종류 == OrderKind.지정가;
-        [ObservableProperty] int _주문수량 = 1;
-        [ObservableProperty] double _현재가;
-        [ObservableProperty] string _codeText = string.Empty;
+        [ObservableProperty]
+        public partial int 주문수량 { get; set; } = 1;
+
+        [ObservableProperty]
+        public partial double 현재가 { get; set; }
+
+        [ObservableProperty]
+        public partial string CodeText { get; set; } = string.Empty;
         public bool 주문확인생략 { get; set; }
 
         [RelayCommand]
@@ -46,7 +63,7 @@ namespace KOAStudio.Core.ViewModels
             }
         }
         [RelayCommand]
-        void ReqAction(string kind) => _extCallProc?.Invoke(this, kind);
+        async Task ReqAction(string kind) => await _extCallProc(this, kind);
 
         partial void OnSelected계좌Changed(string value) => UpdateCodeText();
         partial void On종목코드Changed(string value) => UpdateCodeText();
@@ -59,10 +76,10 @@ namespace KOAStudio.Core.ViewModels
         public void UpdateCodeText()
         {
             if (EnableUpdateCodeText)
-                _extCallProc?.Invoke(this, "Update");
+                _ = _extCallProc(this, "Update");
         }
 
-        private readonly Action<OrderViewModel, string> _extCallProc = extCallProc;
+        private readonly Func<OrderViewModel, string, Task> _extCallProc = extCallProc;
 
         public int SelectedTabIndex { get; set; }
         public ObservableCollection<JangoItem> JangoItems { get; } = [];

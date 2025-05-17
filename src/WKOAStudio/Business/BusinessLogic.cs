@@ -252,7 +252,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
                         if (name[nPos] == ',')
                         {
-                            name = name.Remove(nPos);
+                            name = name[..nPos];
                             break;
                         }
                         nPos++;
@@ -372,7 +372,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
 
                     foreach (var tr_part in all_trs)
                     {
-                        tr_names.AddRange(tr_part.Value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+                        tr_names.AddRange([.. tr_part.Value.Split(',', StringSplitOptions.RemoveEmptyEntries)]);
                     }
                     if (tr_names.Count > 0)
                     {
@@ -710,7 +710,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                         item_info[j] = info.Substring(i * nFrameWidth + nCharIndex, nField_Width[j]);
                         nCharIndex += nField_Width[j];
                     }
-                    result.Add(item_info.Select(x => x.Trim()).ToArray());
+                    result.Add([.. item_info.Select(x => x.Trim())]);
                 }
             }
             return result;

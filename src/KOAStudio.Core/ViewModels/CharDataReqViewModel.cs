@@ -19,29 +19,33 @@ namespace KOAStudio.Core.ViewModels
             this.Kind = Kind;
             this.Title = Title;
             TitleBarVisibility = this.Title.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-
-            _selectedChartRound = ChartRound.일;
+            SelectedChartRound = ChartRound.일;
             SelectedChartInterval_분 = "1";
             SelectedChartInterval_틱 = "100";
-
-            _resultText = string.Empty;
-            _codeText = string.Empty;
-            _nextText = string.Empty;
-            _selected종목 = string.Empty;
-
-            _조회일자 = DateTime.Now;
-            _is수정주가 = null;
+            ResultText = string.Empty;
+            CodeText = string.Empty;
+            NextText = string.Empty;
+            Selected종목 = string.Empty;
+            조회일자 = DateTime.Now;
+            Is수정주가 = null;
         }
 
-        public Func<CharDataReqViewModel, string, string>? ExtProcedure;
+        public Func<CharDataReqViewModel, string, Task>? ExtProcedure;
 
         public KIND Kind { get; }
         public string Title { get; }
         public Visibility TitleBarVisibility { get; }
 
-        [ObservableProperty] string _selected종목;
-        [ObservableProperty] DateTime _조회일자;
-        [ObservableProperty][NotifyPropertyChangedFor(nameof(SelectedChartInterval))] ChartRound _selectedChartRound;
+        [ObservableProperty]
+        public partial string Selected종목 { get; set; }
+
+        [ObservableProperty]
+        public partial DateTime 조회일자 { get; set; }
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SelectedChartInterval))]
+        public partial ChartRound SelectedChartRound { get; set; }
+
         public string SelectedChartInterval
         {
             get => SelectedChartRound switch
@@ -75,25 +79,37 @@ namespace KOAStudio.Core.ViewModels
         public string SelectedChartInterval_틱;
 
         [RelayCommand]
-        void Action(string action_name)
+        async Task Action(string action_name)
         {
             if (ExtProcedure != null)
             {
-                string result = ExtProcedure.Invoke(this, action_name);
-                CodeText += result;
+                await ExtProcedure.Invoke(this, action_name);
             }
         }
 
-        [ObservableProperty] bool _nextEnabled;
+        [ObservableProperty]
+        public partial bool NextEnabled { get; set; }
 
-        [ObservableProperty] int _nRqId;
-        [ObservableProperty] int _receivedDataCount;
-        [ObservableProperty] DateTime _receivedTime;
-        [ObservableProperty] string _resultText;
-        [ObservableProperty] string _codeText;
-        [ObservableProperty] string _nextText;
-        [ObservableProperty] bool? _is수정주가;
+        [ObservableProperty]
+        public partial int NRqId { get; set; }
 
+        [ObservableProperty]
+        public partial int ReceivedDataCount { get; set; }
+
+        [ObservableProperty]
+        public partial DateTime ReceivedTime { get; set; }
+
+        [ObservableProperty]
+        public partial string ResultText { get; set; }
+
+        [ObservableProperty]
+        public partial string CodeText { get; set; }
+
+        [ObservableProperty]
+        public partial string NextText { get; set; }
+
+        [ObservableProperty]
+        public partial bool? Is수정주가 { get; set; }
 
         partial void OnSelectedChartRoundChanged(ChartRound value) => UpdateCodeText();
         partial void OnSelected종목Changed(string value) => UpdateCodeText();
@@ -104,8 +120,7 @@ namespace KOAStudio.Core.ViewModels
         public void UpdateCodeText()
         {
             if (!EnableUpdateCodeText) return;
-            if (ExtProcedure != null)
-                CodeText = ExtProcedure(this, string.Empty);
+            _ = ExtProcedure?.Invoke(this, string.Empty);
         }
     }
 }

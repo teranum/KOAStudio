@@ -1,7 +1,7 @@
 ﻿using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace SI_DevCenter.Converters
+namespace KOAStudio.Core.Converters
 {
     internal class BallIdToImageConverter : IValueConverter
     {

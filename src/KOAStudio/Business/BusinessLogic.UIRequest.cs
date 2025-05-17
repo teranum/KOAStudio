@@ -287,6 +287,10 @@ internal sealed partial class BusinessLogic
                                 ),
                             };
                             SetProperties("조건검색 : " + SelectedText + " 설정", prop_items);
+                            //var sb = new StringBuilder();
+                            //sb.AppendLine($"(int nRet, string sItems) = await _axOpenAPI.SendConditionAsync(\"{scrNum}\", \"{SelectedText}\", {condIndex}, \"0\");");
+                            //SetResultText(sb.ToString());
+                            SetResultText(string.Empty);
                         }
                     }
                 }

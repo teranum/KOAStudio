@@ -8,8 +8,7 @@ namespace KOAStudio.Core.ViewModels
         public string Title { get; } = Title;
 
         [ObservableProperty]
-        private int _ballImage;
-
+        public partial int BallImage { get; set; }
         public ObservableCollection<string> Items { get; } = [];
     }
 }

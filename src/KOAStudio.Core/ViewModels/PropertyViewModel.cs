@@ -12,8 +12,8 @@ namespace KOAStudio.Core.ViewModels
         public PropertyViewModel(IUIRequest uiRequest)
         {
             _uiRequest = uiRequest;
-            _items = [];
-            _headerText = "요청설정";
+            Items = [];
+            HeaderText = "요청설정";
 
             WeakReferenceMessenger.Default.Register<QueryNextEnabledMessageType>(this, (r, m) =>
             {
@@ -39,12 +39,12 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [ObservableProperty]
-        private bool _queryNextEnabled;
+        public partial bool QueryNextEnabled { get; set; }
 
         [ObservableProperty]
-        private string _headerText;
+        public partial string HeaderText { get; set; }
 
         [ObservableProperty]
-        private List<PropertyItem> _items;
+        public partial List<PropertyItem> Items { get; set; }
     }
 }

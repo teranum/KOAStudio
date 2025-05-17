@@ -46,13 +46,12 @@ namespace KOAStudio.Core.ViewModels
         private readonly List<List<object>?> _tab_items = [];
 
         [ObservableProperty]
-        private List<TabTreeData>? _tabDatas;
+        public partial List<TabTreeData>? TabDatas { get; set; }
 
         [ObservableProperty]
-        private int _tabSelectedIndex;
-
+        public partial int TabSelectedIndex { get; set; }
         [ObservableProperty]
-        private bool _filterOnlyNodeChecked;
+        public partial bool FilterOnlyNodeChecked { get; set; }
 
         private IdTextItem? _save_selectedItem;
         [RelayCommand]
@@ -129,7 +128,7 @@ namespace KOAStudio.Core.ViewModels
                             me ??= new IdTextItem(orgitem.Id, orgitem.Text)
                             {
                                 IsExpanded = true,
-                                IsActived = orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0,
+                                IsActived = orgitem.Text.Contains(text, StringComparison.OrdinalIgnoreCase),
                             };
                             me.AddChild(finded);
                         }
@@ -139,7 +138,7 @@ namespace KOAStudio.Core.ViewModels
 
             if (me == null)
             {
-                if (orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (orgitem.Text.Contains(text, StringComparison.OrdinalIgnoreCase))
                 {
                     me = new IdTextItem(orgitem.Id, orgitem.Text)
                     {
@@ -155,7 +154,7 @@ namespace KOAStudio.Core.ViewModels
         {
             IdTextItem? me = null;
 
-            if (orgitem.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (orgitem.Text.Contains(text, StringComparison.OrdinalIgnoreCase))
             {
                 me = ItemsViewModel.CopyItem(orgitem);
                 me.IsActived = true;

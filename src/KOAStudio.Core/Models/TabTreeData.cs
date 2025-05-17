@@ -10,6 +10,6 @@ namespace KOAStudio.Core.ViewModels
         public string FilterText { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private List<object>? _items;
+        public partial List<object>? Items { get; set; }
     }
 }

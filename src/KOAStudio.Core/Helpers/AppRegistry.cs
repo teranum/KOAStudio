@@ -2,8 +2,8 @@
 {
     public interface IAppRegistry
     {
-        public T GetValue<T>(string SectionName, string KeyName, T DefValue);
-        public bool SetValue<T>(string SectionName, string KeyName, T Value);
+        public T GetValue<T>(string section, string key, T defValue);
+        public bool SetValue<T>(string section, string key, T value);
     }
 
     public class AppRegistry : IAppRegistry
@@ -21,16 +21,16 @@
             _corpAssemKey = $"Software\\{corpName}\\{exeName}";
         }
 
-        public T GetValue<T>(string SectionName, string KeyName, T DefValue)
+        public T GetValue<T>(string section, string key, T defValue)
         {
             T retValue;
 
-            string subKeyName = $"{_corpAssemKey}\\{SectionName}";
+            string subKeyName = $"{_corpAssemKey}\\{section}";
             using (var regkey = _currentUser.OpenSubKey(subKeyName))
             {
-                if (regkey is null) return DefValue;
-                var value = regkey.GetValue(KeyName, DefValue);
-                if (value is null) return DefValue;
+                if (regkey is null) return defValue;
+                var value = regkey.GetValue(key, defValue);
+                if (value is null) return defValue;
 
                 try
                 {
@@ -38,20 +38,20 @@
                 }
                 catch
                 {
-                    retValue = DefValue;
+                    retValue = defValue;
                 }
             }
 
             return retValue;
         }
 
-        public bool SetValue<T>(string SectionName, string KeyName, T Value)
+        public bool SetValue<T>(string section, string key, T value)
         {
-            if (Value is null) return false;
+            if (value is null) return false;
 
-            string subKeyName = $"{_corpAssemKey}\\{SectionName}";
+            string subKeyName = $"{_corpAssemKey}\\{section}";
             using var regkey = _currentUser.CreateSubKey(subKeyName);
-            regkey.SetValue(KeyName, Value, Microsoft.Win32.RegistryValueKind.Unknown);
+            regkey.SetValue(key, value, Microsoft.Win32.RegistryValueKind.Unknown);
             return true;
         }
     }

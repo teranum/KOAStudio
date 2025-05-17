@@ -26,7 +26,6 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
     private readonly Encoding _appEncoder = Encoding.GetEncoding("EUC-KR");
 
     private static readonly string _scrNum_REQ_TR_BASE = "3000";
-    private static readonly string _scrNum_CHART_CONTENT = "3101";
     private static readonly string _scrNum_ORDER_CONTENT = "3102";
     private static readonly string _scrNum_REQ_COND_BASE = "4000";
     private static readonly string _scrNum_REQ_COND_LAST = "4999";
@@ -223,14 +222,14 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                 {
                     if (fileDatas[nBytePos] == '\n')
                     {
-                        lines.Add(fileDatas.Skip(nLineStartPos).Take(nBytePos - nLineStartPos - 1).ToArray());
+                        lines.Add([.. fileDatas.Skip(nLineStartPos).Take(nBytePos - nLineStartPos - 1)]);
                         nLineStartPos = nBytePos + 1;
                     }
                     nBytePos++;
                 }
                 if (filelength > nLineStartPos)
                 {
-                    lines.Add(fileDatas.Skip(nLineStartPos).Take(filelength - nLineStartPos).ToArray());
+                    lines.Add([.. fileDatas.Skip(nLineStartPos).Take(filelength - nLineStartPos)]);
                 }
             }
             catch (Exception)
@@ -246,19 +245,19 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
             {
                 // 형식 = GIDC(1) + DESC(19) + NFID(3) + FID1(5) + ... + FIDn(5)'\r\n'
                 if (line.Length < 23) continue;
-                byte[] GIDC = line.Skip(0).Take(1).ToArray();
-                byte[] DESC = line.Skip(1).Take(19).ToArray();
-                byte[] NFID = line.Skip(20).Take(3).ToArray();
+                byte[] GIDC = [.. line.Skip(0).Take(1)];
+                byte[] DESC = [.. line.Skip(1).Take(19)];
+                byte[] NFID = [.. line.Skip(20).Take(3)];
                 if (GIDC[0] == ';') continue;
                 int FidCount = Convert.ToInt32(_appEncoder.GetString(NFID));
                 string name = _appEncoder.GetString(DESC).Trim();
-                if (FidCount == 0 || line.Length < FidCount * 5 + 23)
-                    continue;
+                //if (FidCount == 0 || line.Length < FidCount * 5 + 23)
+                //    continue;
 
                 var hitem = new IdTextItem(1, "Real Type : " + name);
                 for (int i = 0; i < FidCount; i++)
                 {
-                    string fid = _appEncoder.GetString(line.Skip(23 + 5 * i).Take(5).ToArray()).Trim();
+                    string fid = _appEncoder.GetString([.. line.Skip(23 + 5 * i).Take(5)]).Trim();
                     string fiddesc;
                     if (_map_FidToName.TryGetValue(fid, out var fid_name))
                         fiddesc = $"[{fid}] = {fid_name}";
@@ -365,7 +364,7 @@ internal sealed partial class BusinessLogic(IAppRegistry appRegistry) : BaseAppL
                             // Caution and InputDescs
                             string section = trData.Code.ToUpper() + " : " + trData.Name;
                             trData.Caution = GetProfileString(section, "주의", szIniFilePath);
-                            trData.InputDescs = trData.Inputs.Select(x => GetProfileString(section, x, szIniFilePath)).ToList();
+                            trData.InputDescs = [.. trData.Inputs.Select(x => GetProfileString(section, x, szIniFilePath))];
                             _trDatas.Add(trData);
                         }
                     }

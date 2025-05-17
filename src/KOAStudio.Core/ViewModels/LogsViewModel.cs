@@ -91,7 +91,7 @@ namespace KOAStudio.Core.ViewModels
         }
 
         [ObservableProperty]
-        private List<TabListData>? _tabDatas;
+        public partial List<TabListData>? TabDatas { get; set; }
 
         private int _tabSelectedIndex;
         public int TabSelectedIndex

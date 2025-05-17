@@ -3,7 +3,7 @@
 public class IdTextItem(int imageId, string text) : IdText(imageId, text)
 {
     public IdTextItem? Parent;
-    public IList<object> Items { get; } = new List<object>();
+    public IList<object> Items { get; } = [];
     public void AddChild(IdTextItem item)
     {
         item.Parent = this;
