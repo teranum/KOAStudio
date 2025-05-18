@@ -12,48 +12,55 @@ internal sealed partial class BusinessLogic
     private OrderViewModel? _orderViewModel_선물옵션;
     void ShowUserContent(string require)
     {
-        if (require.Equals("해외선물옵션차트요청"))
+        switch (require)
         {
-            var model = _chartDataReqViewModel_선물;
-            if (model == null)
-            {
-                _chartDataReqViewModel_선물 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+            case "해외선물옵션차트":
                 {
-                    ExtProcedure = ChartContentExtProcedure,
-                    Selected종목 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
-                    SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
-                    SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100"),
-                };
-                ChartRound chartRound = ChartRound.분;
-                _ = Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
-                model.SelectedChartRound = chartRound;
-            }
-            model.NextEnabled = false;
-            model.EnableUpdateCodeText = true;
-            model.UpdateCodeText();
-            SetUserContent(new CharDataReqView(model));
-        }
-        else if (require.Equals("해외선물옵션주문요청"))
-        {
-            var model = _orderViewModel_선물옵션;
-            if (model == null)
-            {
-                _orderViewModel_선물옵션 = model = new OrderViewModel(require, OrderExtCallProc)
-                {
-                    종목코드 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
-                };
-            }
-            if ((model.계좌리스트 == null || !model.계좌리스트.Any()) && _axOpenAPI != null && _axOpenAPI.GetConnectState() == 1)
-            {
-                model.계좌리스트 = _axOpenAPI.GetLoginInfo("ACCNO").Split(';', StringSplitOptions.RemoveEmptyEntries);
-                if (model.계좌리스트.Any())
-                {
-                    model.Selected계좌 = model.계좌리스트.First();
+                    var model = _chartDataReqViewModel_선물;
+                    if (model == null)
+                    {
+                        _chartDataReqViewModel_선물 = model = new CharDataReqViewModel(CharDataReqViewModel.KIND.선물, require)
+                        {
+                            ExtProcedure = ChartContentExtProcedure,
+                            Selected종목 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
+                            SelectedChartInterval_분 = _appRegistry.GetValue(require, "분주기", "1"),
+                            SelectedChartInterval_틱 = _appRegistry.GetValue(require, "틱주기", "100"),
+                        };
+                        ChartRound chartRound = ChartRound.분;
+                        _ = Enum.TryParse(_appRegistry.GetValue(require, "시간타입", string.Empty), out chartRound);
+                        model.SelectedChartRound = chartRound;
+                    }
+                    model.NextEnabled = false;
+                    model.EnableUpdateCodeText = true;
+                    model.UpdateCodeText();
+                    SetUserContent(new CharDataReqView(model));
                 }
-            }
-            model.EnableUpdateCodeText = true;
-            model.UpdateCodeText();
-            SetUserContent(new OrderView(model));
+                break;
+            case "해외선물옵션주문":
+                {
+                    var model = _orderViewModel_선물옵션;
+                    if (model == null)
+                    {
+                        _orderViewModel_선물옵션 = model = new OrderViewModel(require, OrderExtCallProc)
+                        {
+                            종목코드 = _appRegistry.GetValue(require, "종목코드", "NQZ23"),
+                        };
+                    }
+                    if ((model.계좌리스트 == null || !model.계좌리스트.Any()) && _axOpenAPI != null && _axOpenAPI.GetConnectState() == 1)
+                    {
+                        model.계좌리스트 = _axOpenAPI.GetLoginInfo("ACCNO").Split(';', StringSplitOptions.RemoveEmptyEntries);
+                        if (model.계좌리스트.Any())
+                        {
+                            model.Selected계좌 = model.계좌리스트.First();
+                        }
+                    }
+                    model.EnableUpdateCodeText = true;
+                    model.UpdateCodeText();
+                    SetUserContent(new OrderView(model));
+                }
+                break;
+            default:
+                return;
         }
     }
 
@@ -197,18 +204,14 @@ internal sealed partial class BusinessLogic
         {
             sRQName = $"{model.Title} 정정";
             stringBuilder.AppendLine($"// {sRQName}");
-            stringBuilder.AppendLine($"(int nRet, string sMsg) = await _axOpenAPI.SendOrderAsync(\"{sRQName}\", \"{sScreenNo}\", \"{sAccNo}\", {nOrderType}, \"{sCode}\", {nQty}, \"{sPrice}\", \"{sStop}\", \"{sHogaGb}\", \"{sOrgOrderNo}\");");
+            stringBuilder.AppendLine($"(int nRet, string sMsg) = await _axOpenAPI.SendOrderAsync(\"{sRQName}\",");
+            stringBuilder.AppendLine($"    \"{sScreenNo}\", \"{sAccNo}\", {nOrderType}, \"{sCode}\", {nQty}, \"{sPrice}\", \"{sStop}\", \"{sHogaGb}\", \"{sOrgOrderNo}\");");
 
             nOrderType -= 2;
-            sRQName = $"{model.Title} 정정";
-            stringBuilder.AppendLine($"// {sRQName}");
-            stringBuilder.AppendLine($"(int nRet, string sMsg) = await _axOpenAPI.SendOrderAsync(\"{sRQName}\", \"{sScreenNo}\", \"{sAccNo}\", {nOrderType}, \"{sCode}\", {nQty}, \"{sPrice}\", \"{sStop}\", \"{sHogaGb}\", \"{sOrgOrderNo}\");");
+            sRQName = $"{model.Title} 취소";
         }
-        else
-        {
-            stringBuilder.AppendLine($"// {model.Title} {model.매매구분}");
-            stringBuilder.AppendLine($"(int nRet, string sMsg) = await _axOpenAPI.SendOrderAsync(\"{sRQName}\", \"{sScreenNo}\", \"{sAccNo}\", {nOrderType}, \"{sCode}\", {nQty}, \"{sPrice}\", \"{sStop}\", \"{sHogaGb}\", \"{sOrgOrderNo}\");");
-        }
+        stringBuilder.AppendLine($"(int nRet, string sMsg) = await _axOpenAPI.SendOrderAsync(\"{sRQName}\",");
+        stringBuilder.AppendLine($"    \"{sScreenNo}\", \"{sAccNo}\", {nOrderType}, \"{sCode}\", {nQty}, \"{sPrice}\", \"{sStop}\", \"{sHogaGb}\", \"{sOrgOrderNo}\");");
         stringBuilder.AppendLine($"Output($\"nRet={{nRet}}, sMsg={{sMsg}}\");");
 
         model.CodeText = stringBuilder.ToString();
@@ -235,9 +238,8 @@ internal sealed partial class BusinessLogic
                     return;
                 }
             }
-            // LONG SendOrder( BSTR sRQName, BSTR sScreenNo, BSTR sAccNo, LONG nOrderType, BSTR sCode, LONG nQty, BSTR sPrice, BSTR sStop, BSTR sHogaGb, BSTR sOrgOrderNo) 
-            sRQName = model.Title + " " + ((model.매매구분 != OrderType.정정취소) ? $"{model.매매구분}" : (b정정주문 ? "정정" : "취소"));
-            if (b취소주문) nOrderType -= 2;
+            // 정정경우 += 2;, 표시에서 마감상태가 취소로 되어있음
+            if (b정정주문) nOrderType += 2;
 
             DateTime CallTime = DateTime.Now;
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -287,30 +289,27 @@ internal sealed partial class BusinessLogic
         else
             throw new NotSupportedException();
 
-        StringBuilder stringBuilder = new();
-        stringBuilder.AppendLine($"// {model.Title}");
-        stringBuilder.AppendLine("var inputs = new Dictionary<string, string>()");
-        stringBuilder.AppendLine("    {");
-        foreach (var input in inputs)
-        {
-            stringBuilder.AppendLine($"        {{ \"{input.Key}\", \"{input.Value}\" }},");
-        }
-        stringBuilder.AppendLine("    };");
-        stringBuilder.AppendLine($"var response = await _axOpenAPI.RequestTrAsync(\"{trCode}\", inputs, [], [");
-        for (int i = 0; i < multies.Count; i++)
-        {
-            stringBuilder.Append($"\"{multies[i]}\"");
-            if (i < multies.Count - 1) stringBuilder.Append(", ");
-        }
-        stringBuilder.Append(']');
+        StringBuilder sb = new();
+        sb.AppendLine($"// {model.Title}");
+        sb.AppendLine($"var response = await _axOpenAPI.RequestTrAsync(\"{trCode}\"");
+        sb.Append("    , [").AppendJoin(", ", inputs.Select(x => $"(\"{x.Key}\", \"{x.Value}\")")).AppendLine("]");
+        sb.AppendLine("    , []");
+        sb.Append("    , [").AppendJoin(", ", multies.Select(x => $"\"{x}\"")).Append(']');
         if (b다음)
         {
-            stringBuilder.Append($", \"{model.NextText}\"");
+            sb.AppendLine();
+            sb.Append($"    , \"{model.NextText}\"");
         }
-        stringBuilder.AppendLine(");");
-        stringBuilder.AppendLine($"Output(response.OutputMultiDatas);");
+        sb.AppendLine(");");
+        sb.AppendLine("if (response.nErrCode != 0)");
+        sb.AppendLine("{");
+        sb.AppendLine($"    Output($\"{model.Title} 요청실패: {{response.rsp_msg}}\");");
+        sb.AppendLine("    return;");
+        sb.AppendLine("}");
+        sb.AppendLine("// 데이터 처리");
+        sb.AppendLine($"Output(response.OutputMultiDatas);");
 
-        model.CodeText = stringBuilder.ToString();
+        model.CodeText = sb.ToString();
         if (b조회 || b다음)
         {
             if (_axOpenAPI == null || _axOpenAPI.GetConnectState() == 0)
@@ -319,34 +318,20 @@ internal sealed partial class BusinessLogic
                 return;
             }
 
+            var requestTime = DateTime.Now;
             Stopwatch stopwatch = Stopwatch.StartNew();
             var response = await _axOpenAPI.RequestTrAsync(trCode, inputs, [], multies, b다음 ? model.NextText : string.Empty);
             stopwatch.Stop();
-            model.ReceivedTime = DateTime.Now;
+            model.RequestTime = requestTime;
+            model.Elapsed_ms = stopwatch.Elapsed.TotalMilliseconds;
             var datas = response.OutputMultiDatas;
-            model.ReceivedDataCount = datas.Count;
-            StringBuilder sb = new StringBuilder();
+            sb.Clear();
             if (b조회)
-            {
-                for (int i = 0; i < response.InMultiFields.Length; i++)
-                {
-                    sb.Append(response.InMultiFields[i]);
-                    if (i < response.InMultiFields.Length - 1)
-                        sb.Append(", ");
-                }
-                sb.AppendLine();
-            }
+                sb.AppendJoin(", ", response.InMultiFields).AppendLine();
             foreach (var data in datas)
-            {
-                for (int i = 0; i < data.Length; i++)
-                {
-                    sb.Append(data[i]);
-                    if (i < data.Length - 1)
-                        sb.Append(", ");
-                }
-                sb.AppendLine();
-            }
+                sb.AppendJoin(", ", data).AppendLine();
             model.ResultText = sb.ToString();
+            model.ReceivedDataCount = datas.Count;
             model.NextText = response.cont_key;
             model.NextEnabled = !string.IsNullOrEmpty(response.cont_key);
         }

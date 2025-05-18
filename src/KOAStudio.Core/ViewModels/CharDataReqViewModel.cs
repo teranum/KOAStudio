@@ -91,13 +91,13 @@ namespace KOAStudio.Core.ViewModels
         public partial bool NextEnabled { get; set; }
 
         [ObservableProperty]
-        public partial int NRqId { get; set; }
-
-        [ObservableProperty]
         public partial int ReceivedDataCount { get; set; }
 
         [ObservableProperty]
-        public partial DateTime ReceivedTime { get; set; }
+        public partial DateTime RequestTime { get; set; }
+
+        [ObservableProperty]
+        public partial double Elapsed_ms { get; set; }
 
         [ObservableProperty]
         public partial string ResultText { get; set; }

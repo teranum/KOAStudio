@@ -103,7 +103,7 @@
         </Grid>
         <Controls:BindableAvalonEditor
             Grid.Row="3"
-            Height="180"
+            Height="220"
             Margin="0,10,0,10"
             Padding="0,3,0,0"
             BorderBrush="Gray"
@@ -121,8 +121,10 @@
             </Controls:BindableAvalonEditor.ContextMenu>
         </Controls:BindableAvalonEditor>
         <StackPanel Grid.Row="4" Orientation="Horizontal">
-            <TextBlock Text="Received Time = " />
-            <TextBlock Width="100" Text="{Binding ReceivedTime, StringFormat='HH:mm:ss.fff'}" />
+            <TextBlock Text="Request Time = " />
+            <TextBlock Width="100" Text="{Binding RequestTime, StringFormat='HH:mm:ss.fff'}" />
+            <TextBlock Text="Elapsed(ms) = " />
+            <TextBlock Width="80" Text="{Binding Elapsed_ms, StringFormat='N3'}" />
             <TextBlock Margin="10,0,0,0" Text="DataCount = " />
             <TextBlock Width="60" Text="{Binding ReceivedDataCount}" />
             <TextBlock Margin="10,0,0,0" Text="sNext = " />
